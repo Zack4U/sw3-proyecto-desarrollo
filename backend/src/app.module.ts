@@ -4,12 +4,12 @@ import { AppService } from './app.service';
 import { PrismaService } from './prisma/prisma.service';
 import { EstablecimientosService } from './services/establecimientos.services';
 import { EstablecimientosController } from './controllers/establecimientos.controller';
-import { AlimentosController } from './controllers/alimentos.controller';
-import { AlimentosService } from './services/alimentos.services';
+import { FoodsController } from './controllers/foods.controller';
+import { FoodsService } from './services/foods.services';
 
 @Module({
   imports: [],
-  controllers: [AppController, EstablecimientosController, AlimentosController],
-  providers: [AppService, PrismaService, EstablecimientosService, AlimentosService],
+  controllers: [AppController, EstablecimientosController, FoodsController],
+  providers: [AppService, PrismaService, EstablecimientosService, FoodsService],
 })
 export class AppModule {}
