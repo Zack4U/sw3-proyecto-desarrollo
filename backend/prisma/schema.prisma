@@ -1,15 +1,55 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// Modelo para los Establecimientos
+model Establishment {
+    establishment_id   String   @id @db.Uuid
+    name               String
+    description        String?
+    phone              String?
+    email              String?
+    address            String
+    location           Json
+    establishment_type String?
+    createdAt          DateTime @default(now())
+    updatedAt          DateTime @updatedAt
+
+    // Relacion con usuario
+    // Creado en mongo
+    user_id String @db.Uuid
+    // Relación: Un establecimiento puede tener muchos alimentos
+    foods   Food[]
+}
+
+// Modelo para los Alimentos
+model Food {
+    food_id       String     @id @default(uuid()) @db.Uuid
+    name          String
+    description   String?
+    category      String?
+    quantity      Float
+    unitOfMeasure String
+    status        FoodStatus @default(AVAILABLE)
+    imageUrl      String?
+    expiresAt     DateTime   @db.Date
+    createdAt     DateTime   @default(now())
+    updatedAt     DateTime   @updatedAt
+
+    // Relación: Un alimento pertenece a un establecimiento
+    establishment    Establishment @relation(fields: [establishment_id], references: [establishment_id], onDelete: Cascade)
+    establishment_id String        @db.Uuid
+}
+
+// Enum para los estados de los alimentos
+enum FoodStatus {
+    AVAILABLE
+    RESERVED
+    DELIVERED
+    EXPIRED
 }
