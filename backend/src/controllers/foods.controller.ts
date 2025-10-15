@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put } from "@nestjs/common";
 import { CreateFoodDto } from "src/dtos/Foods/create-food.dto";
 import { UpdateFoodDto } from "src/dtos/Foods/update-food.dto";
-import { FoodsService } from "src/services/foods.services";
+import { FoodsService } from "src/services/foods.service";
 
 @Controller('foods')
 export class FoodsController {
@@ -26,9 +26,9 @@ export class FoodsController {
         return food;
     }
 
-    @Get('establishment/:establishmentId')
-    findByEstablishment(@Param('establishmentId') establishmentId: string) {
-        return this.foodsService.findByEstablishment(establishmentId);
+    @Get('establishment/:establishment_id')
+    findByEstablishment(@Param('establishment_id') establishment_id: string) {
+        return this.foodsService.findByEstablishment(establishment_id);
     }
 
     @Get('category/:category')
