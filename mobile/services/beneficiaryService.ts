@@ -27,7 +27,7 @@ export const beneficiaryService = {
                 telefono: data.telefono,
             };
 
-            // TODO: Ajustar el endpoint según tu backend
+
             // Por ahora uso /users, pero puede ser diferente
             const response = await api.post<BeneficiaryResponse>('/users', payload);
             return response.data;
