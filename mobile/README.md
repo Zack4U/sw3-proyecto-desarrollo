@@ -20,7 +20,13 @@ npm install
 npx expo install react-native-screens react-native-safe-area-context
 ```
 
+```bash
 npm install axios
+```
+
+```bash
+npm install @react-navigation/native @react-navigation/native-stack
+```
 
 ## 🏃‍♂️ Ejecutar la Aplicación
 
