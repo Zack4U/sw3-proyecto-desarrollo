@@ -23,38 +23,168 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Backend del proyecto **Comiya Business** - Sistema de gestión de establecimientos y alimentos.
 
-## Project setup
+Desarrollado con [NestJS](https://github.com/nestjs/nest), [Prisma](https://www.prisma.io/), y PostgreSQL.
+
+## 📋 Requisitos Previos
+
+- Node.js >= 18.x
+- PostgreSQL >= 14.x
+- npm >= 9.x
+
+## 🚀 Configuración del Proyecto
+
+### 1. Instalar Dependencias
 
 ```bash
 $ npm install
 ```
 
-## Compile and run the project
+### 2. Configurar Base de Datos
+
+#### Opción A: Script Automático (Recomendado)
+
+**Windows (PowerShell):**
+```bash
+$ cd scripts/setup_database
+$ ./setup-database.ps1
+```
+
+**Linux/Mac (Bash):**
+```bash
+$ cd scripts/setup_database
+$ chmod +x setup-database.sh
+$ ./setup-database.sh
+```
+
+#### Opción B: Manual
 
 ```bash
-# development
-$ npm run start
+# 1. Crear archivo .env con la cadena de conexión
+$ echo 'DATABASE_URL="postgresql://comiya_user:password@localhost:5432/comiya_business"' > .env
 
-# watch mode
+# 2. Generar el cliente de Prisma
+$ npm run prisma:generate
+
+# 3. Aplicar migraciones
+$ npm run prisma:migrate
+
+# 4. Cargar datos de prueba
+$ npm run seed
+```
+
+## 💻 Comandos Disponibles
+
+### Desarrollo
+
+```bash
+# Iniciar servidor en modo desarrollo con hot-reload
 $ npm run start:dev
 
-# production mode
+# Iniciar servidor normal
+$ npm run start
+
+# Iniciar en modo debug
+$ npm run start:debug
+
+# Compilar el proyecto
+$ npm run build
+
+# Formatear código con Prettier
+$ npm run format
+
+# Ejecutar ESLint y corregir errores
+$ npm run lint
+```
+
+### Base de Datos (Prisma)
+
+```bash
+# Generar cliente de Prisma (después de cambios en schema.prisma)
+$ npm run prisma:generate
+# Alternativa: npx prisma generate
+
+# Crear y aplicar migraciones
+$ npm run prisma:migrate
+# Alternativa: npx prisma migrate dev
+
+# Cargar datos de prueba (seeds)
+$ npm run prisma:seed
+# Alternativa: npx prisma db seed
+
+# Abrir Prisma Studio (interfaz visual de BD)
+$ npm run prisma:studio
+
+# Ver estado de migraciones
+$ npm run prisma:status
+
+# Resetear base de datos (¡CUIDADO! Borra todos los datos)
+$ npm run prisma:reset
+
+# Aplicar schema sin crear migración (desarrollo)
+$ npm run prisma:push
+```
+
+### Testing
+
+```bash
+# Ejecutar tests unitarios
+$ npm run test
+
+# Ejecutar tests en modo watch
+$ npm run test:watch
+
+# Ejecutar tests e2e (end-to-end)
+$ npm run test:e2e
+
+# Generar reporte de cobertura
+$ npm run test:cov
+
+# Ejecutar tests en modo debug
+$ npm run test:debug
+```
+
+### Producción
+
+```bash
+# Compilar para producción
+$ npm run build
+
+# Ejecutar versión compilada
 $ npm run start:prod
 ```
 
-## Run tests
+## 📊 Acceder a la Aplicación
 
-```bash
-# unit tests
-$ npm run test
+Una vez iniciado el servidor:
 
-# e2e tests
-$ npm run test:e2e
+- **API REST**: http://localhost:3000
+- **Swagger UI**: http://localhost:3000/api
+- **Prisma Studio**: http://localhost:5555 (después de ejecutar `npx prisma studio`)
 
-# test coverage
-$ npm run test:cov
+## 🗂️ Estructura del Proyecto
+
+```
+backend/
+├── prisma/
+│   ├── schema.prisma          # Esquema de base de datos
+│   ├── seed.ts                # Script principal de seeds
+│   └── seeds/                 # Seeds modulares por entidad
+│       ├── establishment.seed.ts
+│       └── food.seed.ts
+├── src/
+│   ├── config/                # Configuraciones (Swagger, etc)
+│   ├── controllers/           # Controladores REST
+│   ├── dtos/                  # Data Transfer Objects
+│   ├── models/               # Modelos de dominio
+│   ├── services/             # Lógica de negocio
+│   ├── prisma/               # Servicio de Prisma
+│   ├── app.module.ts         # Módulo principal
+│   └── main.ts               # Punto de entrada
+├── test/                     # Tests e2e
+├── .env                      # Variables de entorno (crear este!)
+└── package.json              # Dependencias y scripts
 ```
 
 ## Deployment
