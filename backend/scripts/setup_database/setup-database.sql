@@ -38,10 +38,11 @@ CREATE USER :db_user WITH PASSWORD :db_password;
 -- Crear la base de datos
 CREATE DATABASE :db_name
     WITH 
+    TEMPLATE = template0
     OWNER = :db_user
     ENCODING = 'UTF8'
-    LC_COLLATE = 'en_US.UTF-8'
-    LC_CTYPE = 'en_US.UTF-8'
+    LC_COLLATE = 'Spanish_Colombia.1252'
+    LC_CTYPE = 'Spanish_Colombia.1252'
     TABLESPACE = pg_default
     CONNECTION LIMIT = -1;
 
