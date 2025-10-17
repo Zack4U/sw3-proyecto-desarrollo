@@ -99,10 +99,11 @@ echo -e "${YELLOW}Paso 5: Creando base de datos...${NC}"
 PGPASSWORD="$POSTGRES_PASSWORD" psql -U "$POSTGRES_USER" -h "$DB_HOST" -p "$DB_PORT" -c "
 CREATE DATABASE $DB_NAME
     WITH 
+    TEMPLATE = template0
     OWNER = $DB_USER
     ENCODING = 'UTF8'
-    LC_COLLATE = 'en_US.UTF-8'
-    LC_CTYPE = 'en_US.UTF-8'
+    LC_COLLATE = 'Spanish_Colombia.1252'
+    LC_CTYPE = 'Spanish_Colombia.1252'
     CONNECTION LIMIT = -1;"
 
 if [ $? -eq 0 ]; then

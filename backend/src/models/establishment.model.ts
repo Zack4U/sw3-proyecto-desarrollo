@@ -1,11 +1,20 @@
 import { Food } from "./food.model";
 
 export class Establishment {
-    establishment_id: string;
-    address: string;
-    type: string;
-    location: string;
-    registration_date: Date;
-    user_id: string;
-    foods: Food[];
+    establishmentId: string;
+    name
+    description
+    phone
+    email
+    address
+    location
+    establismentType
+    createdAt: Date;
+    updatedAt: Date;
+
+    // Relations
+    foods?: Food[];
+
+    //TBD
+    userId: string;
 }
