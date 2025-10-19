@@ -13,7 +13,7 @@ export async function seedEstablishments(prisma: PrismaClient) {
         type: 'Point',
         coordinates: [-3.7038, 40.4168],
       },
-      establishmentType: EstablishmentType.PANADERIA,
+      establishmentType: EstablishmentType.BAKERY,
       userId: 'a23e4567-e89b-12d3-a456-426614174100',
     },
     {
@@ -25,7 +25,7 @@ export async function seedEstablishments(prisma: PrismaClient) {
         type: 'Point',
         coordinates: [-3.6882, 40.4254],
       },
-      establishmentType: EstablishmentType.RESTAURANTE,
+      establishmentType: EstablishmentType.RESTAURANT,
       userId: 'a23e4567-e89b-12d3-a456-426614174101',
     },
     {
@@ -37,7 +37,7 @@ export async function seedEstablishments(prisma: PrismaClient) {
         type: 'Point',
         coordinates: [-3.7124, 40.4198],
       },
-      establishmentType: EstablishmentType.SUPERMERCADO,
+      establishmentType: EstablishmentType.SUPERMARKET,
       userId: 'a23e4567-e89b-12d3-a456-426614174102',
     },
     {
@@ -49,7 +49,7 @@ export async function seedEstablishments(prisma: PrismaClient) {
         type: 'Point',
         coordinates: [-3.6936, 40.4152],
       },
-      establishmentType: EstablishmentType.CAFETERIA,
+      establishmentType: EstablishmentType.COFFEE_SHOP,
       userId: 'a23e4567-e89b-12d3-a456-426614174103',
     },
     {
@@ -61,7 +61,7 @@ export async function seedEstablishments(prisma: PrismaClient) {
         type: 'Point',
         coordinates: [-3.6758, 40.4234],
       },
-      establishmentType: EstablishmentType.FRUTERIA,
+      establishmentType: EstablishmentType.FRUIT_SHOP,
       userId: 'a23e4567-e89b-12d3-a456-426614174104',
     },
     {
@@ -73,7 +73,7 @@ export async function seedEstablishments(prisma: PrismaClient) {
         type: 'Point',
         coordinates: [-3.6845, 40.4301],
       },
-      establishmentType: EstablishmentType.CARNICERIA,
+      establishmentType: EstablishmentType.BUTCHER_SHOP,
       userId: 'a23e4567-e89b-12d3-a456-426614174105',
     },
     {
@@ -85,7 +85,7 @@ export async function seedEstablishments(prisma: PrismaClient) {
         type: 'Point',
         coordinates: [-3.7012, 40.4512],
       },
-      establishmentType: EstablishmentType.RESTAURANTE,
+      establishmentType: EstablishmentType.RESTAURANT,
       userId: 'a23e4567-e89b-12d3-a456-426614174106',
     },
     {
@@ -97,7 +97,7 @@ export async function seedEstablishments(prisma: PrismaClient) {
         type: 'Point',
         coordinates: [-3.6723, 40.4234],
       },
-      establishmentType: EstablishmentType.RESTAURANTE,
+      establishmentType: EstablishmentType.BAKERY,
       userId: 'a23e4567-e89b-12d3-a456-426614174107',
     },
   ];
