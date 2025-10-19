@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateFoodDto } from 'src/dtos/Foods/create-food.dto';
 import { UpdateFoodDto } from 'src/dtos/Foods/update-food.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { FoodStatus } from '@prisma/client';
+import { FoodCategory, FoodStatus } from '@prisma/client';
 
 @Injectable()
 export class FoodsService {
@@ -44,13 +44,13 @@ export class FoodsService {
     });
   }
 
-  async findByEstablishment(establishment_id: string) {
+  async findByEstablishment(establishmentId: string) {
     return this.prisma.food.findMany({
-      where: { establishmentId: establishment_id },
+      where: { establishmentId: establishmentId },
     });
   }
 
-  async findByCategory(category: string) {
+  async findByCategory(category: FoodCategory) {
     return this.prisma.food.findMany({
       where: { category: category },
     });

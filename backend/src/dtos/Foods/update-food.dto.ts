@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { FoodCategory, UnitOfMeasure, FoodStatus } from '@prisma/client';
 
 export class UpdateFoodDto {
   @ApiProperty({
@@ -19,11 +20,12 @@ export class UpdateFoodDto {
 
   @ApiProperty({
     description: 'Food category',
-    example: 'Bakery',
+    example: 'BAKERY',
+    enum: FoodCategory,
     required: false,
     type: String,
   })
-  readonly category?: string;
+  readonly category?: FoodCategory;
 
   @ApiProperty({
     description: 'Available quantity',
@@ -34,20 +36,21 @@ export class UpdateFoodDto {
   readonly quantity?: number;
 
   @ApiProperty({
-    description: 'Unit of measurement/weight',
-    example: 'units',
+    description: 'Unit of measurement',
+    example: 'UNIT',
+    enum: UnitOfMeasure,
     required: false,
     type: String,
   })
-  readonly weightOfUnit?: string;
+  readonly unitOfMeasure?: UnitOfMeasure;
 
   @ApiProperty({
     description: 'Food status',
     example: 'AVAILABLE',
-    enum: ['AVAILABLE', 'RESERVED', 'DELIVERED', 'EXPIRED'],
+    enum: FoodStatus,
     required: false,
   })
-  readonly status?: string;
+  readonly status?: FoodStatus;
 
   @ApiProperty({
     description: 'URL of the food image',
