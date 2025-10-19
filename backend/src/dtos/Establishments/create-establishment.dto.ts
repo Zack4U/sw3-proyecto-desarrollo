@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { EstablishmentType } from '@prisma/client';
 
 export class CreateEstablishmentDto {
   @ApiProperty({
@@ -24,22 +25,6 @@ export class CreateEstablishmentDto {
   readonly description?: string;
 
   @ApiProperty({
-    description: 'Contact phone number',
-    example: '+34 912 345 678',
-    required: false,
-    type: String,
-  })
-  readonly phone?: string;
-
-  @ApiProperty({
-    description: 'Contact email address',
-    example: 'contact@centralbakery.com',
-    required: false,
-    type: String,
-  })
-  readonly email?: string;
-
-  @ApiProperty({
     description: 'Physical address of the establishment',
     example: 'Main Street 15, Madrid',
     type: String,
@@ -48,11 +33,12 @@ export class CreateEstablishmentDto {
 
   @ApiProperty({
     description: 'Establishment type/category',
-    example: 'Bakery',
+    example: 'RESTAURANT',
+    enum: EstablishmentType,
     required: false,
     type: String,
   })
-  readonly establishmentType?: string;
+  readonly establishmentType?: EstablishmentType;
 
   @ApiProperty({
     description: 'Geographic location (GeoJSON format)',

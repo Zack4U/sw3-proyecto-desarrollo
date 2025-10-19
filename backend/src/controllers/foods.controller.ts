@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { FoodCategory } from '@prisma/client';
 import { CreateFoodDto } from 'src/dtos/Foods/create-food.dto';
 import { UpdateFoodDto } from 'src/dtos/Foods/update-food.dto';
 import { FoodsService } from 'src/services/foods.service';
@@ -66,13 +67,13 @@ export class FoodsController {
     return food;
   }
 
-  @Get('establishment/:establishment_id')
+  @Get('establishment/:establishmentId')
   @ApiOperation({
     summary: 'Get foods by establishment',
     description: 'Returns all foods from a specific establishment',
   })
   @ApiParam({
-    name: 'establishment_id',
+    name: 'establishmentId',
     description: 'Establishment UUID',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
@@ -80,8 +81,8 @@ export class FoodsController {
     status: 200,
     description: 'List of foods from the establishment',
   })
-  findByEstablishment(@Param('establishment_id') establishment_id: string) {
-    return this.foodsService.findByEstablishment(establishment_id);
+  findByEstablishment(@Param('establishmentId') establishmentId: string) {
+    return this.foodsService.findByEstablishment(establishmentId);
   }
 
   @Get('category/:category')
@@ -98,7 +99,7 @@ export class FoodsController {
     status: 200,
     description: 'List of foods from the category',
   })
-  findByCategory(@Param('category') category: string) {
+  findByCategory(@Param('category') category: FoodCategory) {
     return this.foodsService.findByCategory(category);
   }
 
