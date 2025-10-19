@@ -7,49 +7,264 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+// Modelo para los Usuarios
+model User {
+    userId         String        @id @db.Uuid
+    username       String?       @unique
+    documentNumber String?       @unique
+    documentType   DocumentType?
+    email          String        @unique
+    phone          String?
+    password       String?
+    role           UserRole      @default(BENEFICIARY)
+    picture        String?
+    isVerified     Boolean       @default(true)
+    isActive       Boolean       @default(true)
+    createdAt      DateTime      @default(now())
+    updatedAt      DateTime      @updatedAt
+
+    // Configuraciones
+    settings Json?
+
+    // IDs externos
+    googleId String? @unique
+
+    // Relación: Un usuario puede tener muchos establecimientos
+    establishments Establishment[]
+    beneficiary    Beneficiary[]
+}
+
+// Modelo para Beneficiarios
+model Beneficiary {
+    beneficiaryId String   @id @db.Uuid
+    name          String
+    lastName      String   @unique
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    // Relación: Un beneficiario pertenece a un usuario
+    User       User   @relation(fields: [userUserId], references: [userId])
+    userUserId String @db.Uuid
+}
+
 // Modelo para los Establecimientos
 model Establishment {
-    establishmentId   String   @id @db.Uuid
+    establishmentId   String             @id @db.Uuid
     name              String
     description       String?
-    phone             String?
-    email             String?
     address           String
     location          Json
-    establishmentType String?
-    createdAt         DateTime @default(now())
-    updatedAt         DateTime @updatedAt
+    establishmentType EstablishmentType?
+    createdAt         DateTime           @default(now())
+    updatedAt         DateTime           @updatedAt
 
-    // Relacion con usuario
-    // Creado en mongo
+    // Relación: Un establecimiento pertenece a un usuario
+    user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
     userId String @db.Uuid
+
     // Relación: Un establecimiento puede tener muchos alimentos
-    foods  Food[]
+    foods Food[]
 }
 
 // Modelo para los Alimentos
 model Food {
-    foodId       String     @id @default(uuid()) @db.Uuid
-    name         String
-    description  String?
-    category     String?
-    quantity     Float
-    weightOfUnit String
-    status       FoodStatus @default(AVAILABLE)
-    imageUrl     String?
-    expiresAt    DateTime   @db.Date
-    createdAt    DateTime   @default(now())
-    updatedAt    DateTime   @updatedAt
+    foodId        String        @id @default(uuid()) @db.Uuid
+    name          String
+    description   String?
+    category      FoodCategory?
+    quantity      Float
+    unitOfMeasure UnitOfMeasure
+    status        FoodStatus    @default(AVAILABLE)
+    imageUrl      String?
+    expiresAt     DateTime      @db.Date
+    createdAt     DateTime      @default(now())
+    updatedAt     DateTime      @updatedAt
 
     // Relación: Un alimento pertenece a un establecimiento
     establishment   Establishment @relation(fields: [establishmentId], references: [establishmentId], onDelete: Cascade)
     establishmentId String        @db.Uuid
 }
 
-// Enum para los estados de los alimentos
+enum DocumentType {
+    CC
+    TI
+    CE
+    RC
+    PAS
+    PPT
+    NIT
+}
+
+enum UserRole {
+    ADMIN
+    ESTABLISHMENT
+    BENEFICIARY
+}
+
 enum FoodStatus {
     AVAILABLE
-    RESERVED
     DELIVERED
     EXPIRED
+}
+
+enum UnitOfMeasure {
+    // Unidades
+    UNIDAD
+    DOCENA
+    PAQUETE
+    CAJA
+    LATA
+    BOTELLA
+    BOLSA
+    ROLLO
+    TARRO
+    TUBO
+
+    // Peso (Sistema Métrico)
+    GRAMO
+    KILOGRAMO
+    MILIGRAMO
+
+    // Volumen (Sistema Métrico)
+    LITRO
+    MILILITRO
+    CENTIMETRO_CUBICO
+
+    // Peso (Sistema Imperial)
+    ONZA
+    LIBRA
+
+    // Volumen (Sistema Imperial)
+    ONZA_LIQUIDA
+    PINTA
+    CUARTO
+    GALON
+
+    // Unidades de Cocina
+    CUCHARADITA
+    CUCHARADA
+    TAZA
+    PIZCA
+    DIENTE // Para ajos, por ejemplo
+    RAMA
+}
+
+enum FoodCategory {
+    // Frutas y Verduras
+    FRUTAS
+    VERDURAS
+    HORTALIZAS
+    LEGUMBRES
+    TUBERCULOS
+
+    // Carnes y Aves
+    CARNE_ROJA
+    AVES
+    PESCADOS
+    MARISCOS
+    EMBUTIDOS
+
+    // Lácteos y Huevos
+    LACTEOS
+    QUESOS
+    YOGURES
+    HUEVOS
+
+    // Granos, Cereales y Panadería
+    CEREALES
+    GRANOS
+    PASTAS
+    PANADERIA
+    HARINAS
+
+    // Despensa y Enlatados
+    ENLATADOS
+    CONSERVAS
+    SALSAS_Y_CONDIMENTOS
+    ACEITES_Y_VINAGRES
+    ESPECIAS_Y_HIERBAS
+    SOPAS_Y_CREMAS
+
+    // Snacks y Dulces
+    SNACKS_SALADOS
+    DULCES_Y_CHOCOLATES
+    GALLETAS_Y_POSTRES
+    FRUTOS_SECOS
+
+    // Bebidas
+    BEBIDAS_NO_ALCOHOLICAS
+    JUGOS_Y_ZUMOS
+    CAFES_E_INFUSIONES
+    BEBIDAS_ALCOHOLICAS
+
+    // Congelados
+    CONGELADOS
+
+    // Comida Preparada
+    COMIDA_PREPARADA
+
+    // Otros
+    OTROS
+}
+
+enum EstablishmentType {
+    // Alimentos y Bebidas
+    RESTAURANTE
+    CAFETERIA
+    BAR
+    DISCOTECA
+    PANADERIA
+    SUPERMERCADO
+    TIENDA_DE_ABARROTES
+    FRUTERIA
+    CARNICERIA
+    FOOD_TRUCK
+
+    // Alojamiento
+    HOTEL
+    HOSTAL
+    MOTEL
+    APARTAHOTEL
+
+    // Comercio Minorista (Retail)
+    TIENDA_DE_ROPA
+    ZAPATERIA
+    JOYERIA
+    LIBRERIA
+    PAPELERIA
+    JUGUETERIA
+    TIENDA_DE_ELECTRONICA
+    TIENDA_DEPORTIVA
+    FARMACIA
+    FERRETERIA
+    TIENDA_DE_MASCOTAS
+    VIVERO
+
+    // Servicios
+    PELUQUERIA
+    BARBERIA
+    CENTRO_DE_ESTETICA
+    SPA
+    GIMNASIO
+    LAVANDERIA
+    TALLER_MECANICO
+    CONSULTORIO_MEDICO
+    CONSULTORIO_ODONTOLOGICO
+    VETERINARIA
+    OFICINA_CORPORATIVA
+    CENTRO_EDUCATIVO
+
+    // Entretenimiento y Cultura
+    CINE
+    TEATRO
+    MUSEO
+    GALERIA_DE_ARTE
+    CENTRO_DE_EVENTOS
+    PARQUE_DE_DIVERSIONES
+    BOLERA
+
+    // Otros
+    CENTRO_COMERCIAL
+    PARQUEADERO
+    OTRO
 }
