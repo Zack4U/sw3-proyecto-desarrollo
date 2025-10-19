@@ -108,163 +108,163 @@ enum FoodStatus {
 }
 
 enum UnitOfMeasure {
-    // Unidades
-    UNIDAD
-    DOCENA
-    PAQUETE
-    CAJA
-    LATA
-    BOTELLA
-    BOLSA
-    ROLLO
-    TARRO
-    TUBO
+    // Units
+    UNIT
+    DOZEN
+    PACKAGE
+    BOX
+    CAN
+    BOTTLE
+    BAG
+    ROLL
+    JAR
+    TUBE
 
-    // Peso (Sistema Métrico)
-    GRAMO
-    KILOGRAMO
-    MILIGRAMO
+    // Weight (Metric System)
+    GRAM
+    KILOGRAM
+    MILLIGRAM
 
-    // Volumen (Sistema Métrico)
-    LITRO
-    MILILITRO
-    CENTIMETRO_CUBICO
+    // Volume (Metric System)
+    LITER
+    MILLILITER
+    CUBIC_CENTIMETER
 
-    // Peso (Sistema Imperial)
-    ONZA
-    LIBRA
+    // Weight (Imperial System)
+    OUNCE
+    POUND
 
-    // Volumen (Sistema Imperial)
-    ONZA_LIQUIDA
-    PINTA
-    CUARTO
-    GALON
+    // Volume (Imperial System)
+    FLUID_OUNCE
+    PINT
+    QUART
+    GALLON
 
-    // Unidades de Cocina
-    CUCHARADITA
-    CUCHARADA
-    TAZA
-    PIZCA
-    DIENTE // Para ajos, por ejemplo
-    RAMA
+    // Cooking Units
+    TEASPOON
+    TABLESPOON
+    CUP
+    PINCH
+    CLOVE // For garlic, for example
+    BRANCH
 }
 
 enum FoodCategory {
-    // Frutas y Verduras
-    FRUTAS
-    VERDURAS
-    HORTALIZAS
-    LEGUMBRES
-    TUBERCULOS
+    // Fruits and Vegetables
+    FRUITS
+    VEGETABLES
+    GREENS
+    LEGUMES
+    TUBERS
 
-    // Carnes y Aves
-    CARNE_ROJA
-    AVES
-    PESCADOS
-    MARISCOS
-    EMBUTIDOS
+    // Meats and Poultry
+    RED_MEAT
+    POULTRY
+    FISH
+    SEAFOOD
+    COLD_CUTS
 
-    // Lácteos y Huevos
-    LACTEOS
-    QUESOS
-    YOGURES
-    HUEVOS
+    // Dairy and Eggs
+    DAIRY
+    CHEESE
+    YOGURT
+    EGGS
 
-    // Granos, Cereales y Panadería
-    CEREALES
-    GRANOS
-    PASTAS
-    PANADERIA
-    HARINAS
+    // Grains, Cereals and Bakery
+    CEREALS
+    GRAINS
+    PASTA
+    BAKERY
+    FLOUR
 
-    // Despensa y Enlatados
-    ENLATADOS
-    CONSERVAS
-    SALSAS_Y_CONDIMENTOS
-    ACEITES_Y_VINAGRES
-    ESPECIAS_Y_HIERBAS
-    SOPAS_Y_CREMAS
+    // Pantry and Canned
+    CANNED
+    PRESERVES
+    SAUCES_AND_CONDIMENTS
+    OILS_AND_VINEGARS
+    SPICES_AND_HERBS
+    SOUPS_AND_CREAMS
 
-    // Snacks y Dulces
-    SNACKS_SALADOS
-    DULCES_Y_CHOCOLATES
-    GALLETAS_Y_POSTRES
-    FRUTOS_SECOS
+    // Snacks and Sweets
+    SALTY_SNACKS
+    SWEETS_AND_CHOCOLATES
+    COOKIES_AND_DESSERTS
+    NUTS
 
-    // Bebidas
-    BEBIDAS_NO_ALCOHOLICAS
-    JUGOS_Y_ZUMOS
-    CAFES_E_INFUSIONES
-    BEBIDAS_ALCOHOLICAS
+    // Beverages
+    NON_ALCOHOLIC_BEVERAGES
+    JUICES
+    COFFEE_AND_TEA
+    ALCOHOLIC_BEVERAGES
 
-    // Congelados
-    CONGELADOS
+    // Frozen
+    FROZEN
 
-    // Comida Preparada
-    COMIDA_PREPARADA
+    // Prepared Food
+    PREPARED_FOOD
 
-    // Otros
-    OTROS
+    // Others
+    OTHERS
 }
 
 enum EstablishmentType {
-    // Alimentos y Bebidas
-    RESTAURANTE
-    CAFETERIA
+    // Food and Beverages
+    RESTAURANT
+    COFFEE_SHOP
     BAR
-    DISCOTECA
-    PANADERIA
-    SUPERMERCADO
-    TIENDA_DE_ABARROTES
-    FRUTERIA
-    CARNICERIA
+    NIGHTCLUB
+    BAKERY
+    SUPERMARKET
+    GROCERY_STORE
+    FRUIT_SHOP
+    BUTCHER_SHOP
     FOOD_TRUCK
 
-    // Alojamiento
+    // Accommodation
     HOTEL
-    HOSTAL
+    HOSTEL
     MOTEL
-    APARTAHOTEL
+    APART_HOTEL
 
-    // Comercio Minorista (Retail)
-    TIENDA_DE_ROPA
-    ZAPATERIA
-    JOYERIA
-    LIBRERIA
-    PAPELERIA
-    JUGUETERIA
-    TIENDA_DE_ELECTRONICA
-    TIENDA_DEPORTIVA
-    FARMACIA
-    FERRETERIA
-    TIENDA_DE_MASCOTAS
-    VIVERO
+    // Retail
+    CLOTHING_STORE
+    SHOE_STORE
+    JEWELRY_STORE
+    BOOKSTORE
+    STATIONERY_STORE
+    TOY_STORE
+    ELECTRONICS_STORE
+    SPORTS_STORE
+    PHARMACY
+    HARDWARE_STORE
+    PET_STORE
+    NURSERY
 
-    // Servicios
-    PELUQUERIA
-    BARBERIA
-    CENTRO_DE_ESTETICA
+    // Services
+    HAIR_SALON
+    BARBER_SHOP
+    BEAUTY_CENTER
     SPA
-    GIMNASIO
-    LAVANDERIA
-    TALLER_MECANICO
-    CONSULTORIO_MEDICO
-    CONSULTORIO_ODONTOLOGICO
-    VETERINARIA
-    OFICINA_CORPORATIVA
-    CENTRO_EDUCATIVO
+    GYM
+    LAUNDRY
+    AUTO_REPAIR_SHOP
+    MEDICAL_OFFICE
+    DENTAL_OFFICE
+    VETERINARY
+    CORPORATE_OFFICE
+    EDUCATIONAL_CENTER
 
-    // Entretenimiento y Cultura
-    CINE
-    TEATRO
-    MUSEO
-    GALERIA_DE_ARTE
-    CENTRO_DE_EVENTOS
-    PARQUE_DE_DIVERSIONES
-    BOLERA
+    // Entertainment and Culture
+    CINEMA
+    THEATER
+    MUSEUM
+    ART_GALLERY
+    EVENT_CENTER
+    AMUSEMENT_PARK
+    BOWLING_ALLEY
 
-    // Otros
-    CENTRO_COMERCIAL
-    PARQUEADERO
-    OTRO
+    // Others
+    SHOPPING_MALL
+    PARKING
+    OTHER
 }
