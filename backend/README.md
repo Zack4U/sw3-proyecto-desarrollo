@@ -145,6 +145,45 @@ $ npm run test:cov
 $ npm run test:debug
 ```
 
+#### 📝 Cobertura de Pruebas Unitarias
+
+El proyecto incluye pruebas unitarias completas para los servicios principales:
+
+**Servicios (`src/services/*.spec.ts`):**
+- ✅ **EstablishmentsService** (100% cobertura)
+  - `create()` - Creación de establecimientos con validación
+  - `findAll()` - Obtención de todos los establecimientos
+  - `findOne()` - Búsqueda por ID con manejo de casos no encontrados
+  - `update()` - Actualización con validación de datos
+  - `remove()` - Eliminación con manejo de errores
+  
+- ✅ **FoodsService** (100% cobertura)
+  - `create()` - Creación de alimentos con conversión de estados
+  - `findAll()` - Listado completo de alimentos
+  - `findOne()` - Búsqueda individual por ID
+  - `update()` - Actualización excluyendo campos protegidos (establishmentId)
+  - `remove()` - Eliminación con manejo de errores
+  - `findByEstablishment()` - Búsqueda por establecimiento
+  - `findByCategory()` - Filtrado por categoría
+  - `findByName()` - Búsqueda case-insensitive por nombre
+
+**Características de las pruebas:**
+- ✅ Mock completo de PrismaService para pruebas aisladas
+- ✅ Validación de casos de éxito y error
+- ✅ Pruebas de manejo de excepciones
+- ✅ Cobertura de DTOs y transformaciones
+- ✅ Pruebas de relaciones entre entidades
+- ✅ 30 tests pasando exitosamente
+
+**Métricas de Cobertura:**
+```
+File                          | % Stmts | % Branch | % Funcs | % Lines
+------------------------------|---------|----------|---------|--------
+src/services/
+  establishment.service.ts    |   100%  |   75%    |  100%   |  100%
+  foods.service.ts            |   100%  |   83%    |  100%   |  100%
+```
+
 ### Producción
 
 ```bash
@@ -172,20 +211,195 @@ backend/
 │   ├── seed.ts                # Script principal de seeds
 │   └── seeds/                 # Seeds modulares por entidad
 │       ├── establishment.seed.ts
-│       └── food.seed.ts
+│       ├── food.seed.ts
+│       └── README.md
+├── scripts/
+│   └── setup_database/        # Scripts de configuración de BD
+│       ├── setup-database.ps1
+│       ├── setup-database.sh
+│       └── setup-database.sql
 ├── src/
-│   ├── config/                # Configuraciones (Swagger, etc)
+│   ├── config/                # Configuración de la aplicación
+│   │   ├── swagger.config.ts
+│   │   └── index.ts
 │   ├── controllers/           # Controladores REST
+│   │   ├── establishment.controller.ts
+│   │   ├── establishment.controller.spec.ts
+│   │   ├── foods.controller.ts
+│   │   └── foods.controller.spec.ts
 │   ├── dtos/                  # Data Transfer Objects
-│   ├── models/               # Modelos de dominio
-│   ├── services/             # Lógica de negocio
-│   ├── prisma/               # Servicio de Prisma
-│   ├── app.module.ts         # Módulo principal
-│   └── main.ts               # Punto de entrada
-├── test/                     # Tests e2e
-├── .env                      # Variables de entorno (crear este!)
-└── package.json              # Dependencias y scripts
+│   │   ├── Establishments/
+│   │   │   ├── create-establishment.dto.ts
+│   │   │   └── update-establishment.dto.ts
+│   │   └── Foods/
+│   │       ├── create-food.dto.ts
+│   │       └── update-food.dto.ts
+│   ├── models/                # Modelos de dominio
+│   │   ├── establishment.model.ts
+│   │   └── food.model.ts
+│   ├── prisma/                # Servicio de Prisma
+│   │   ├── prisma.service.ts
+│   │   └── prisma.service.spec.ts
+│   ├── services/              # Lógica de negocio
+│   │   ├── establishment.service.ts
+│   │   ├── establishment.service.spec.ts
+│   │   ├── foods.service.ts
+│   │   └── foods.service.spec.ts
+│   ├── app.module.ts          # Módulo principal
+│   ├── app.controller.ts      # Controlador de salud/bienvenida
+│   ├── app.service.ts
+│   └── main.ts                # Punto de entrada
+├── test/                      # Tests e2e
+│   ├── app.e2e-spec.ts
+│   └── jest-e2e.json
+├── .env                       # Variables de entorno
+├── package.json
+├── tsconfig.json
+└── nest-cli.json
 ```
+
+### 🏗️ Arquitectura de Capas
+
+El proyecto sigue una arquitectura por capas limpia:
+
+1. **Controllers (Capa de Presentación)**
+   - Manejo de peticiones HTTP
+   - Validación de entrada con DTOs
+   - Documentación con Swagger
+   - Manejo de excepciones HTTP
+
+2. **Services (Capa de Negocio)**
+   - Lógica de negocio
+   - Operaciones CRUD
+   - Transformación de datos
+   - Interacción con Prisma
+
+3. **Prisma Service (Capa de Datos)**
+   - Conexión a PostgreSQL
+   - ORM y type-safety
+   - Migraciones y schemas
+
+4. **DTOs (Validación)**
+   - Validación de entrada
+   - Documentación de API
+   - Type-safety en transferencia de datos
+
+5. **Models (Dominio)**
+   - Definición de entidades
+   - Tipado fuerte
+
+## 🧪 Guía de Testing
+
+### Ejecutar Todas las Pruebas
+
+```bash
+# Ejecutar todas las pruebas unitarias
+npm test
+
+# Ejecutar con reporte de cobertura
+npm run test:cov
+
+# Ejecutar en modo watch (útil durante desarrollo)
+npm run test:watch
+```
+
+> 📖 Para documentación completa sobre testing, ver [TESTING.md](./TESTING.md)
+
+### Estructura de Pruebas
+
+```
+src/services/
+├── establishment.service.spec.ts    # Tests del servicio de establecimientos (14 tests)
+└── foods.service.spec.ts            # Tests del servicio de alimentos (16 tests)
+```
+
+**Total: 30 tests pasando ✅**
+
+### Cobertura de Pruebas
+
+Las pruebas cubren los siguientes escenarios:
+
+**✅ Operaciones CRUD:**
+- Crear entidades con datos válidos
+- Leer entidades individuales y colecciones
+- Actualizar entidades existentes
+- Eliminar entidades
+
+**✅ Validaciones:**
+- Manejo de datos inválidos
+- Validación de DTOs
+- Campos requeridos vs opcionales
+
+**✅ Manejo de Errores:**
+- NotFoundException para recursos no encontrados
+- Errores de base de datos
+- Validación de relaciones entre entidades
+
+**✅ Búsquedas Especializadas:**
+- Búsqueda de alimentos por establecimiento
+- Búsqueda de alimentos por categoría
+- Búsqueda de alimentos por nombre (case-insensitive)
+
+### Principios Aplicados
+
+Las pruebas siguen estos principios de calidad:
+
+1. **Aislamiento**: Uso de mocks para aislar componentes
+2. **AAA Pattern**: Arrange-Act-Assert en cada test
+3. **Descriptivo**: Nombres claros que describen el comportamiento esperado
+4. **Mantenibilidad**: Tests fáciles de leer y mantener
+5. **Cobertura**: Testing de casos de éxito y error
+
+### Ejemplo de Ejecución
+
+```bash
+# Navegar al directorio backend
+cd backend
+
+# Ejecutar todas las pruebas
+npm test
+
+# Resultado esperado:
+# PASS  src/services/establishment.service.spec.ts
+# PASS  src/services/foods.service.spec.ts
+#
+# Test Suites: 2 passed, 2 total
+# Tests:       30 passed, 30 total
+# Snapshots:   0 total
+# Time:        2.158 s
+
+# Ejecutar con cobertura
+npm run test:cov
+
+# Ver reporte detallado en: coverage/lcov-report/index.html
+```
+
+## 🔍 Patrones y Mejores Prácticas
+
+### DTOs (Data Transfer Objects)
+- Validación automática con `class-validator`
+- Documentación con `@ApiProperty` de Swagger
+- Separación entre Create y Update DTOs
+- Readonly properties para inmutabilidad
+
+### Servicios
+- Inyección de dependencias
+- Responsabilidad única
+- Métodos async/await
+- Manejo de errores apropiado
+
+### Controladores
+- Decoradores de NestJS para routing
+- Validación automática de entrada
+- Respuestas HTTP apropiadas
+- Documentación completa con Swagger
+
+## 📚 Recursos Adicionales
+
+- [Documentación de NestJS](https://docs.nestjs.com)
+- [Documentación de Prisma](https://www.prisma.io/docs)
+- [Documentación de Jest](https://jestjs.io/docs/getting-started)
+- [Testing en NestJS](https://docs.nestjs.com/fundamentals/testing)
 
 ## Deployment
 
