@@ -3,6 +3,7 @@ import { EstablishmentsService } from './establishment.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEstablishmentDto } from '../dtos/Establishments/create-establishment.dto';
 import { UpdateEstablishmentDto } from '../dtos/Establishments/update-establishment.dto';
+import { EstablishmentType } from '@prisma/client';
 
 describe('EstablishmentsService', () => {
   let service: EstablishmentsService;
@@ -18,18 +19,29 @@ describe('EstablishmentsService', () => {
     },
   };
 
+  const mockCity = {
+    cityId: 'c8813235-6f94-4f56-b9dc-22e2a3206e6b',
+    name: 'Cali',
+    departmentId: 'd8813235-6f94-4f56-b9dc-22e2a3206e6b',
+    department: {
+      departmentId: 'd8813235-6f94-4f56-b9dc-22e2a3206e6b',
+      name: 'Valle del Cauca',
+    },
+  };
+
   const mockEstablishment = {
     establishmentId: '123e4567-e89b-12d3-a456-426614174000',
     name: 'Test Bakery',
     description: 'A test bakery',
-    phone: '+34 912 345 678',
-    email: 'test@bakery.com',
-    address: 'Test Street 123',
-    location: { type: 'Point', coordinates: [-3.7038, 40.4168] },
-    establishmentType: 'Bakery',
+    address: 'Calle 5 #23-45',
+    neighborhood: 'Granada',
+    location: { type: 'Point', coordinates: [-76.532, 3.4516] },
+    establishmentType: EstablishmentType.BAKERY,
     userId: '123e4567-e89b-12d3-a456-426614174001',
+    cityId: mockCity.cityId,
     createdAt: new Date(),
     updatedAt: new Date(),
+    city: mockCity,
   };
 
   beforeEach(async () => {
@@ -61,12 +73,12 @@ describe('EstablishmentsService', () => {
         establishmentId: mockEstablishment.establishmentId,
         name: mockEstablishment.name,
         description: mockEstablishment.description,
-        phone: mockEstablishment.phone,
-        email: mockEstablishment.email,
         address: mockEstablishment.address,
+        neighborhood: mockEstablishment.neighborhood,
         location: mockEstablishment.location,
         establishmentType: mockEstablishment.establishmentType,
         userId: mockEstablishment.userId,
+        cityId: mockEstablishment.cityId,
       };
 
       mockPrismaService.establishment.create.mockResolvedValue(mockEstablishment);
@@ -80,6 +92,39 @@ describe('EstablishmentsService', () => {
       expect(mockPrismaService.establishment.create).toHaveBeenCalledTimes(1);
     });
 
+    it('should create an establishment without optional fields', async () => {
+      const createDto: CreateEstablishmentDto = {
+        establishmentId: mockEstablishment.establishmentId,
+        name: mockEstablishment.name,
+        address: mockEstablishment.address,
+        location: mockEstablishment.location,
+        userId: mockEstablishment.userId,
+        cityId: mockEstablishment.cityId,
+      };
+
+      const establishmentWithoutOptionals = {
+        establishmentId: mockEstablishment.establishmentId,
+        name: mockEstablishment.name,
+        address: mockEstablishment.address,
+        location: mockEstablishment.location,
+        userId: mockEstablishment.userId,
+        cityId: mockEstablishment.cityId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        city: mockCity,
+      };
+
+      mockPrismaService.establishment.create.mockResolvedValue(establishmentWithoutOptionals);
+
+      const result = await service.create(createDto);
+
+      expect(result).toEqual(establishmentWithoutOptionals);
+      expect(mockPrismaService.establishment.create).toHaveBeenCalledWith({
+        data: createDto,
+      });
+      expect(mockPrismaService.establishment.create).toHaveBeenCalledTimes(1);
+    });
+
     it('should throw an error if creation fails', async () => {
       const createDto: CreateEstablishmentDto = {
         establishmentId: mockEstablishment.establishmentId,
@@ -87,6 +132,7 @@ describe('EstablishmentsService', () => {
         address: mockEstablishment.address,
         location: mockEstablishment.location,
         userId: mockEstablishment.userId,
+        cityId: mockEstablishment.cityId,
       };
 
       const error = new Error('Database error');
@@ -194,6 +240,306 @@ describe('EstablishmentsService', () => {
         'Deletion failed',
       );
       expect(mockPrismaService.establishment.delete).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('findByCity', () => {
+    it('should return establishments by city id', async () => {
+      const establishments = [mockEstablishment];
+      mockPrismaService.establishment.findMany.mockResolvedValue(establishments);
+
+      const result = await service.findByCity(mockCity.cityId);
+
+      expect(result).toEqual(establishments);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledWith({
+        where: { cityId: mockCity.cityId },
+        include: {
+          city: {
+            include: {
+              department: true,
+            },
+          },
+        },
+      });
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return empty array if no establishments found in city', async () => {
+      mockPrismaService.establishment.findMany.mockResolvedValue([]);
+
+      const result = await service.findByCity('non-existent-city-id');
+
+      expect(result).toEqual([]);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('findByDepartment', () => {
+    it('should return establishments by department id', async () => {
+      const establishments = [mockEstablishment];
+      mockPrismaService.establishment.findMany.mockResolvedValue(establishments);
+
+      const result = await service.findByDepartment(mockCity.department.departmentId);
+
+      expect(result).toEqual(establishments);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledWith({
+        where: {
+          city: {
+            departmentId: mockCity.department.departmentId,
+          },
+        },
+        include: {
+          city: {
+            include: {
+              department: true,
+            },
+          },
+        },
+      });
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return empty array if no establishments found in department', async () => {
+      mockPrismaService.establishment.findMany.mockResolvedValue([]);
+
+      const result = await service.findByDepartment('non-existent-department-id');
+
+      expect(result).toEqual([]);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('findByNeighborhood', () => {
+    it('should return establishments by neighborhood (case-insensitive)', async () => {
+      const establishments = [mockEstablishment];
+      mockPrismaService.establishment.findMany.mockResolvedValue(establishments);
+
+      const result = await service.findByNeighborhood('Granada');
+
+      expect(result).toEqual(establishments);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledWith({
+        where: {
+          neighborhood: {
+            contains: 'Granada',
+            mode: 'insensitive',
+          },
+        },
+        include: {
+          city: {
+            include: {
+              department: true,
+            },
+          },
+        },
+      });
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('should find establishments with partial neighborhood match', async () => {
+      const establishments = [mockEstablishment];
+      mockPrismaService.establishment.findMany.mockResolvedValue(establishments);
+
+      const result = await service.findByNeighborhood('gran');
+
+      expect(result).toEqual(establishments);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledWith({
+        where: {
+          neighborhood: {
+            contains: 'gran',
+            mode: 'insensitive',
+          },
+        },
+        include: {
+          city: {
+            include: {
+              department: true,
+            },
+          },
+        },
+      });
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return empty array if no establishments found in neighborhood', async () => {
+      mockPrismaService.establishment.findMany.mockResolvedValue([]);
+
+      const result = await service.findByNeighborhood('NonExistentNeighborhood');
+
+      expect(result).toEqual([]);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('findByLocation', () => {
+    it('should find establishments by city id', async () => {
+      const establishments = [mockEstablishment];
+      mockPrismaService.establishment.findMany.mockResolvedValue(establishments);
+
+      const result = await service.findByLocation({ cityId: mockCity.cityId });
+
+      expect(result).toEqual(establishments);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledWith({
+        where: { cityId: mockCity.cityId },
+        include: {
+          city: {
+            include: {
+              department: true,
+            },
+          },
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      });
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('should find establishments by department id', async () => {
+      const establishments = [mockEstablishment];
+      mockPrismaService.establishment.findMany.mockResolvedValue(establishments);
+
+      const result = await service.findByLocation({
+        departmentId: mockCity.department.departmentId,
+      });
+
+      expect(result).toEqual(establishments);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledWith({
+        where: {
+          city: {
+            departmentId: mockCity.department.departmentId,
+          },
+        },
+        include: {
+          city: {
+            include: {
+              department: true,
+            },
+          },
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      });
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('should find establishments by neighborhood', async () => {
+      const establishments = [mockEstablishment];
+      mockPrismaService.establishment.findMany.mockResolvedValue(establishments);
+
+      const result = await service.findByLocation({ neighborhood: 'Granada' });
+
+      expect(result).toEqual(establishments);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledWith({
+        where: {
+          neighborhood: {
+            contains: 'Granada',
+            mode: 'insensitive',
+          },
+        },
+        include: {
+          city: {
+            include: {
+              department: true,
+            },
+          },
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      });
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('should find establishments by city and neighborhood combined', async () => {
+      const establishments = [mockEstablishment];
+      mockPrismaService.establishment.findMany.mockResolvedValue(establishments);
+
+      const result = await service.findByLocation({
+        cityId: mockCity.cityId,
+        neighborhood: 'Granada',
+      });
+
+      expect(result).toEqual(establishments);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledWith({
+        where: {
+          cityId: mockCity.cityId,
+          neighborhood: {
+            contains: 'Granada',
+            mode: 'insensitive',
+          },
+        },
+        include: {
+          city: {
+            include: {
+              department: true,
+            },
+          },
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      });
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('should prioritize city over department when both provided', async () => {
+      const establishments = [mockEstablishment];
+      mockPrismaService.establishment.findMany.mockResolvedValue(establishments);
+
+      const result = await service.findByLocation({
+        cityId: mockCity.cityId,
+        departmentId: mockCity.department.departmentId,
+      });
+
+      expect(result).toEqual(establishments);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledWith({
+        where: {
+          cityId: mockCity.cityId,
+        },
+        include: {
+          city: {
+            include: {
+              department: true,
+            },
+          },
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      });
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return establishments ordered by name', async () => {
+      const establishments = [
+        { ...mockEstablishment, name: 'Bakery A' },
+        { ...mockEstablishment, name: 'Bakery B' },
+      ];
+      mockPrismaService.establishment.findMany.mockResolvedValue(establishments);
+
+      const result = await service.findByLocation({ cityId: mockCity.cityId });
+
+      expect(result).toEqual(establishments);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: {
+            name: 'asc',
+          },
+        }),
+      );
+    });
+
+    it('should return empty array if no establishments match filters', async () => {
+      mockPrismaService.establishment.findMany.mockResolvedValue([]);
+
+      const result = await service.findByLocation({
+        cityId: 'non-existent-id',
+        neighborhood: 'NonExistent',
+      });
+
+      expect(result).toEqual([]);
+      expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
     });
   });
 });
