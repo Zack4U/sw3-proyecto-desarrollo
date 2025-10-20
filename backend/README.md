@@ -202,6 +202,7 @@ Una vez iniciado el servidor:
 - **Swagger UI**: http://localhost:3000/api
 - **Prisma Studio**: http://localhost:5555 (después de ejecutar `npx prisma studio`)
 
+
 ## 🗂️ Estructura del Proyecto
 
 ```
@@ -210,40 +211,57 @@ backend/
 │   ├── schema.prisma          # Esquema de base de datos
 │   ├── seed.ts                # Script principal de seeds
 │   └── seeds/                 # Seeds modulares por entidad
-│       ├── establishment.seed.ts
-│       ├── food.seed.ts
-│       └── README.md
+│       ├── department.seed.ts # Departamentos de Colombia
+│       ├── city.seed.ts       # Ciudades capitales
+│       ├── user.seed.ts       # Usuarios de prueba
+│       ├── establishment.seed.ts # Establecimientos
+│       ├── food.seed.ts       # Alimentos
+│       └── README.md          # Documentación de seeds
 ├── scripts/
+│   ├── get_city_ids.sql       # Helper SQL para obtener IDs de ciudades
 │   └── setup_database/        # Scripts de configuración de BD
 │       ├── setup-database.ps1
 │       ├── setup-database.sh
-│       └── setup-database.sql
+│       ├── setup-database.sql
+│       └── README.md
 ├── src/
 │   ├── config/                # Configuración de la aplicación
 │   │   ├── swagger.config.ts
-│   │   └── index.ts
+│   │   ├── index.ts
+│   │   └── README.md
 │   ├── controllers/           # Controladores REST
-│   │   ├── establishment.controller.ts
-│   │   ├── establishment.controller.spec.ts
-│   │   ├── foods.controller.ts
-│   │   └── foods.controller.spec.ts
+│   │   ├── department.controller.ts     # CRUD de departamentos
+│   │   ├── city.controller.ts           # CRUD de ciudades
+│   │   ├── establishment.controller.ts  # CRUD y búsqueda de establecimientos
+│   │   ├── foods.controller.ts          # CRUD y búsqueda de alimentos
+│   │   └── [...]
 │   ├── dtos/                  # Data Transfer Objects
-│   │   ├── Establishments/
+│   │   ├── Departments/       # DTOs de departamentos
+│   │   │   ├── create-department.dto.ts
+│   │   │   └── update-department.dto.ts
+│   │   ├── Cities/            # DTOs de ciudades
+│   │   │   ├── create-city.dto.ts
+│   │   │   └── update-city.dto.ts
+│   │   ├── Establishments/    # DTOs de establecimientos
 │   │   │   ├── create-establishment.dto.ts
 │   │   │   └── update-establishment.dto.ts
-│   │   └── Foods/
+│   │   └── Foods/             # DTOs de alimentos
 │   │       ├── create-food.dto.ts
 │   │       └── update-food.dto.ts
 │   ├── models/                # Modelos de dominio
-│   │   ├── establishment.model.ts
-│   │   └── food.model.ts
+│   │   ├── department.model.ts      # Modelo de departamento
+│   │   ├── city.model.ts            # Modelo de ciudad
+│   │   ├── establishment.model.ts   # Modelo de establecimiento
+│   │   └── food.model.ts            # Modelo de alimento
 │   ├── prisma/                # Servicio de Prisma
 │   │   ├── prisma.service.ts
 │   │   └── prisma.service.spec.ts
 │   ├── services/              # Lógica de negocio
-│   │   ├── establishment.service.ts
+│   │   ├── department.service.ts        # Servicio de departamentos
+│   │   ├── city.service.ts              # Servicio de ciudades
+│   │   ├── establishment.service.ts     # Servicio de establecimientos
 │   │   ├── establishment.service.spec.ts
-│   │   ├── foods.service.ts
+│   │   ├── foods.service.ts             # Servicio de alimentos
 │   │   └── foods.service.spec.ts
 │   ├── app.module.ts          # Módulo principal
 │   ├── app.controller.ts      # Controlador de salud/bienvenida
@@ -252,6 +270,8 @@ backend/
 ├── test/                      # Tests e2e
 │   ├── app.e2e-spec.ts
 │   └── jest-e2e.json
+├── coverage/                  # Reportes de cobertura de tests
+├── US1.3_IMPLEMENTATION.md    # Documentación de implementación US1.3
 ├── .env                       # Variables de entorno
 ├── package.json
 ├── tsconfig.json
@@ -273,20 +293,24 @@ El proyecto sigue una arquitectura por capas limpia:
    - Operaciones CRUD
    - Transformación de datos
    - Interacción con Prisma
+   - Métodos de búsqueda especializados
 
 3. **Prisma Service (Capa de Datos)**
    - Conexión a PostgreSQL
    - ORM y type-safety
    - Migraciones y schemas
+   - Relaciones entre entidades: Department → City → Establishment → Food
 
 4. **DTOs (Validación)**
-   - Validación de entrada
-   - Documentación de API
+   - Validación de entrada con `class-validator`
+   - Documentación de API con `@ApiProperty`
    - Type-safety en transferencia de datos
+   - Separación clara entre Create y Update DTOs
 
 5. **Models (Dominio)**
-   - Definición de entidades
-   - Tipado fuerte
+   - Definición de entidades de negocio
+   - Tipado fuerte con TypeScript
+   - Documentación con Swagger decorators
 
 ## 🧪 Guía de Testing
 

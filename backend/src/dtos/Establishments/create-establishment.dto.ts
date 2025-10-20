@@ -53,4 +53,19 @@ export class CreateEstablishmentDto {
     type: String,
   })
   readonly userId: string;
+
+  @ApiProperty({
+    description: 'Neighborhood or district',
+    example: 'Chapinero',
+    required: false,
+    type: String,
+  })
+  readonly neighborhood?: string;
+
+  @ApiProperty({
+    description: 'UUID of the city where the establishment is located',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    type: String,
+  })
+  readonly cityId: string;
 }

@@ -1,11 +1,39 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
+
+// ====================
+// MODELOS BASE
+// ====================
+
+model Department {
+  departmentId String @id @default(uuid())
+  name         String @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  cities       City[]
+}
+
+model City {
+  cityId        String @id @default(uuid())
+  name          String
+  departmentId  String
+  department    Department @relation(fields: [departmentId], references: [departmentId])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  establishments Establishment[]
+
+  @@unique([name, departmentId])
+}
+
+// ====================
+// USUARIOS
+// ====================
 
 // Modelo para los Usuarios
 model User {
@@ -34,6 +62,10 @@ model User {
     beneficiary    Beneficiary[]
 }
 
+// ====================
+// BENEFICIARIOS
+// ====================
+
 // Modelo para Beneficiarios
 model Beneficiary {
     beneficiaryId String   @id @db.Uuid
@@ -47,24 +79,35 @@ model Beneficiary {
     userUserId String @db.Uuid
 }
 
+// ====================
+// ESTABLECIMIENTOS
+// ====================
+
 // Modelo para los Establecimientos
 model Establishment {
     establishmentId   String             @id @db.Uuid
     name              String
     description       String?
     address           String
+    neighborhood      String?
     location          Json
     establishmentType EstablishmentType?
     createdAt         DateTime           @default(now())
     updatedAt         DateTime           @updatedAt
 
-    // Relación: Un establecimiento pertenece a un usuario
+    // Relaciones
     user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
     userId String @db.Uuid
 
-    // Relación: Un establecimiento puede tener muchos alimentos
-    foods Food[]
+    city   City   @relation(fields: [cityId], references: [cityId])
+    cityId String
+
+    foods  Food[]
 }
+
+// ====================
+// ALIMENTOS
+// ====================
 
 // Modelo para los Alimentos
 model Food {

@@ -8,28 +8,85 @@ Este directorio contiene los archivos de seed para poblar la base de datos con d
 prisma/
 ├── seed.ts                          # Archivo principal que orquesta todos los seeds
 └── seeds/
+    ├── department.seed.ts           # Seed de departamentos de Colombia
+    ├── city.seed.ts                 # Seed de ciudades capitales
+    ├── user.seed.ts                 # Seed de usuarios
     ├── establishment.seed.ts        # Seed de establecimientos
-    └── food.seed.ts                 # Seed de alimentos
+    ├── food.seed.ts                 # Seed de alimentos
+    └── README.md                    # Esta documentación
 ```
 
 ## 🎯 Descripción de los Seeds
 
+### Departamentos (`department.seed.ts`)
+Crea **32 departamentos** de Colombia en orden alfabético:
+- Amazonas, Antioquia, Arauca, Atlántico, Bolívar, Boyacá
+- Caldas, Caquetá, Casanare, Cauca, Cesar, Chocó
+- Córdoba, Cundinamarca, Guainía, Guaviare, Huila, La Guajira
+- Magdalena, Meta, Nariño, Norte de Santander, Putumayo, Quindío
+- Risaralda, San Andrés y Providencia, Santander, Sucre, Tolima
+- Valle del Cauca, Vaupés, Vichada
+
+Cada departamento incluye:
+- ID único (UUID v4)
+- Nombre del departamento
+- Relación con sus ciudades capitales
+
+### Ciudades (`city.seed.ts`)
+Crea **32 ciudades capitales** de Colombia, una por cada departamento:
+- Leticia (Amazonas), Medellín (Antioquia), Arauca (Arauca)
+- Barranquilla (Atlántico), Cartagena (Bolívar), Tunja (Boyacá)
+- Manizales (Caldas), Florencia (Caquetá), Yopal (Casanare)
+- Popayán (Cauca), Valledupar (Cesar), Quibdó (Chocó)
+- Montería (Córdoba), Bogotá D.C. (Cundinamarca), Inírida (Guainía)
+- San José del Guaviare (Guaviare), Neiva (Huila), Riohacha (La Guajira)
+- Santa Marta (Magdalena), Villavicencio (Meta), Pasto (Nariño)
+- Cúcuta (Norte de Santander), Mocoa (Putumayo), Armenia (Quindío)
+- Pereira (Risaralda), San Andrés (San Andrés y Providencia)
+- Bucaramanga (Santander), Sincelejo (Sucre), Ibagué (Tolima)
+- Cali (Valle del Cauca), Mitú (Vaupés), Puerto Carreño (Vichada)
+
+Cada ciudad incluye:
+- ID único (UUID v4)
+- Nombre de la ciudad
+- Relación con su departamento padre
+- Relación con establecimientos ubicados en la ciudad
+
+### Usuarios (`user.seed.ts`)
+Crea usuarios de prueba para asociar con los establecimientos.
+
+Cada usuario incluye:
+- ID único (UUID v4)
+- Información de perfil
+- Credenciales de acceso
+- Relación con establecimientos
+
 ### Establecimientos (`establishment.seed.ts`)
-Crea **8 establecimientos** de diferentes tipos:
-- Panadería El Buen Pan
-- Restaurante La Esquina
-- Supermercado Fresh Market
-- Cafetería Aroma
-- Frutería Los Naranjos
-- Carnicería Don José
-- Pizzería Bella Napoli
-- Pastelería Dulce Encanto
+Crea **8 establecimientos** distribuidos en diferentes ciudades de Colombia:
+
+**Medellín (Antioquia):**
+- Panadería El Buen Pan (Laureles)
+- Restaurante La Esquina (El Poblado)
+
+**Bogotá D.C. (Cundinamarca):**
+- Supermercado Fresh Market (Chapinero)
+- Cafetería Aroma (Usaquén)
+
+**Cali (Valle del Cauca):**
+- Frutería Los Naranjos (San Fernando)
+- Pastelería Dulce Encanto (Granada)
+
+**Barranquilla (Atlántico):**
+- Carnicería Don José (El Prado)
+- Pizzería Bella Napoli (Riomar)
 
 Cada establecimiento incluye:
 - Nombre, descripción y tipo
 - Información de contacto (teléfono, email)
-- Dirección física
-- Ubicación geográfica (coordenadas)
+- Dirección física normalizada
+- Barrio o vecindario
+- Ubicación geográfica (coordenadas GeoJSON Point)
+- Relación con ciudad y departamento
 - ID de usuario asociado
 
 ### Alimentos (`food.seed.ts`)
@@ -89,14 +146,30 @@ npx prisma migrate reset
 
 Después de ejecutar los seeds tendrás:
 
-- ✅ **8 establecimientos** con diferentes tipos de negocio
+- ✅ **32 departamentos** de Colombia (estructura administrativa completa)
+- ✅ **32 ciudades capitales** (una por cada departamento)
+- ✅ **Usuarios** de prueba para asociar con establecimientos
+- ✅ **8 establecimientos** distribuidos en 4 ciudades principales (Medellín, Bogotá, Cali, Barranquilla)
 - ✅ **50+ alimentos** con datos realistas y variados
-- ✅ Relaciones completas entre establecimientos y alimentos
+- ✅ Relaciones completas: Departamentos → Ciudades → Establecimientos → Alimentos
 - ✅ Diferentes estados de alimentos para probar filtros
 - ✅ Fechas de expiración variadas
-- ✅ Datos geográficos para probar búsquedas por ubicación
+- ✅ Datos geográficos para probar búsquedas por ubicación, ciudad, departamento y barrio
+- ✅ Información de barrios/vecindarios para búsquedas detalladas
 
-## 🔧 Añadir nuevos seeds
+## � Orden de Ejecución
+
+Los seeds se ejecutan en el siguiente orden para mantener la integridad referencial:
+
+1. **Departamentos** (`department.seed.ts`) - Base geográfica
+2. **Ciudades** (`city.seed.ts`) - Depende de departamentos
+3. **Usuarios** (`user.seed.ts`) - Independiente
+4. **Establecimientos** (`establishment.seed.ts`) - Depende de ciudades y usuarios
+5. **Alimentos** (`food.seed.ts`) - Depende de establecimientos
+
+⚠️ **Importante:** No alterar este orden ya que hay dependencias entre las tablas.
+
+## �🔧 Añadir nuevos seeds
 
 Para agregar un nuevo seed:
 
@@ -115,14 +188,19 @@ export async function seedMiEntidad(prisma: PrismaClient) {
 }
 ```
 
-3. Importa y ejecuta tu función en `seed.ts`:
+3. Importa y ejecuta tu función en `seed.ts` **en el orden correcto**:
 
 ```typescript
 import { seedMiEntidad } from './seeds/mi-entidad.seed';
 
 async function main() {
   // ...
-  await seedMiEntidad(prisma);
+  await seedDepartments(prisma);
+  await seedCities(prisma);
+  await seedUsers(prisma);
+  await seedMiEntidad(prisma);  // Colócalo según sus dependencias
+  await seedEstablishments(prisma);
+  await seedFoods(prisma);
   // ...
 }
 ```
@@ -130,10 +208,15 @@ async function main() {
 ## ⚠️ Notas importantes
 
 - Los seeds **eliminan todos los datos existentes** antes de insertar nuevos datos
-- Los IDs de los establecimientos están predefinidos para mantener consistencia
-- Las coordenadas están basadas en ubicaciones reales de Madrid, España
-- Los user_id son UUIDs de ejemplo y deberán coincidir con usuarios reales en producción
+- Los IDs están predefinidos (UUIDs v4) para mantener consistencia entre ejecuciones
+- Las coordenadas están basadas en ubicaciones reales de Colombia:
+  - Medellín: 6.2476° N, 75.5658° W
+  - Bogotá: 4.7110° N, 74.0721° W
+  - Cali: 3.4516° N, 76.5320° W
+  - Barranquilla: 10.9639° N, 74.7964° W
+- Los barrios/vecindarios son reales de cada ciudad
 - Las URLs de imágenes apuntan a Unsplash (puedes reemplazarlas con tus propias imágenes)
+- Los departamentos y ciudades corresponden a la división político-administrativa real de Colombia
 
 ## 🐛 Solución de problemas
 
