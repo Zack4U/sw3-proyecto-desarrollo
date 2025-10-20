@@ -7,13 +7,14 @@ type RootStackParamList = {
 	Home: undefined;
 	EstablishmentRegistration: undefined;
 	BeneficiaryRegistration: undefined;
+	FoodRegistration: undefined;
 };
 
 type HomeScreenProps = {
 	navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
 };
 
-export default function HomeScreen({ navigation }: HomeScreenProps) {
+export default function HomeScreen({ navigation }: Readonly<HomeScreenProps>) {
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>ComiYa</Text>
@@ -39,6 +40,17 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 					<Text style={styles.buttonText}>Registrar Beneficiario</Text>
 					<Text style={styles.buttonDescription}>
 						Recibe alimentos disponibles en tu área
+					</Text>
+				</TouchableOpacity>
+
+				<TouchableOpacity
+					style={[styles.menuButton, styles.foodButton]}
+					onPress={() => navigation.navigate('FoodRegistration')}
+				>
+					<Text style={styles.buttonIcon}>🍎</Text>
+					<Text style={styles.buttonText}>Registrar Alimento</Text>
+					<Text style={styles.buttonDescription}>
+						Publica alimentos disponibles para donación
 					</Text>
 				</TouchableOpacity>
 			</View>

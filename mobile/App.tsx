@@ -4,11 +4,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './screens/HomeScreen';
 import EstablishmentRegistrationScreen from './screens/EstablishmentRegistrationScreen';
 import BeneficiaryRegistrationScreen from './screens/BeneficiaryRegistrationScreen';
+import FoodRegistrationScreen from './screens/FoodRegistrationScreen';
 
 export type RootStackParamList = {
 	Home: undefined;
 	EstablishmentRegistration: undefined;
 	BeneficiaryRegistration: undefined;
+	FoodRegistration: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -50,6 +52,14 @@ export default function App() {
 					component={BeneficiaryRegistrationScreen}
 					options={{
 						title: 'Registro de Beneficiario',
+						headerShown: false,
+					}}
+				/>
+				<Stack.Screen
+					name="FoodRegistration"
+					component={FoodRegistrationScreen}
+					options={{
+						title: 'Registro de Alimento',
 						headerShown: false,
 					}}
 				/>
