@@ -217,11 +217,3 @@ npx expo install nombre-del-paquete
 ```bash
 npx expo-doctor
 ```
-
-## 📄 Licencia
-
-Este proyecto es parte del desarrollo de software 3
-
----
-
-**ComiYa** - Reduce el desperdicio de alimentos 🌱
