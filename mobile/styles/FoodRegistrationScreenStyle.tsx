@@ -3,7 +3,6 @@ import { Colors, Spacing, FontSizes, FontWeights, BorderRadius, Shadows } from '
 
 export const styles = StyleSheet.create({
 	container: {
-		flex: 1,
 		backgroundColor: Colors.background,
 	},
 	header: {
@@ -28,6 +27,7 @@ export const styles = StyleSheet.create({
 	},
 	form: {
 		padding: Spacing.lg,
+		paddingBottom: Spacing.xxl,
 	},
 	inputGroup: {
 		marginBottom: Spacing.md,

@@ -5,9 +5,8 @@ import { styles } from '../styles/HomeScreenStyle';
 
 type RootStackParamList = {
 	Home: undefined;
-	EstablishmentRegistration: undefined;
-	BeneficiaryRegistration: undefined;
-	FoodRegistration: undefined;
+	Login: undefined;
+	RegisterOptions: undefined;
 };
 
 type HomeScreenProps = {
@@ -18,40 +17,25 @@ export default function HomeScreen({ navigation }: Readonly<HomeScreenProps>) {
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>ComiYa</Text>
-			<Text style={styles.subtitle}>Reduce el desperdicio de alimentos</Text>
-
+			<Text style={styles.subtitle}>
+				¡Bienvenido! Reduce el desperdicio de alimentos con nosotros.
+			</Text>
 			<View style={styles.menuContainer}>
 				<TouchableOpacity
 					style={[styles.menuButton, styles.establishmentButton]}
-					onPress={() => navigation.navigate('EstablishmentRegistration')}
+					onPress={() => navigation.navigate('Login')}
 				>
-					<Text style={styles.buttonIcon}>🏪</Text>
-					<Text style={styles.buttonText}>Registrar Establecimiento</Text>
-					<Text style={styles.buttonDescription}>
-						¿Eres dueño de un restaurante? Registra tu negocio
-					</Text>
+					<Text style={styles.buttonIcon}>🔐</Text>
+					<Text style={styles.buttonText}>Iniciar sesión</Text>
+					<Text style={styles.buttonDescription}>Accede con tu correo y contraseña</Text>
 				</TouchableOpacity>
-
 				<TouchableOpacity
 					style={[styles.menuButton, styles.beneficiaryButton]}
-					onPress={() => navigation.navigate('BeneficiaryRegistration')}
+					onPress={() => navigation.navigate('RegisterOptions')}
 				>
-					<Text style={styles.buttonIcon}>👤</Text>
-					<Text style={styles.buttonText}>Registrar Beneficiario</Text>
-					<Text style={styles.buttonDescription}>
-						Recibe alimentos disponibles en tu área
-					</Text>
-				</TouchableOpacity>
-
-				<TouchableOpacity
-					style={[styles.menuButton, styles.foodButton]}
-					onPress={() => navigation.navigate('FoodRegistration')}
-				>
-					<Text style={styles.buttonIcon}>🍎</Text>
-					<Text style={styles.buttonText}>Registrar Alimento</Text>
-					<Text style={styles.buttonDescription}>
-						Publica alimentos disponibles para donación
-					</Text>
+					<Text style={styles.buttonIcon}>�</Text>
+					<Text style={styles.buttonText}>Registrarse</Text>
+					<Text style={styles.buttonDescription}>Crea una cuenta para comenzar</Text>
 				</TouchableOpacity>
 			</View>
 		</View>

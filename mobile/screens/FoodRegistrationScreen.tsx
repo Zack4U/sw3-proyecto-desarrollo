@@ -50,7 +50,11 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
 				</Text>
 			</TouchableOpacity>
 			{isOpen && (
-				<ScrollView style={{ maxHeight: 200 }}>
+				<ScrollView
+					style={{ maxHeight: 200 }}
+					nestedScrollEnabled
+					keyboardShouldPersistTaps="handled"
+				>
 					{items.map((item) => (
 						<TouchableOpacity
 							key={item.value}
@@ -185,7 +189,14 @@ export default function FoodRegistrationScreen({
 	};
 
 	return (
-		<ScrollView style={styles.container}>
+		<ScrollView
+			style={styles.container}
+			contentContainerStyle={{ paddingBottom: 32 }}
+			keyboardShouldPersistTaps="handled"
+			nestedScrollEnabled
+			contentInsetAdjustmentBehavior="automatic"
+			showsVerticalScrollIndicator
+		>
 			<View style={styles.header}>
 				<Text style={styles.title}>Registrar Alimento</Text>
 				<Text style={styles.subtitle}>
