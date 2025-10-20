@@ -25,6 +25,6 @@ export const API_ENDPOINTS = {
 
 // Constantes de la aplicación
 export const APP_CONFIG = {
-    NAME: 'ComeYa',
+    NAME: 'ComiYa',
     VERSION: '1.0.0',
 };

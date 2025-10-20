@@ -1,6 +1,6 @@
-# ComeYa - Aplicación Móvil
+# ComiYa - Aplicación Móvil
 
-Aplicación móvil de **ComeYa** desarrollada con React Native y Expo. Esta app permite a los restaurantes registrar alimentos que están por vencer o desperdiciar, y a los beneficiarios acceder a estos alimentos disponibles.
+Aplicación móvil de **ComiYa** desarrollada con React Native y Expo. Esta app permite a los restaurantes registrar alimentos que están por vencer o desperdiciar, y a los beneficiarios acceder a estos alimentos disponibles.
 
 ## 📋 Requisitos Previos
 
@@ -76,6 +76,24 @@ mobile/
 │   ├── HomeScreen.tsx                          # Pantalla principal
 │   ├── EstablishmentRegistrationScreen.tsx     # Registro de establecimientos
 │   └── BeneficiaryRegistrationScreen.tsx       # Registro de beneficiarios
+├── components/           # Componentes reutilizables
+│   ├── Button.tsx                              # Botón con variantes
+│   ├── Card.tsx                                # Contenedor con sombra
+│   ├── Input.tsx                               # Campo de entrada
+│   ├── index.ts                                # Exportaciones
+│   └── README.md                               # Documentación de componentes
+├── styles/               # Estilos globales y por pantalla
+│   ├── global.tsx                              # Paleta de colores, estilos globales
+│   ├── HomeScreenStyle.tsx                     # Estilos de Home
+│   ├── BeneficiaryRegistrationScreenStyle.tsx  # Estilos de Beneficiarios
+│   ├── EstablishmentRegistrationScreenStyle.tsx # Estilos de Establecimientos
+│   └── README.md                               # Guía de estilos
+├── services/             # Servicios de API
+│   ├── api.ts                                  # Configuración de Axios
+│   ├── beneficiaryService.ts                   # Servicio de beneficiarios
+│   └── establishmentService.ts                 # Servicio de establecimientos
+├── config/               # Configuración de la app
+│   └── app.config.ts                           # Configuración de API
 ├── assets/               # Recursos (imágenes, iconos, etc.)
 ├── App.tsx              # Componente principal y navegación
 ├── app.json             # Configuración de Expo
@@ -83,7 +101,48 @@ mobile/
 └── tsconfig.json        # Configuración de TypeScript
 ```
 
-## 🎨 Pantallas Disponibles
+## 🎨 Sistema de Diseño
+
+### Paleta de Colores "Clean Green"
+
+La aplicación utiliza una paleta moderna tipo startup con enfoque ecológico:
+
+- **Primary** (`#00BFA6`): Botones principales, acentos
+- **Secondary** (`#009688`): Elementos destacados
+- **Accent** (`#FF7043`): Alertas, botones secundarios
+- **Background** (`#FAFAFA`): Fondo general
+- **Surface** (`#FFFFFF`): Tarjetas y superficies
+
+Ver documentación completa en [`styles/README.md`](./styles/README.md)
+
+### Componentes Reutilizables
+
+La app incluye componentes pre-construidos que usan los estilos globales:
+
+```tsx
+import { Button, Card, Input } from './components';
+
+// Botón primario
+<Button title="Enviar" onPress={handleSubmit} variant="primary" />
+
+// Card con contenido
+<Card>
+  <Text>Contenido del card</Text>
+</Card>
+
+// Input con validación
+<Input
+  label="Email"
+  value={email}
+  onChangeText={setEmail}
+  error={emailError}
+  required
+/>
+```
+
+Ver documentación de componentes en [`components/README.md`](./components/README.md)
+
+## 📱 Pantallas Disponibles
 
 1. **Home Screen**: Pantalla principal con opciones de registro
 2. **Registro de Establecimiento**: Formulario para restaurantes
@@ -165,4 +224,4 @@ Este proyecto es parte del desarrollo de software 3
 
 ---
 
-**ComeYa** - Reduce el desperdicio de alimentos 🌱
+**ComiYa** - Reduce el desperdicio de alimentos 🌱

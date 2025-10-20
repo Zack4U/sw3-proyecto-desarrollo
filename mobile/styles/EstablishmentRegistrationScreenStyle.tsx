@@ -1,73 +1,47 @@
 import { StyleSheet } from 'react-native';
+import { Colors, Spacing, GlobalStyles } from './global';
 
 export const styles = StyleSheet.create({
 	container: {
-		flex: 1,
-		backgroundColor: '#f5f5f5',
+		...GlobalStyles.scrollContainer,
 	},
 	header: {
-		backgroundColor: '#2e7d32',
-		padding: 30,
-		paddingTop: 60,
+		...GlobalStyles.header,
+		backgroundColor: Colors.primary,
 	},
 	title: {
-		fontSize: 28,
-		fontWeight: 'bold',
-		color: 'white',
-		marginBottom: 5,
+		...GlobalStyles.headerTitle,
 	},
 	subtitle: {
-		fontSize: 16,
-		color: '#e8f5e9',
+		...GlobalStyles.headerSubtitle,
 	},
 	form: {
-		padding: 20,
-		maxWidth: 500,
-		width: '100%',
-		alignSelf: 'center',
+		...GlobalStyles.form,
 	},
 	inputGroup: {
-		marginBottom: 20,
+		...GlobalStyles.inputGroup,
 	},
 	label: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#333',
-		marginBottom: 8,
+		...GlobalStyles.label,
 	},
 	input: {
-		backgroundColor: 'white',
-		padding: 15,
-		borderRadius: 8,
-		fontSize: 16,
-		borderWidth: 1,
-		borderColor: '#ddd',
+		...GlobalStyles.input,
 	},
 	submitButton: {
-		backgroundColor: '#2e7d32',
-		padding: 18,
-		borderRadius: 8,
-		alignItems: 'center',
-		marginTop: 10,
+		...GlobalStyles.buttonPrimary,
+		marginTop: Spacing.sm,
 	},
 	submitButtonDisabled: {
-		backgroundColor: '#81c784',
-		opacity: 0.6,
+		...GlobalStyles.buttonDisabled,
 	},
 	submitButtonText: {
-		color: 'white',
-		fontSize: 18,
-		fontWeight: '600',
+		...GlobalStyles.buttonTextPrimary,
 	},
 	cancelButton: {
-		backgroundColor: 'transparent',
-		padding: 18,
-		borderRadius: 8,
-		alignItems: 'center',
-		marginTop: 10,
+		...GlobalStyles.buttonText,
+		marginTop: Spacing.sm,
 	},
 	cancelButtonText: {
-		color: '#666',
-		fontSize: 16,
+		...GlobalStyles.buttonTextGhost,
 	},
 });
