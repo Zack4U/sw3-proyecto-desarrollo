@@ -1,12 +1,15 @@
 import api from './api';
 
-// Tipos para los datos del establecimiento
+// Tipos para los datos del establecimiento (según el diagrama)
 export interface CreateEstablishmentData {
-    nombre: string;
+    name: string;
+    description?: string;
+    cityId: string;
+    neighborhood?: string;
     address: string;
-    type: string;
     location: string;
-    user_id?: string; // Opcional por ahora, se puede asignar un valor por defecto
+    establishmentType: string;
+    userId?: string;
 }
 
 export interface EstablishmentResponse {
@@ -24,12 +27,15 @@ export const establishmentService = {
     // Crear un nuevo establecimiento
     create: async (data: CreateEstablishmentData): Promise<EstablishmentResponse> => {
         try {
-            // Por ahora, usar un user_id temporal si no se proporciona
             const payload = {
+                name: data.name,
+                description: data.description,
+                cityId: data.cityId,
+                neighborhood: data.neighborhood,
                 address: data.address,
-                type: data.type,
                 location: data.location,
-                user_id: data.user_id || 'temp-user-id',
+                establishmentType: data.establishmentType,
+                userId: data.userId || 'temp-user-id',
             };
 
             const response = await api.post<EstablishmentResponse>('/establishments', payload);
