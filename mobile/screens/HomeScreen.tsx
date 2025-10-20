@@ -16,7 +16,7 @@ type HomeScreenProps = {
 export default function HomeScreen({ navigation }: HomeScreenProps) {
 	return (
 		<View style={styles.container}>
-			<Text style={styles.title}>ComeYa</Text>
+			<Text style={styles.title}>ComiYa</Text>
 			<Text style={styles.subtitle}>Reduce el desperdicio de alimentos</Text>
 
 			<View style={styles.menuContainer}>
