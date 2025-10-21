@@ -39,7 +39,10 @@ export const styles = StyleSheet.create({
 		borderLeftWidth: 5,
 		borderLeftColor: Colors.secondary,
 	},
-	// foodButton removed for simplified menu
+	foodButton: {
+		borderLeftWidth: 5,
+		borderLeftColor: Colors.accent,
+	},
 	buttonIcon: {
 		fontSize: 48,
 		marginBottom: Spacing.sm,
