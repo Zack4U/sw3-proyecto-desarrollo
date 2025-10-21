@@ -7,6 +7,7 @@ type RootStackParamList = {
 	Home: undefined;
 	Login: undefined;
 	RegisterOptions: undefined;
+	EstablishmentList: undefined;
 };
 
 type HomeScreenProps = {
@@ -36,6 +37,14 @@ export default function HomeScreen({ navigation }: Readonly<HomeScreenProps>) {
 					<Text style={styles.buttonIcon}>�</Text>
 					<Text style={styles.buttonText}>Registrarse</Text>
 					<Text style={styles.buttonDescription}>Crea una cuenta para comenzar</Text>
+				</TouchableOpacity>
+				<TouchableOpacity
+					style={[styles.menuButton, styles.establishmentButton]}
+					onPress={() => navigation.navigate('EstablishmentList')}
+				>
+					<Text style={styles.buttonIcon}>🏢</Text>
+					<Text style={styles.buttonText}>Ver establecimientos</Text>
+					<Text style={styles.buttonDescription}>Listado de puntos de donación</Text>
 				</TouchableOpacity>
 			</View>
 		</View>

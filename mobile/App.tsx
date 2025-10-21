@@ -7,6 +7,7 @@ import RegisterOptionsScreen from './screens/RegisterOptionsScreen';
 import EstablishmentRegistrationScreen from './screens/EstablishmentRegistrationScreen';
 import BeneficiaryRegistrationScreen from './screens/BeneficiaryRegistrationScreen';
 import FoodRegistrationScreen from './screens/FoodRegistrationScreen';
+import EstablishmentListScreen from './screens/EstablishmentListScreen';
 
 export type RootStackParamList = {
 	Home: undefined;
@@ -15,6 +16,7 @@ export type RootStackParamList = {
 	EstablishmentRegistration: undefined;
 	BeneficiaryRegistration: undefined;
 	FoodRegistration: undefined;
+	EstablishmentList: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -80,6 +82,14 @@ export default function App() {
 					component={FoodRegistrationScreen}
 					options={{
 						title: 'Registro de Alimento',
+						headerShown: false,
+					}}
+				/>
+				<Stack.Screen
+					name="EstablishmentList"
+					component={EstablishmentListScreen}
+					options={{
+						title: 'Establecimientos',
 						headerShown: false,
 					}}
 				/>

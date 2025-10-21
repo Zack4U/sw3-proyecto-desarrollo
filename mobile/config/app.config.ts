@@ -7,7 +7,7 @@
 
 export const API_CONFIG = {
     // Cambia esta URL según tu entorno
-    BASE_URL: 'http://localhost:3000',
+    BASE_URL: 'http://localhost:3001/api/v1',
 
     // Alternativas comunes:
     // BASE_URL: 'http://10.0.2.2:3000', // Para emulador Android
