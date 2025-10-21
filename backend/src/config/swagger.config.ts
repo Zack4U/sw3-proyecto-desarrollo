@@ -16,6 +16,7 @@ export class SwaggerConfig {
       .setDescription('Documentación de la API de ComiYA')
       .setVersion('1.0')
       .addTag('health', 'Operaciones de salud del sistema')
+      .addTag('authentication', 'Operaciones de autenticación y autorización')
       .addTag('establishments', 'Operaciones relacionadas con establecimientos')
       .addTag('foods', 'Operaciones relacionadas con alimentos')
       .addBearerAuth(
