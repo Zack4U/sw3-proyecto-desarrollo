@@ -29,31 +29,76 @@ export interface FoodResponse {
     updatedAt: string;
 }
 
-// Categorías de alimentos
+// Categorías de alimentos (deben coincidir con el enum FoodCategory del backend)
 export const FOOD_CATEGORIES = [
-    { value: 'Frutas', label: 'Frutas' },
-    { value: 'Verduras', label: 'Verduras' },
-    { value: 'Lácteos', label: 'Lácteos' },
-    { value: 'Carnes', label: 'Carnes' },
-    { value: 'Panadería', label: 'Panadería' },
-    { value: 'Bebidas', label: 'Bebidas' },
-    { value: 'Enlatados', label: 'Enlatados' },
-    { value: 'Granos', label: 'Granos' },
-    { value: 'Comida Preparada', label: 'Comida Preparada' },
-    { value: 'Otros', label: 'Otros' },
+    { value: 'FRUITS', label: 'Frutas' },
+    { value: 'VEGETABLES', label: 'Verduras' },
+    { value: 'GREENS', label: 'Verduras de Hoja' },
+    { value: 'LEGUMES', label: 'Legumbres' },
+    { value: 'TUBERS', label: 'Tubérculos' },
+    { value: 'RED_MEAT', label: 'Carnes Rojas' },
+    { value: 'POULTRY', label: 'Aves' },
+    { value: 'FISH', label: 'Pescado' },
+    { value: 'SEAFOOD', label: 'Mariscos' },
+    { value: 'COLD_CUTS', label: 'Embutidos' },
+    { value: 'DAIRY', label: 'Lácteos' },
+    { value: 'CHEESE', label: 'Quesos' },
+    { value: 'YOGURT', label: 'Yogurt' },
+    { value: 'EGGS', label: 'Huevos' },
+    { value: 'CEREALS', label: 'Cereales' },
+    { value: 'GRAINS', label: 'Granos' },
+    { value: 'PASTA', label: 'Pasta' },
+    { value: 'BAKERY', label: 'Panadería' },
+    { value: 'FLOUR', label: 'Harinas' },
+    { value: 'CANNED', label: 'Enlatados' },
+    { value: 'PRESERVES', label: 'Conservas' },
+    { value: 'SAUCES_AND_CONDIMENTS', label: 'Salsas y Condimentos' },
+    { value: 'OILS_AND_VINEGARS', label: 'Aceites y Vinagres' },
+    { value: 'SPICES_AND_HERBS', label: 'Especias y Hierbas' },
+    { value: 'SOUPS_AND_CREAMS', label: 'Sopas y Cremas' },
+    { value: 'SALTY_SNACKS', label: 'Snacks Salados' },
+    { value: 'SWEETS_AND_CHOCOLATES', label: 'Dulces y Chocolates' },
+    { value: 'COOKIES_AND_DESSERTS', label: 'Galletas y Postres' },
+    { value: 'NUTS', label: 'Frutos Secos' },
+    { value: 'NON_ALCOHOLIC_BEVERAGES', label: 'Bebidas No Alcohólicas' },
+    { value: 'JUICES', label: 'Jugos' },
+    { value: 'COFFEE_AND_TEA', label: 'Café y Té' },
+    { value: 'ALCOHOLIC_BEVERAGES', label: 'Bebidas Alcohólicas' },
+    { value: 'FROZEN', label: 'Congelados' },
+    { value: 'PREPARED_FOOD', label: 'Comida Preparada' },
+    { value: 'OTHERS', label: 'Otros' },
 ];
 
-// Unidades de medida
+// Unidades de medida (deben coincidir con el enum UnitOfMeasure del backend)
 export const UNIT_OF_MEASURE = [
-    { value: 'kg', label: 'Kilogramos (kg)' },
-    { value: 'g', label: 'Gramos (g)' },
-    { value: 'lb', label: 'Libras (lb)' },
-    { value: 'oz', label: 'Onzas (oz)' },
-    { value: 'L', label: 'Litros (L)' },
-    { value: 'mL', label: 'Mililitros (mL)' },
-    { value: 'unidad', label: 'Unidad' },
-    { value: 'porción', label: 'Porción' },
-    { value: 'paquete', label: 'Paquete' },
+    { value: 'UNIT', label: 'Unidad' },
+    { value: 'DOZEN', label: 'Docena' },
+    { value: 'PACKAGE', label: 'Paquete' },
+    { value: 'BOX', label: 'Caja' },
+    { value: 'CAN', label: 'Lata' },
+    { value: 'BOTTLE', label: 'Botella' },
+    { value: 'BAG', label: 'Bolsa' },
+    { value: 'ROLL', label: 'Rollo' },
+    { value: 'JAR', label: 'Frasco' },
+    { value: 'TUBE', label: 'Tubo' },
+    { value: 'GRAM', label: 'Gramos (g)' },
+    { value: 'KILOGRAM', label: 'Kilogramos (kg)' },
+    { value: 'MILLIGRAM', label: 'Miligramos (mg)' },
+    { value: 'LITER', label: 'Litros (L)' },
+    { value: 'MILLILITER', label: 'Mililitros (mL)' },
+    { value: 'CUBIC_CENTIMETER', label: 'Centímetros Cúbicos (cc)' },
+    { value: 'OUNCE', label: 'Onzas (oz)' },
+    { value: 'POUND', label: 'Libras (lb)' },
+    { value: 'FLUID_OUNCE', label: 'Onzas Líquidas (fl oz)' },
+    { value: 'PINT', label: 'Pinta' },
+    { value: 'QUART', label: 'Cuarto de Galón' },
+    { value: 'GALLON', label: 'Galón' },
+    { value: 'TEASPOON', label: 'Cucharadita' },
+    { value: 'TABLESPOON', label: 'Cucharada' },
+    { value: 'CUP', label: 'Taza' },
+    { value: 'PINCH', label: 'Pizca' },
+    { value: 'CLOVE', label: 'Diente' },
+    { value: 'BRANCH', label: 'Rama' },
 ];
 
 // Función helper para formatear mensajes de error
@@ -105,16 +150,17 @@ export const foodService = {
     // Crear un nuevo alimento
     create: async (data: CreateFoodData): Promise<FoodResponse> => {
         try {
+            // Formatear el payload según lo que espera el backend
             const payload = {
                 name: data.name,
                 description: data.description,
-                category: data.category,
+                category: data.category, // Ya viene en formato correcto (FRUITS, VEGETABLES, etc.)
                 quantity: data.quantity,
-                weight_unit: data.unitOfMeasure,
-                expiration_date: data.expiresAt,
+                unitOfMeasure: data.unitOfMeasure, // Ya viene en formato correcto (KILOGRAM, LITER, etc.)
+                expiresAt: data.expiresAt, // ISO date string
                 status: data.status || 'AVAILABLE',
-                image: data.imageUrl || '',
-                establishment_id: data.establishmentId,
+                imageUrl: data.imageUrl || undefined,
+                establishmentId: data.establishmentId,
             };
 
             const response = await api.post<FoodResponse>('/foods', payload);

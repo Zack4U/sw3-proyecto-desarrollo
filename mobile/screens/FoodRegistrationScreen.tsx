@@ -93,8 +93,9 @@ export default function FoodRegistrationScreen({
 		quantity: '',
 		unitOfMeasure: '',
 		expiresAt: '',
-		// Por ahora usamos un ID temporal, en producción se obtendría del usuario logueado
-		establishmentId: 'temp-establishment-id',
+		// TODO: Obtener del contexto de autenticación o selección del usuario
+		// Debe ser un UUID válido de un establecimiento existente
+		establishmentId: '00000000-0000-0000-0000-000000000000', // UUID temporal
 	});
 
 	// Usar el hook personalizado para gestionar el estado de la petición
@@ -141,7 +142,7 @@ export default function FoodRegistrationScreen({
 		// Validar que haya un establecimiento asociado
 		if (
 			!formData.establishmentId ||
-			formData.establishmentId === 'temp-establishment-id'
+			formData.establishmentId === '00000000-0000-0000-0000-000000000000'
 		) {
 			requestState.setError(
 				'Debes tener un establecimiento registrado para agregar alimentos'

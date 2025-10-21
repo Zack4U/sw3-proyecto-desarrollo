@@ -1,27 +1,98 @@
 import api from './api';
 import axios from 'axios';
 
-// Tipos para los datos del establecimiento (según el diagrama)
+// Tipos para los datos del establecimiento
 export interface CreateEstablishmentData {
+    establishmentId: string; // UUID generado en el frontend
     name: string;
     description?: string;
     cityId: string;
     neighborhood?: string;
     address: string;
-    location: string;
+    location: {
+        type: string;
+        coordinates: number[];
+    };
     establishmentType: string;
-    userId?: string;
+    userId: string;
 }
 
 export interface EstablishmentResponse {
-    establecimiento_id: string;
-    nombre?: string;
-    direccion: string;
-    tipo: string;
-    ubicacion: string;
-    fecha_registro: string;
-    user_id: string;
+    establishmentId: string;
+    name: string;
+    description?: string;
+    address: string;
+    neighborhood?: string;
+    location: any;
+    establishmentType: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    cityId: string;
 }
+
+// Tipos de establecimiento (deben coincidir con el enum EstablishmentType del backend)
+export const ESTABLISHMENT_TYPES = [
+    // Comida y Bebidas
+    { value: 'RESTAURANT', label: 'Restaurante' },
+    { value: 'COFFEE_SHOP', label: 'Cafetería' },
+    { value: 'BAR', label: 'Bar' },
+    { value: 'NIGHTCLUB', label: 'Discoteca' },
+    { value: 'BAKERY', label: 'Panadería' },
+    { value: 'SUPERMARKET', label: 'Supermercado' },
+    { value: 'GROCERY_STORE', label: 'Tienda de Abarrotes' },
+    { value: 'FRUIT_SHOP', label: 'Frutería' },
+    { value: 'BUTCHER_SHOP', label: 'Carnicería' },
+    { value: 'FOOD_TRUCK', label: 'Food Truck' },
+
+    // Alojamiento
+    { value: 'HOTEL', label: 'Hotel' },
+    { value: 'HOSTEL', label: 'Hostal' },
+    { value: 'MOTEL', label: 'Motel' },
+    { value: 'APART_HOTEL', label: 'Apart Hotel' },
+
+    // Comercio Minorista
+    { value: 'CLOTHING_STORE', label: 'Tienda de Ropa' },
+    { value: 'SHOE_STORE', label: 'Zapatería' },
+    { value: 'JEWELRY_STORE', label: 'Joyería' },
+    { value: 'BOOKSTORE', label: 'Librería' },
+    { value: 'STATIONERY_STORE', label: 'Papelería' },
+    { value: 'TOY_STORE', label: 'Juguetería' },
+    { value: 'ELECTRONICS_STORE', label: 'Tienda de Electrónicos' },
+    { value: 'SPORTS_STORE', label: 'Tienda de Deportes' },
+    { value: 'PHARMACY', label: 'Farmacia' },
+    { value: 'HARDWARE_STORE', label: 'Ferretería' },
+    { value: 'PET_STORE', label: 'Tienda de Mascotas' },
+    { value: 'NURSERY', label: 'Vivero' },
+
+    // Servicios
+    { value: 'HAIR_SALON', label: 'Peluquería' },
+    { value: 'BARBER_SHOP', label: 'Barbería' },
+    { value: 'BEAUTY_CENTER', label: 'Centro de Belleza' },
+    { value: 'SPA', label: 'Spa' },
+    { value: 'GYM', label: 'Gimnasio' },
+    { value: 'LAUNDRY', label: 'Lavandería' },
+    { value: 'AUTO_REPAIR_SHOP', label: 'Taller Mecánico' },
+    { value: 'MEDICAL_OFFICE', label: 'Consultorio Médico' },
+    { value: 'DENTAL_OFFICE', label: 'Consultorio Dental' },
+    { value: 'VETERINARY', label: 'Veterinaria' },
+    { value: 'CORPORATE_OFFICE', label: 'Oficina Corporativa' },
+    { value: 'EDUCATIONAL_CENTER', label: 'Centro Educativo' },
+
+    // Entretenimiento y Cultura
+    { value: 'CINEMA', label: 'Cine' },
+    { value: 'THEATER', label: 'Teatro' },
+    { value: 'MUSEUM', label: 'Museo' },
+    { value: 'ART_GALLERY', label: 'Galería de Arte' },
+    { value: 'EVENT_CENTER', label: 'Centro de Eventos' },
+    { value: 'AMUSEMENT_PARK', label: 'Parque de Diversiones' },
+    { value: 'BOWLING_ALLEY', label: 'Bolera' },
+
+    // Otros
+    { value: 'SHOPPING_MALL', label: 'Centro Comercial' },
+    { value: 'PARKING', label: 'Estacionamiento' },
+    { value: 'OTHER', label: 'Otro' },
+];
 
 // Función helper para formatear mensajes de error
 const getErrorMessage = (error: unknown): string => {
@@ -69,11 +140,17 @@ export const establishmentService = {
     // Crear un nuevo establecimiento
     create: async (data: CreateEstablishmentData): Promise<EstablishmentResponse> => {
         try {
+            // Formatear el payload según lo que espera el backend
             const payload = {
+                establishmentId: data.establishmentId,
+                name: data.name,
+                description: data.description,
                 address: data.address,
-                type: data.establishmentType,
-                location: data.location,
-                user_id: data.userId || 'temp-user-id',
+                neighborhood: data.neighborhood,
+                location: data.location, // Debe ser un objeto GeoJSON
+                establishmentType: data.establishmentType,
+                userId: data.userId,
+                cityId: data.cityId,
             };
 
             const response = await api.post<EstablishmentResponse>('/establishments', payload);
