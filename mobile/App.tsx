@@ -2,13 +2,19 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './screens/HomeScreen';
+import LoginScreen from './screens/LoginScreen';
+import RegisterOptionsScreen from './screens/RegisterOptionsScreen';
 import EstablishmentRegistrationScreen from './screens/EstablishmentRegistrationScreen';
 import BeneficiaryRegistrationScreen from './screens/BeneficiaryRegistrationScreen';
+import FoodRegistrationScreen from './screens/FoodRegistrationScreen';
 
 export type RootStackParamList = {
 	Home: undefined;
+	Login: undefined;
+	RegisterOptions: undefined;
 	EstablishmentRegistration: undefined;
 	BeneficiaryRegistration: undefined;
+	FoodRegistration: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -33,7 +39,23 @@ export default function App() {
 					name="Home"
 					component={HomeScreen}
 					options={{
-						title: 'ComeYa',
+						title: 'ComiYa',
+						headerShown: false,
+					}}
+				/>
+				<Stack.Screen
+					name="Login"
+					component={LoginScreen}
+					options={{
+						title: 'Iniciar sesión',
+						headerShown: false,
+					}}
+				/>
+				<Stack.Screen
+					name="RegisterOptions"
+					component={RegisterOptionsScreen}
+					options={{
+						title: 'Crear cuenta',
 						headerShown: false,
 					}}
 				/>
@@ -50,6 +72,14 @@ export default function App() {
 					component={BeneficiaryRegistrationScreen}
 					options={{
 						title: 'Registro de Beneficiario',
+						headerShown: false,
+					}}
+				/>
+				<Stack.Screen
+					name="FoodRegistration"
+					component={FoodRegistrationScreen}
+					options={{
+						title: 'Registro de Alimento',
 						headerShown: false,
 					}}
 				/>

@@ -201,9 +201,16 @@ describe('FoodsService', () => {
       const updateDto: UpdateFoodDto = {
         name: 'Updated Bread',
         establishmentId: 'new-establishment-id',
+        status: FoodStatus.RESERVED,
       };
 
-      mockPrismaService.food.update.mockResolvedValue(mockFood);
+      const updatedFood = {
+        ...mockFood,
+        name: updateDto.name,
+        status: FoodStatus.RESERVED,
+      };
+
+      mockPrismaService.food.update.mockResolvedValue(updatedFood);
 
       await service.update(mockFood.foodId, updateDto);
 
@@ -211,7 +218,7 @@ describe('FoodsService', () => {
         where: { foodId: mockFood.foodId },
         data: {
           name: updateDto.name,
-          status: undefined,
+          status: FoodStatus.RESERVED,
         },
       });
     });

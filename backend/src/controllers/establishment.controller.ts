@@ -122,4 +122,58 @@ export class EstablishmentsController {
     }
     return this.establishmentsService.remove(id);
   }
+
+  @Get('city/:cityId')
+  @ApiOperation({
+    summary: 'Get establishments by city',
+    description: 'Returns all establishments in a specific city',
+  })
+  @ApiParam({
+    name: 'cityId',
+    description: 'City UUID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Establishments found',
+  })
+  findByCity(@Param('cityId') cityId: string) {
+    return this.establishmentsService.findByCity(cityId);
+  }
+
+  @Get('department/:departmentId')
+  @ApiOperation({
+    summary: 'Get establishments by department',
+    description: 'Returns all establishments in a specific department',
+  })
+  @ApiParam({
+    name: 'departmentId',
+    description: 'Department UUID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Establishments found',
+  })
+  findByDepartment(@Param('departmentId') departmentId: string) {
+    return this.establishmentsService.findByDepartment(departmentId);
+  }
+
+  @Get('neighborhood/:neighborhood')
+  @ApiOperation({
+    summary: 'Get establishments by neighborhood',
+    description: 'Returns all establishments in a specific neighborhood',
+  })
+  @ApiParam({
+    name: 'neighborhood',
+    description: 'Neighborhood name',
+    example: 'Chapinero',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Establishments found',
+  })
+  findByNeighborhood(@Param('neighborhood') neighborhood: string) {
+    return this.establishmentsService.findByNeighborhood(neighborhood);
+  }
 }

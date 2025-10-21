@@ -1,60 +1,58 @@
 import { StyleSheet } from 'react-native';
+import { Colors, Spacing, FontSizes, FontWeights, BorderRadius, Shadows } from './global';
 
 export const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#f5f5f5',
-		padding: 20,
+		backgroundColor: Colors.background,
+		padding: Spacing.md,
 		justifyContent: 'center',
 	},
 	title: {
-		fontSize: 42,
-		fontWeight: 'bold',
-		color: '#2e7d32',
+		fontSize: FontSizes.xxxl,
+		fontWeight: FontWeights.bold,
+		color: Colors.primary,
 		textAlign: 'center',
-		marginBottom: 10,
+		marginBottom: Spacing.sm,
 	},
 	subtitle: {
-		fontSize: 16,
-		color: '#666',
+		fontSize: FontSizes.md,
+		color: Colors.textSecondary,
 		textAlign: 'center',
-		marginBottom: 50,
+		marginBottom: Spacing.xxl,
 	},
 	menuContainer: {
-		gap: 20,
+		gap: Spacing.md,
 	},
 	menuButton: {
-		backgroundColor: 'white',
-		padding: 25,
-		borderRadius: 15,
+		backgroundColor: Colors.surface,
+		padding: Spacing.lg,
+		borderRadius: BorderRadius.xl,
 		alignItems: 'center',
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		elevation: 3,
+		...Shadows.md,
 	},
 	establishmentButton: {
 		borderLeftWidth: 5,
-		borderLeftColor: '#2e7d32',
+		borderLeftColor: Colors.primary,
 	},
 	beneficiaryButton: {
 		borderLeftWidth: 5,
-		borderLeftColor: '#1976d2',
+		borderLeftColor: Colors.secondary,
 	},
+	// foodButton removed for simplified menu
 	buttonIcon: {
 		fontSize: 48,
-		marginBottom: 10,
+		marginBottom: Spacing.sm,
 	},
 	buttonText: {
-		fontSize: 20,
-		fontWeight: '600',
-		color: '#333',
-		marginBottom: 5,
+		fontSize: FontSizes.xl,
+		fontWeight: FontWeights.semibold,
+		color: Colors.textPrimary,
+		marginBottom: Spacing.xs,
 	},
 	buttonDescription: {
-		fontSize: 14,
-		color: '#666',
+		fontSize: FontSizes.sm,
+		color: Colors.textSecondary,
 		textAlign: 'center',
 	},
 });

@@ -35,4 +35,89 @@ export class EstablishmentsService {
       where: { establishmentId: id },
     });
   }
+
+  async findByCity(cityId: string) {
+    return this.prisma.establishment.findMany({
+      where: { cityId },
+      include: {
+        city: {
+          include: {
+            department: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findByDepartment(departmentId: string) {
+    return this.prisma.establishment.findMany({
+      where: {
+        city: {
+          departmentId,
+        },
+      },
+      include: {
+        city: {
+          include: {
+            department: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findByNeighborhood(neighborhood: string) {
+    return this.prisma.establishment.findMany({
+      where: {
+        neighborhood: {
+          contains: neighborhood,
+          mode: 'insensitive',
+        },
+      },
+      include: {
+        city: {
+          include: {
+            department: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findByLocation(filters: {
+    departmentId?: string;
+    cityId?: string;
+    neighborhood?: string;
+  }) {
+    const where: any = {};
+
+    if (filters.cityId) {
+      where.cityId = filters.cityId;
+    } else if (filters.departmentId) {
+      where.city = {
+        departmentId: filters.departmentId,
+      };
+    }
+
+    if (filters.neighborhood) {
+      where.neighborhood = {
+        contains: filters.neighborhood,
+        mode: 'insensitive',
+      };
+    }
+
+    return this.prisma.establishment.findMany({
+      where,
+      include: {
+        city: {
+          include: {
+            department: true,
+          },
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
 }

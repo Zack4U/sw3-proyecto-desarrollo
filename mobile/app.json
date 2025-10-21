@@ -1,7 +1,7 @@
 {
 	"expo": {
-		"name": "ComeYa",
-		"slug": "comeya",
+		"name": "ComiYa",
+		"slug": "comiya",
 		"version": "1.0.0",
 		"orientation": "portrait",
 		"icon": "./assets/icon.png",

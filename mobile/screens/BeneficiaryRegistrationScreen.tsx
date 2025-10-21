@@ -5,12 +5,13 @@ import {
 	TextInput,
 	TouchableOpacity,
 	ScrollView,
-	Alert,
 	ActivityIndicator,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { beneficiaryService } from '../services/beneficiaryService';
 import { styles } from '../styles/BeneficiaryRegistrationScreenStyle';
+import { FeedbackMessage } from '../components';
+import { useRequestState } from '../hooks/useRequestState';
 
 type RootStackParamList = {
 	Home: undefined;
@@ -24,26 +25,40 @@ type BeneficiaryRegistrationScreenProps = {
 
 export default function BeneficiaryRegistrationScreen({
 	navigation,
-}: BeneficiaryRegistrationScreenProps) {
+}: Readonly<BeneficiaryRegistrationScreenProps>) {
 	const [formData, setFormData] = useState({
 		nombre: '',
 		email: '',
 		telefono: '',
 	});
-	const [loading, setLoading] = useState(false);
+
+	// Usar el hook personalizado para gestionar el estado de la petición
+	const requestState = useRequestState();
 
 	const handleInputChange = (field: string, value: string) => {
 		setFormData({ ...formData, [field]: value });
+		// Resetear el estado cuando el usuario empiece a editar de nuevo
+		if (requestState.error || requestState.success) {
+			requestState.reset();
+		}
 	};
 
 	const handleSubmit = async () => {
 		// Validación básica
 		if (!formData.nombre || !formData.email || !formData.telefono) {
-			Alert.alert('Error', 'Por favor completa todos los campos');
+			requestState.setError('Por favor completa todos los campos');
 			return;
 		}
 
-		setLoading(true);
+		// Validación de email
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(formData.email)) {
+			requestState.setError('Por favor ingresa un correo electrónico válido');
+			return;
+		}
+
+		// Iniciar estado de carga
+		requestState.setLoading();
 
 		try {
 			// Llamada al backend
@@ -51,12 +66,13 @@ export default function BeneficiaryRegistrationScreen({
 
 			console.log('Beneficiario creado:', response);
 
-			Alert.alert('¡Éxito!', 'Beneficiario registrado correctamente', [
-				{
-					text: 'OK',
-					onPress: () => navigation.navigate('Home'),
-				},
-			]);
+			// Marcar como exitoso
+			requestState.setSuccess();
+
+			// Esperar un momento para que el usuario vea el mensaje de éxito
+			setTimeout(() => {
+				navigation.navigate('Home');
+			}, 2000);
 		} catch (error) {
 			console.error('Error al registrar beneficiario:', error);
 
@@ -66,9 +82,7 @@ export default function BeneficiaryRegistrationScreen({
 				errorMessage = error.message;
 			}
 
-			Alert.alert('Error', errorMessage);
-		} finally {
-			setLoading(false);
+			requestState.setError(errorMessage);
 		}
 	};
 
@@ -79,7 +93,28 @@ export default function BeneficiaryRegistrationScreen({
 				<Text style={styles.subtitle}>Completa tu información personal</Text>
 			</View>
 
+			{/* Mensajes de feedback */}
 			<View style={styles.form}>
+				{requestState.loading && (
+					<FeedbackMessage
+						type="loading"
+						message="Registrando beneficiario..."
+						visible={true}
+					/>
+				)}
+
+				{requestState.success && (
+					<FeedbackMessage
+						type="success"
+						message="¡Beneficiario registrado exitosamente! Redirigiendo..."
+						visible={true}
+					/>
+				)}
+
+				{requestState.error && (
+					<FeedbackMessage type="error" message={requestState.error} visible={true} />
+				)}
+
 				<View style={styles.inputGroup}>
 					<Text style={styles.label}>Nombre Completo *</Text>
 					<TextInput
@@ -114,11 +149,14 @@ export default function BeneficiaryRegistrationScreen({
 				</View>
 
 				<TouchableOpacity
-					style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+					style={[
+						styles.submitButton,
+						requestState.loading && styles.submitButtonDisabled,
+					]}
 					onPress={handleSubmit}
-					disabled={loading}
+					disabled={requestState.loading || requestState.success}
 				>
-					{loading ? (
+					{requestState.loading ? (
 						<ActivityIndicator color="white" />
 					) : (
 						<Text style={styles.submitButtonText}>Registrar Beneficiario</Text>
@@ -128,7 +166,7 @@ export default function BeneficiaryRegistrationScreen({
 				<TouchableOpacity
 					style={styles.cancelButton}
 					onPress={() => navigation.goBack()}
-					disabled={loading}
+					disabled={requestState.loading}
 				>
 					<Text style={styles.cancelButtonText}>Cancelar</Text>
 				</TouchableOpacity>

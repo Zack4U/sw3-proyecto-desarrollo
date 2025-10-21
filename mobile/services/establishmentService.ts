@@ -1,12 +1,16 @@
 import api from './api';
+import axios from 'axios';
 
-// Tipos para los datos del establecimiento
+// Tipos para los datos del establecimiento (según el diagrama)
 export interface CreateEstablishmentData {
-    nombre: string;
+    name: string;
+    description?: string;
+    cityId: string;
+    neighborhood?: string;
     address: string;
-    type: string;
     location: string;
-    user_id?: string; // Opcional por ahora, se puede asignar un valor por defecto
+    establishmentType: string;
+    userId?: string;
 }
 
 export interface EstablishmentResponse {
@@ -19,24 +23,65 @@ export interface EstablishmentResponse {
     user_id: string;
 }
 
+// Función helper para formatear mensajes de error
+const getErrorMessage = (error: unknown): string => {
+    if (axios.isAxiosError(error)) {
+        // Error de respuesta del servidor
+        if (error.response) {
+            const status = error.response.status;
+            const data = error.response.data;
+
+            // Mensajes específicos según el código de estado
+            switch (status) {
+                case 400:
+                    return data?.message || 'Datos inválidos. Por favor verifica la información ingresada.';
+                case 401:
+                    return 'No autorizado. Por favor inicia sesión nuevamente.';
+                case 403:
+                    return 'No tienes permisos para realizar esta acción.';
+                case 404:
+                    return 'Recurso no encontrado.';
+                case 409:
+                    return 'Ya existe un establecimiento con estos datos.';
+                case 500:
+                    return 'Error del servidor. Por favor intenta nuevamente más tarde.';
+                default:
+                    return data?.message || `Error del servidor (${status})`;
+            }
+        }
+
+        // Error de red
+        if (error.request) {
+            return 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+        }
+    }
+
+    // Error genérico
+    if (error instanceof Error) {
+        return error.message;
+    }
+
+    return 'Ocurrió un error inesperado. Por favor intenta nuevamente.';
+};
+
 // Servicio para manejar operaciones de establecimientos
 export const establishmentService = {
     // Crear un nuevo establecimiento
     create: async (data: CreateEstablishmentData): Promise<EstablishmentResponse> => {
         try {
-            // Por ahora, usar un user_id temporal si no se proporciona
             const payload = {
                 address: data.address,
-                type: data.type,
+                type: data.establishmentType,
                 location: data.location,
-                user_id: data.user_id || 'temp-user-id',
+                user_id: data.userId || 'temp-user-id',
             };
 
             const response = await api.post<EstablishmentResponse>('/establishments', payload);
             return response.data;
         } catch (error) {
-            console.error('Error al crear establecimiento:', error);
-            throw error;
+            const errorMessage = getErrorMessage(error);
+            console.error('Error al crear establecimiento:', errorMessage);
+            throw new Error(errorMessage);
         }
     },
 
@@ -46,8 +91,9 @@ export const establishmentService = {
             const response = await api.get<EstablishmentResponse[]>('/establishments');
             return response.data;
         } catch (error) {
-            console.error('Error al obtener establecimientos:', error);
-            throw error;
+            const errorMessage = getErrorMessage(error);
+            console.error('Error al obtener establecimientos:', errorMessage);
+            throw new Error(errorMessage);
         }
     },
 
@@ -57,8 +103,9 @@ export const establishmentService = {
             const response = await api.get<EstablishmentResponse>(`/establishments/${id}`);
             return response.data;
         } catch (error) {
-            console.error('Error al obtener establecimiento:', error);
-            throw error;
+            const errorMessage = getErrorMessage(error);
+            console.error('Error al obtener establecimiento:', errorMessage);
+            throw new Error(errorMessage);
         }
     },
 
@@ -68,8 +115,9 @@ export const establishmentService = {
             const response = await api.put<EstablishmentResponse>(`/establishments/${id}`, data);
             return response.data;
         } catch (error) {
-            console.error('Error al actualizar establecimiento:', error);
-            throw error;
+            const errorMessage = getErrorMessage(error);
+            console.error('Error al actualizar establecimiento:', errorMessage);
+            throw new Error(errorMessage);
         }
     },
 
@@ -78,8 +126,9 @@ export const establishmentService = {
         try {
             await api.delete(`/establishments/${id}`);
         } catch (error) {
-            console.error('Error al eliminar establecimiento:', error);
-            throw error;
+            const errorMessage = getErrorMessage(error);
+            console.error('Error al eliminar establecimiento:', errorMessage);
+            throw new Error(errorMessage);
         }
     },
 };
