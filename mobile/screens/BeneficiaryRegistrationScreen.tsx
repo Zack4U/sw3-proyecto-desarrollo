@@ -1,176 +1,173 @@
-import React, { useState } from 'react';
-import {
-	View,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	ScrollView,
-	ActivityIndicator,
-} from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { beneficiaryService } from '../services/beneficiaryService';
-import { styles } from '../styles/BeneficiaryRegistrationScreenStyle';
-import { FeedbackMessage } from '../components';
-import { useRequestState } from '../hooks/useRequestState';
+import React, { useState } from "react";
+import { View, Text, ScrollView } from "react-native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Button, Input, FeedbackMessage } from "../components";
+import { styles } from "../styles/LoginScreenStyle";
+import { useAuth } from "../hooks/useAuth";
+import { RegisterBeneficiaryData } from "../types/auth.types";
 
 type RootStackParamList = {
-	Home: undefined;
-	EstablishmentRegistration: undefined;
-	BeneficiaryRegistration: undefined;
+  Home: undefined;
+  Login: undefined;
 };
 
 type BeneficiaryRegistrationScreenProps = {
-	navigation: NativeStackNavigationProp<RootStackParamList, 'BeneficiaryRegistration'>;
+  navigation: NativeStackNavigationProp<RootStackParamList, "Home">;
 };
 
+interface FormErrors {
+  email?: string;
+  username?: string;
+  password?: string;
+  confirmPassword?: string;
+}
+
 export default function BeneficiaryRegistrationScreen({
-	navigation,
+  navigation,
 }: Readonly<BeneficiaryRegistrationScreenProps>) {
-	const [formData, setFormData] = useState({
-		nombre: '',
-		email: '',
-		telefono: '',
-	});
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState<FormErrors>({});
+  const { registerBeneficiary, isLoading, error, clearError } = useAuth();
 
-	// Usar el hook personalizado para gestionar el estado de la petición
-	const requestState = useRequestState();
+  const validate = (): boolean => {
+    const next: FormErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-	const handleInputChange = (field: string, value: string) => {
-		setFormData({ ...formData, [field]: value });
-		// Resetear el estado cuando el usuario empiece a editar de nuevo
-		if (requestState.error || requestState.success) {
-			requestState.reset();
-		}
-	};
+    if (!email) next.email = "El correo es obligatorio";
+    else if (!emailRegex.test(email)) next.email = "Correo inválido";
 
-	const handleSubmit = async () => {
-		// Validación básica
-		if (!formData.nombre || !formData.email || !formData.telefono) {
-			requestState.setError('Por favor completa todos los campos');
-			return;
-		}
+    if (!username) next.username = "El usuario es obligatorio";
+    else if (username.length < 3)
+      next.username = "El usuario debe tener al menos 3 caracteres";
 
-		// Validación de email
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(formData.email)) {
-			requestState.setError('Por favor ingresa un correo electrónico válido');
-			return;
-		}
+    if (!password) next.password = "La contraseña es obligatoria";
+    else if (password.length < 8)
+      next.password = "La contraseña debe tener al menos 8 caracteres";
 
-		// Iniciar estado de carga
-		requestState.setLoading();
+    if (!confirmPassword) next.confirmPassword = "Confirma tu contraseña";
+    else if (confirmPassword !== password)
+      next.confirmPassword = "Las contraseñas no coinciden";
 
-		try {
-			// Llamada al backend
-			const response = await beneficiaryService.create(formData);
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
 
-			console.log('Beneficiario creado:', response);
+  const onSubmit = async () => {
+    if (!validate()) return;
 
-			// Marcar como exitoso
-			requestState.setSuccess();
+    try {
+      clearError();
+      const data: RegisterBeneficiaryData = {
+        email,
+        username,
+        password,
+        confirmPassword,
+      };
+      await registerBeneficiary(data);
+    } catch (e) {
+      console.error("Registration error", e);
+    }
+  };
 
-			// Esperar un momento para que el usuario vea el mensaje de éxito
-			setTimeout(() => {
-				navigation.navigate('Home');
-			}, 2000);
-		} catch (error) {
-			console.error('Error al registrar beneficiario:', error);
+  return (
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Registrarse como Beneficiario</Text>
+            <Text style={styles.subtitle}>
+              Crea tu cuenta para buscar alimentos
+            </Text>
+          </View>
 
-			let errorMessage = 'No se pudo registrar el beneficiario';
+          <FeedbackMessage
+            type="loading"
+            message="Creando cuenta..."
+            visible={isLoading}
+          />
+          <FeedbackMessage
+            type="error"
+            message={error ?? ""}
+            visible={!!error}
+          />
 
-			if (error instanceof Error) {
-				errorMessage = error.message;
-			}
+          <View style={styles.form}>
+            <Input
+              label="Correo electrónico"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={(t) => {
+                setEmail(t);
+                clearError();
+              }}
+              error={errors.email}
+              required
+              editable={!isLoading}
+            />
+            <Input
+              label="Usuario"
+              autoCapitalize="none"
+              value={username}
+              onChangeText={(t) => {
+                setUsername(t);
+                clearError();
+              }}
+              error={errors.username}
+              required
+              editable={!isLoading}
+            />
+            <Input
+              label="Contraseña"
+              secureTextEntry
+              value={password}
+              onChangeText={(t) => {
+                setPassword(t);
+                clearError();
+              }}
+              error={errors.password}
+              required
+              editable={!isLoading}
+            />
+            <Input
+              label="Confirmar contraseña"
+              secureTextEntry
+              value={confirmPassword}
+              onChangeText={(t) => {
+                setConfirmPassword(t);
+                clearError();
+              }}
+              error={errors.confirmPassword}
+              required
+              editable={!isLoading}
+            />
+          </View>
 
-			requestState.setError(errorMessage);
-		}
-	};
+          <View style={styles.actions}>
+            <Button
+              title="Registrarse"
+              onPress={onSubmit}
+              variant="primary"
+              disabled={isLoading}
+            />
+          </View>
 
-	return (
-		<ScrollView style={styles.container}>
-			<View style={styles.header}>
-				<Text style={styles.title}>Registrar Beneficiario</Text>
-				<Text style={styles.subtitle}>Completa tu información personal</Text>
-			</View>
-
-			{/* Mensajes de feedback */}
-			<View style={styles.form}>
-				{requestState.loading && (
-					<FeedbackMessage
-						type="loading"
-						message="Registrando beneficiario..."
-						visible={true}
-					/>
-				)}
-
-				{requestState.success && (
-					<FeedbackMessage
-						type="success"
-						message="¡Beneficiario registrado exitosamente! Redirigiendo..."
-						visible={true}
-					/>
-				)}
-
-				{requestState.error && (
-					<FeedbackMessage type="error" message={requestState.error} visible={true} />
-				)}
-
-				<View style={styles.inputGroup}>
-					<Text style={styles.label}>Nombre Completo *</Text>
-					<TextInput
-						style={styles.input}
-						placeholder="Ej: Juan Pérez"
-						value={formData.nombre}
-						onChangeText={(value) => handleInputChange('nombre', value)}
-					/>
-				</View>
-
-				<View style={styles.inputGroup}>
-					<Text style={styles.label}>Correo Electrónico *</Text>
-					<TextInput
-						style={styles.input}
-						placeholder="Ej: juan@email.com"
-						value={formData.email}
-						onChangeText={(value) => handleInputChange('email', value)}
-						keyboardType="email-address"
-						autoCapitalize="none"
-					/>
-				</View>
-
-				<View style={styles.inputGroup}>
-					<Text style={styles.label}>Teléfono *</Text>
-					<TextInput
-						style={styles.input}
-						placeholder="Ej: 3001234567"
-						value={formData.telefono}
-						onChangeText={(value) => handleInputChange('telefono', value)}
-						keyboardType="phone-pad"
-					/>
-				</View>
-
-				<TouchableOpacity
-					style={[
-						styles.submitButton,
-						requestState.loading && styles.submitButtonDisabled,
-					]}
-					onPress={handleSubmit}
-					disabled={requestState.loading || requestState.success}
-				>
-					{requestState.loading ? (
-						<ActivityIndicator color="white" />
-					) : (
-						<Text style={styles.submitButtonText}>Registrar Beneficiario</Text>
-					)}
-				</TouchableOpacity>
-
-				<TouchableOpacity
-					style={styles.cancelButton}
-					onPress={() => navigation.goBack()}
-					disabled={requestState.loading}
-				>
-					<Text style={styles.cancelButtonText}>Cancelar</Text>
-				</TouchableOpacity>
-			</View>
-		</ScrollView>
-	);
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              ¿Ya tienes cuenta?{" "}
+              <Text
+                style={styles.linkText}
+                onPress={() => navigation.navigate("Login")}
+              >
+                Inicia sesión aquí
+              </Text>
+            </Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  );
 }
