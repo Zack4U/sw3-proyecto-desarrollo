@@ -6,6 +6,8 @@ interface JwtPayload {
   sub: string;
   email: string;
   username?: string;
+  role?: string;
+  isActive?: boolean;
   iat: number;
   exp: number;
 }
@@ -21,6 +23,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: JwtPayload): Promise<any> {
-    return { userId: payload.sub, email: payload.email, username: payload.username };
+    return {
+      userId: payload.sub,
+      email: payload.email,
+      username: payload.username,
+      role: payload.role,
+      isActive: payload.isActive,
+    };
   }
 }
