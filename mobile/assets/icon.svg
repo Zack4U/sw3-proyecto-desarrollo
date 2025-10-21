@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo verde ComiYa -->
+  <rect width="1024" height="1024" fill="#2e7d32"/>
+  <!-- Círculo blanco central (representando el concepto de comida compartida) -->
+  <circle cx="512" cy="512" r="300" fill="white" opacity="0.9"/>
+  <!-- Pequeño círculo interior para profundidad -->
+  <circle cx="512" cy="512" r="200" fill="#2e7d32" opacity="0.3"/>
+</svg>

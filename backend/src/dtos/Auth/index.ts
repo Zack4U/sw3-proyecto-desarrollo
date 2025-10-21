@@ -6,3 +6,5 @@ export * from './auth-response.dto';
 export * from './google-auth.dto';
 export * from './google-auth-beneficiary.dto';
 export * from './google-auth-establishment.dto';
+export * from './google-login-common.dto';
+export * from './complete-profile.dto';

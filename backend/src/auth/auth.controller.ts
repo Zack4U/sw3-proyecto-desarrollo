@@ -18,8 +18,10 @@ import {
   GoogleAuthEstablishmentDto,
   AuthResponseDto,
   LoginDto,
+  GoogleLoginCommonDto,
+  CompleteProfileDto,
 } from '../dtos/Auth';
-import { JwtAuthGuard, LocalAuthGuard } from './guards';
+import { GoogleAuthGuard, JwtAuthGuard, LocalAuthGuard } from './guards';
 
 @ApiTags('authentication')
 @Controller('auth')
@@ -345,5 +347,61 @@ export class AuthController {
     }
 
     return this.authService.changePassword(req.user.userId, body.oldPassword, body.newPassword);
+  }
+
+  /**
+   * Google login común - crea usuario con datos mínimos (isActive = false)
+   */
+  @Post('google/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Common Google login - no role specified',
+    description:
+      'Authenticate or create user with Google. User is created with isActive=false until profile is completed',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully authenticated with Google. User requires profile completion.',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid or missing required fields',
+  })
+  async googleLoginCommon(@Body() googleAuthDto: GoogleLoginCommonDto): Promise<AuthResponseDto> {
+    return this.authService.googleLoginCommon(googleAuthDto);
+  }
+
+  /**
+   * Completar perfil del usuario después de Google login
+   * Actualiza datos y establece isActive = true
+   */
+  @Post('profile/complete')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Complete user profile after Google login',
+    description:
+      'Complete user profile with role and required fields. Sets isActive=true upon completion.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile completed successfully',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input or missing required fields',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  async completeProfile(
+    @Request() req: any,
+    @Body() completeProfileDto: CompleteProfileDto,
+  ): Promise<AuthResponseDto> {
+    return this.authService.completeUserProfile(req.user.userId, completeProfileDto);
   }
 }

@@ -9,31 +9,18 @@ import {
 } from 'react-native';
 import { locationService, Department, City } from '../services/locationService';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import {
-	establishmentService,
-	ESTABLISHMENT_TYPES,
-} from '../services/establishmentService';
+import { establishmentService } from '../services/establishmentService';
 import { styles } from '../styles/EstablishmentRegistrationScreenStyle';
 import { FeedbackMessage } from '../components';
 import { useRequestState } from '../hooks/useRequestState';
 
-// Función para generar UUID v4
-const generateUUID = (): string => {
-	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-		const r = Math.trunc(Math.random() * 16);
-		const v = c === 'x' ? r : (r & 0x3) | 0x8;
-		return v.toString(16);
-	});
-};
-
 type RootStackParamList = {
-	Home: undefined;
-	EstablishmentRegistration: undefined;
-	BeneficiaryRegistration: undefined;
+  Home: undefined;
+  Login: undefined;
 };
 
 type EstablishmentRegistrationScreenProps = {
-	navigation: NativeStackNavigationProp<RootStackParamList, 'EstablishmentRegistration'>;
+  navigation: NativeStackNavigationProp<RootStackParamList, "Home">;
 };
 
 // Componente personalizado para Picker
@@ -54,70 +41,36 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
 	valueKey,
 	placeholder,
 }) => {
-	const [isOpen, setIsOpen] = useState(false);
-
 	return (
-		<View style={{ marginBottom: 8 }}>
-			<TouchableOpacity
-				onPress={() => setIsOpen(!isOpen)}
-				style={{
-					borderWidth: 1,
-					borderColor: '#E0E0E0',
-					borderRadius: 8,
-					backgroundColor: '#fff',
-					padding: 12,
-				}}
-			>
-				<Text style={{ color: selectedValue ? '#2E2E2E' : '#6B6B6B' }}>
-					{selectedValue
-						? items.find((item) => item[valueKey] === selectedValue)?.[labelKey] ||
-						  placeholder
-						: placeholder}
-				</Text>
-			</TouchableOpacity>
-			{isOpen && (
-				<ScrollView
-					style={{
-						maxHeight: 200,
-						borderWidth: 1,
-						borderColor: '#E0E0E0',
-						borderRadius: 8,
-						backgroundColor: '#fff',
-						marginTop: 4,
-					}}
-					nestedScrollEnabled
+		<View
+			style={{
+				borderWidth: 1,
+				borderColor: '#E0E0E0',
+				borderRadius: 8,
+				backgroundColor: '#fff',
+				marginBottom: 8,
+			}}
+		>
+			<Text style={{ color: '#6B6B6B', padding: 8 }}>{placeholder}</Text>
+			{items.map((item) => (
+				<TouchableOpacity
+					key={item[valueKey]}
+					style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' }}
+					onPress={() => onValueChange(item[valueKey])}
 				>
-					{items.map((item) => (
-						<TouchableOpacity
-							key={item[valueKey]}
-							style={{
-								padding: 12,
-								borderBottomWidth: 1,
-								borderBottomColor: '#F0F0F0',
-								backgroundColor: selectedValue === item[valueKey] ? '#E8F5E9' : '#fff',
-							}}
-							onPress={() => {
-								onValueChange(item[valueKey]);
-								setIsOpen(false);
-							}}
-						>
-							<Text
-								style={{
-									color: selectedValue === item[valueKey] ? '#3CA55C' : '#2E2E2E',
-								}}
-							>
-								{item[labelKey]}
-							</Text>
-						</TouchableOpacity>
-					))}
-				</ScrollView>
-			)}
+					<Text
+						style={{ color: selectedValue === item[valueKey] ? '#3CA55C' : '#2E2E2E' }}
+					>
+						{item[labelKey]}
+					</Text>
+				</TouchableOpacity>
+			))}
 		</View>
 	);
 };
 
 export default function EstablishmentRegistrationScreen({
-	navigation,
+  navigation,
 }: Readonly<EstablishmentRegistrationScreenProps>) {
 	const [formData, setFormData] = useState({
 		name: '',
@@ -126,10 +79,9 @@ export default function EstablishmentRegistrationScreen({
 		cityId: '',
 		neighborhood: '',
 		address: '',
-		latitude: '',
-		longitude: '',
+		location: '',
 		establishmentType: '',
-		userId: 'temp-user-id', // TODO: Obtener del contexto de autenticación
+		userId: '',
 	});
 	const [departments, setDepartments] = useState<Department[]>([]);
 	const [filteredCities, setFilteredCities] = useState<City[]>([]);
@@ -174,48 +126,20 @@ export default function EstablishmentRegistrationScreen({
 			return;
 		}
 
-		// Validar coordenadas si se proporcionan
-		if (formData.latitude || formData.longitude) {
-			const lat = Number.parseFloat(formData.latitude);
-			const lng = Number.parseFloat(formData.longitude);
-
-			if (Number.isNaN(lat) || Number.isNaN(lng)) {
-				requestState.setError('Las coordenadas deben ser números válidos');
-				return;
-			}
-			if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-				requestState.setError('Las coordenadas están fuera de rango válido');
-				return;
-			}
-		}
-
 		// Iniciar estado de carga
 		requestState.setLoading();
 
 		try {
-			// Generar UUID para el establecimiento
-			const establishmentId = generateUUID();
-
-			// Crear el objeto location en formato GeoJSON
-			const location = {
-				type: 'Point',
-				coordinates: [
-					formData.longitude ? Number.parseFloat(formData.longitude) : 0,
-					formData.latitude ? Number.parseFloat(formData.latitude) : 0,
-				],
-			};
-
-			// Llamada al backend con el formato correcto
+			// Llamada al backend
 			const payload = {
-				establishmentId: establishmentId,
 				name: formData.name,
-				description: formData.description || undefined,
-				address: formData.address,
-				neighborhood: formData.neighborhood || undefined,
-				location: location,
-				establishmentType: formData.establishmentType,
-				userId: formData.userId,
+				description: formData.description,
 				cityId: formData.cityId,
+				neighborhood: formData.neighborhood,
+				address: formData.address,
+				location: formData.location,
+				establishmentType: formData.establishmentType,
+				userId: formData.userId || 'temp-user-id',
 			};
 			const response = await establishmentService.create(payload);
 
@@ -241,12 +165,16 @@ export default function EstablishmentRegistrationScreen({
 		}
 	};
 
-	return (
-		<ScrollView style={styles.container}>
-			<View style={styles.header}>
-				<Text style={styles.title}>Registrar Establecimiento</Text>
-				<Text style={styles.subtitle}>Completa la información de tu negocio</Text>
-			</View>
+  return (
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Registrarse como Establecimiento</Text>
+            <Text style={styles.subtitle}>
+              Crea tu cuenta para compartir alimentos
+            </Text>
+          </View>
 
 			{/* Mensajes de feedback */}
 			<View style={styles.form}>
@@ -286,34 +214,15 @@ export default function EstablishmentRegistrationScreen({
 					<Text style={styles.label}>Descripción</Text>
 					<TextInput
 						style={styles.input}
-						placeholder="Breve descripción de tu establecimiento"
+						placeholder="Breve descripción"
 						value={formData.description}
 						onChangeText={(value) => handleInputChange('description', value)}
-						multiline
-						numberOfLines={3}
-					/>
-				</View>
-
-				{/* Tipo de establecimiento */}
-				<View style={styles.inputGroup}>
-					<Text style={styles.label}>
-						Tipo de Establecimiento <Text style={{ color: 'red' }}>*</Text>
-					</Text>
-					<CustomPicker
-						items={ESTABLISHMENT_TYPES}
-						selectedValue={formData.establishmentType}
-						onValueChange={(value) => handleInputChange('establishmentType', value)}
-						labelKey="label"
-						valueKey="value"
-						placeholder="Selecciona el tipo de establecimiento"
 					/>
 				</View>
 
 				{/* Departamento */}
 				<View style={styles.inputGroup}>
-					<Text style={styles.label}>
-						Departamento <Text style={{ color: 'red' }}>*</Text>
-					</Text>
+					<Text style={styles.label}>Departamento *</Text>
 					<CustomPicker
 						items={departments}
 						selectedValue={formData.departmentId}
@@ -326,9 +235,7 @@ export default function EstablishmentRegistrationScreen({
 
 				{/* Ciudad */}
 				<View style={styles.inputGroup}>
-					<Text style={styles.label}>
-						Ciudad <Text style={{ color: 'red' }}>*</Text>
-					</Text>
+					<Text style={styles.label}>Ciudad *</Text>
 					<CustomPicker
 						items={filteredCities}
 						selectedValue={formData.cityId}
@@ -341,7 +248,7 @@ export default function EstablishmentRegistrationScreen({
 
 				{/* Barrio */}
 				<View style={styles.inputGroup}>
-					<Text style={styles.label}>Barrio / Zona</Text>
+					<Text style={styles.label}>Barrio</Text>
 					<TextInput
 						style={styles.input}
 						placeholder="Ej: Chapinero, La Floresta"
@@ -352,9 +259,7 @@ export default function EstablishmentRegistrationScreen({
 
 				{/* Dirección */}
 				<View style={styles.inputGroup}>
-					<Text style={styles.label}>
-						Dirección <Text style={{ color: 'red' }}>*</Text>
-					</Text>
+					<Text style={styles.label}>Dirección *</Text>
 					<TextInput
 						style={styles.input}
 						placeholder="Ej: Calle 123 #45-67"
@@ -363,34 +268,15 @@ export default function EstablishmentRegistrationScreen({
 					/>
 				</View>
 
-				{/* Coordenadas - Opcional */}
+				{/* Tipo de establecimiento */}
 				<View style={styles.inputGroup}>
-					<Text style={styles.label}>Ubicación (Opcional)</Text>
-					<Text style={{ fontSize: 12, color: '#6B6B6B', marginBottom: 8 }}>
-						Ingresa las coordenadas geográficas de tu establecimiento
-					</Text>
-					<View style={{ flexDirection: 'row', gap: 8 }}>
-						<View style={{ flex: 1 }}>
-							<Text style={{ fontSize: 12, marginBottom: 4 }}>Latitud</Text>
-							<TextInput
-								style={styles.input}
-								placeholder="Ej: 4.6097"
-								value={formData.latitude}
-								onChangeText={(value) => handleInputChange('latitude', value)}
-								keyboardType="numeric"
-							/>
-						</View>
-						<View style={{ flex: 1 }}>
-							<Text style={{ fontSize: 12, marginBottom: 4 }}>Longitud</Text>
-							<TextInput
-								style={styles.input}
-								placeholder="Ej: -74.0817"
-								value={formData.longitude}
-								onChangeText={(value) => handleInputChange('longitude', value)}
-								keyboardType="numeric"
-							/>
-						</View>
-					</View>
+					<Text style={styles.label}>Tipo de Establecimiento *</Text>
+					<TextInput
+						style={styles.input}
+						placeholder="Ej: Restaurante, Cafetería, Panadería"
+						value={formData.establishmentType}
+						onChangeText={(value) => handleInputChange('establishmentType', value)}
+					/>
 				</View>
 
 				<TouchableOpacity
