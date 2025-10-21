@@ -6,9 +6,10 @@ import { EstablishmentsService } from './services/establishment.service';
 import { EstablishmentsController } from './controllers/establishment.controller';
 import { FoodsController } from './controllers/foods.controller';
 import { FoodsService } from './services/foods.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [],
+  imports: [AuthModule],
   controllers: [AppController, EstablishmentsController, FoodsController],
   providers: [AppService, PrismaService, EstablishmentsService, FoodsService],
 })
