@@ -15,22 +15,14 @@ export const styles = StyleSheet.create({
     subtitle: {
         ...GlobalStyles.headerSubtitle,
     },
-    list: {
-        paddingBottom: Spacing.lg,
+    filtersContainer: {
+        width: '100%',
+        paddingHorizontal: 16,
+        marginBottom: 16,
+        marginTop: 8,
     },
     card: {
-        marginBottom: 24, // o Spacing.lg si usas tu sistema de espaciado
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
-        // Sombra ligera
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
+        marginBottom: Spacing.lg,
     },
     name: {
         ...GlobalStyles.headerTitle,
@@ -49,12 +41,27 @@ export const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     divider: {
-        height: 1,
-        backgroundColor: '#e0e0e0',
+        ...GlobalStyles.divider,
         marginTop: 12,
     },
-    icon: {
-        fontSize: 28,
+    list: {
+        paddingHorizontal: 16,
+        paddingBottom: Spacing.lg,
+    },
+    input: {
+        ...GlobalStyles.input,
+        width: '100%',
+        backgroundColor: '#f5f5f5',
+        borderRadius: 8,
+        padding: 8,
+        alignSelf: 'stretch',
+    },
+    label: {
+        ...GlobalStyles.label,
+        width: '100%',
+        textAlign: 'left',
         marginBottom: 8,
+        fontWeight: 'bold',
+        fontSize: 16,
     },
 });

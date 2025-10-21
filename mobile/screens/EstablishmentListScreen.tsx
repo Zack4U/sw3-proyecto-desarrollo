@@ -9,7 +9,7 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { establishmentService, EstablishmentResponse } from '../services/establishmentService';
 import { styles } from '../styles/EstablishmentListScreenStyle';
-import { FeedbackMessage, Card } from '../components';
+import { FeedbackMessage, Card, Input } from '../components';
 import { GlobalStyles } from '../styles/global';
 
 type RootStackParamList = {
@@ -25,6 +25,7 @@ export default function EstablishmentListScreen({ navigation }: Readonly<Props>)
     const [establishments, setEstablishments] = useState<EstablishmentResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
         establishmentService.getAll()
@@ -33,11 +34,26 @@ export default function EstablishmentListScreen({ navigation }: Readonly<Props>)
             .finally(() => setLoading(false));
     }, []);
 
+    const filteredEstablishments = establishments.filter(est =>
+        est.name.toLowerCase().includes(search.toLowerCase())
+    );
+
     return (
         <ScrollView style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Establecimientos Registrados</Text>
                 <Text style={styles.subtitle}>Lista de puntos de donación</Text>
+            </View>
+
+            <View style={styles.filtersContainer}>
+                <Input
+                    label="Buscar"
+                    labelStyle={styles.label}
+                    placeholder="Buscar por nombre..."
+                    value={search}
+                    onChangeText={setSearch}
+                    style={styles.input}
+                />
             </View>
 
             {loading && (
@@ -49,15 +65,16 @@ export default function EstablishmentListScreen({ navigation }: Readonly<Props>)
             )}
 
             <FlatList
-                data={establishments}
+                data={filteredEstablishments}
                 keyExtractor={item => item.establishmentId}
                 renderItem={({ item }) => (
-                    <View style={styles.card}>
+                    <Card style={styles.card}>
+                        <Text style={{ fontSize: 28, marginBottom: 8 }}>🏢</Text>
                         <Text style={styles.name}>{item.name}</Text>
                         <Text style={styles.address}>{item.address}</Text>
                         <Text style={styles.type}>{item.establishmentType}</Text>
                         <View style={styles.divider} />
-                    </View>
+                    </Card>
                 )}
                 contentContainerStyle={styles.list}
             />

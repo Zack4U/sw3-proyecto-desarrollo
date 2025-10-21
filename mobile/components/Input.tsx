@@ -4,12 +4,14 @@ import { GlobalStyles, Colors } from '../styles/global';
 
 interface InputProps extends TextInputProps {
 	label: string;
+	labelStyle?: object;
 	error?: string;
 	required?: boolean;
 }
 
 export default function Input({
 	label,
+	labelStyle,
 	error,
 	required = false,
 	style,
@@ -19,7 +21,7 @@ export default function Input({
 
 	return (
 		<View style={GlobalStyles.inputGroup}>
-			<Text style={GlobalStyles.label}>
+			<Text style={[GlobalStyles.label, labelStyle]}>
 				{label} {required && <Text style={{ color: Colors.error }}>*</Text>}
 			</Text>
 			<TextInput
