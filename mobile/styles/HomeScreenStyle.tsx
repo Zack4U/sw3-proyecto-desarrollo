@@ -25,6 +25,24 @@ export const styles = StyleSheet.create({
     fontSize: FontSizes.xxxl,
     fontWeight: FontWeights.bold,
     color: Colors.primary,
+    flex: 1,
+  },
+  headerButtonsContainer: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    alignItems: "center",
+  },
+  profileButton: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.primary || "#10B981",
+    borderRadius: BorderRadius.lg,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  profileButtonText: {
+    fontSize: FontSizes.md,
+    color: "#FFFFFF",
   },
   logoutButton: {
     paddingHorizontal: Spacing.md,

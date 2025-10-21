@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { styles } from "../styles/HomeScreenStyle";
 import { useAuth } from "../hooks/useAuth";
+import { ProfileModal } from "../components";
 
 type RootStackParamList = {
   Home: undefined;
@@ -16,6 +17,7 @@ type HomeScreenProps = {
 
 export default function HomeScreen({ navigation }: Readonly<HomeScreenProps>) {
   const { logout, user, isLoading } = useAuth();
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -29,13 +31,23 @@ export default function HomeScreen({ navigation }: Readonly<HomeScreenProps>) {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>ComiYa</Text>
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-          disabled={isLoading}
-        >
-          <Text style={styles.logoutButtonText}>🚪 Cerrar sesión</Text>
-        </TouchableOpacity>
+        <View style={styles.headerButtonsContainer}>
+          {user && (
+            <TouchableOpacity
+              style={styles.profileButton}
+              onPress={() => setProfileModalVisible(true)}
+            >
+              <Text style={styles.profileButtonText}>👤</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            disabled={isLoading}
+          >
+            <Text style={styles.logoutButtonText}>🚪 Cerrar sesión</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.contentContainer}>
         <Text style={styles.subtitle}>
@@ -64,6 +76,11 @@ export default function HomeScreen({ navigation }: Readonly<HomeScreenProps>) {
           </TouchableOpacity>
         </View>
       </View>
+      <ProfileModal
+        visible={profileModalVisible}
+        user={user}
+        onClose={() => setProfileModalVisible(false)}
+      />
     </View>
   );
 }
