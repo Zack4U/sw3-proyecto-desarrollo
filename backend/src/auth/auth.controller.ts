@@ -21,7 +21,7 @@ import {
   GoogleLoginCommonDto,
   CompleteProfileDto,
 } from '../dtos/Auth';
-import { JwtAuthGuard, LocalAuthGuard } from './guards';
+import { GoogleAuthGuard, JwtAuthGuard, LocalAuthGuard } from './guards';
 
 @ApiTags('authentication')
 @Controller('auth')
