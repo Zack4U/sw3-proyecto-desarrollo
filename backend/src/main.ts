@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { SwaggerConfig } from './config';
 
@@ -9,6 +10,24 @@ async function bootstrap() {
   const PORT = process.env.PORT ?? 3001;
   const API_VERSION = process.env.API_VERSION ?? 'v1';
   const ENVIRONMENT = process.env.NODE_ENV ?? 'development';
+
+  // Habilitar CORS
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
+
+  // Configurar ValidationPipe global para validar DTOs
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
 
   // Configurar prefijo global para todas las rutas
   app.setGlobalPrefix(`api/${API_VERSION}`);

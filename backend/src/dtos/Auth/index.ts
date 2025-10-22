@@ -1,5 +1,6 @@
 export * from './login.dto';
 export * from './register.dto';
+export * from './register-basic.dto';
 export * from './register-beneficiary.dto';
 export * from './register-establishment.dto';
 export * from './auth-response.dto';

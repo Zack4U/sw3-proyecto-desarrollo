@@ -1,5 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { FoodCategory, UnitOfMeasure, FoodStatus } from '@prisma/client';
+import {
+  IsDate,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+  IsUUID,
+  Min,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class UpdateFoodDto {
   @ApiProperty({
@@ -8,6 +19,8 @@ export class UpdateFoodDto {
     required: false,
     type: String,
   })
+  @IsOptional()
+  @IsString()
   readonly name?: string;
 
   @ApiProperty({
@@ -16,6 +29,8 @@ export class UpdateFoodDto {
     required: false,
     type: String,
   })
+  @IsOptional()
+  @IsString()
   readonly description?: string;
 
   @ApiProperty({
@@ -25,6 +40,8 @@ export class UpdateFoodDto {
     required: false,
     type: String,
   })
+  @IsOptional()
+  @IsEnum(FoodCategory)
   readonly category?: FoodCategory;
 
   @ApiProperty({
@@ -33,6 +50,10 @@ export class UpdateFoodDto {
     required: false,
     type: Number,
   })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0.0000001)
   readonly quantity?: number;
 
   @ApiProperty({
@@ -42,6 +63,8 @@ export class UpdateFoodDto {
     required: false,
     type: String,
   })
+  @IsOptional()
+  @IsEnum(UnitOfMeasure)
   readonly unitOfMeasure?: UnitOfMeasure;
 
   @ApiProperty({
@@ -50,6 +73,8 @@ export class UpdateFoodDto {
     enum: FoodStatus,
     required: false,
   })
+  @IsOptional()
+  @IsEnum(FoodStatus)
   readonly status?: FoodStatus;
 
   @ApiProperty({
@@ -58,6 +83,8 @@ export class UpdateFoodDto {
     required: false,
     type: String,
   })
+  @IsOptional()
+  @IsUrl()
   readonly imageUrl?: string;
 
   @ApiProperty({
@@ -66,6 +93,9 @@ export class UpdateFoodDto {
     required: false,
     type: Date,
   })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
   readonly expiresAt?: Date;
 
   @ApiProperty({
@@ -74,5 +104,7 @@ export class UpdateFoodDto {
     required: false,
     type: String,
   })
+  @IsOptional()
+  @IsUUID()
   readonly establishmentId?: string;
 }

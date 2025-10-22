@@ -13,6 +13,7 @@ export interface User {
   isVerified: boolean;
   picture?: string;
   documentNumber?: string;
+  establishmentId?: string; // ID del establecimiento si el usuario es ESTABLISHMENT
 }
 
 export interface AuthResponse {
@@ -22,6 +23,7 @@ export interface AuthResponse {
   expiresIn: number;
   userId: string;
   email: string;
+  establishmentId?: string; // ID del establecimiento si el usuario es ESTABLISHMENT
 }
 
 export interface LoginCredentials {
@@ -46,6 +48,7 @@ export interface RegisterEstablishmentData {
 }
 
 export interface GoogleAuthData {
+  token: string; // Google ID token (JWT)
   email: string;
   name?: string;
   picture?: string;
@@ -110,6 +113,11 @@ export interface AuthContextType {
 
   // Métodos
   login: (credentials: LoginCredentials) => Promise<void>;
+  registerBasic: (data: {
+    email: string;
+    password: string;
+    confirmPassword: string;
+  }) => Promise<void>;
   registerBeneficiary: (data: RegisterBeneficiaryData) => Promise<void>;
   registerEstablishment: (data: RegisterEstablishmentData) => Promise<void>;
   loginWithGoogle: (data: GoogleAuthData) => Promise<void>;

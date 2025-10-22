@@ -11,7 +11,7 @@ export interface GoogleUser {
   name?: string;
   picture?: string;
   id: string;
-  idToken?: string;
+  idToken?: string; // Google ID token (JWT)
   accessToken?: string;
 }
 
@@ -58,8 +58,16 @@ export const useGoogleSignIn = () => {
       setIsLoading(true);
 
       await GoogleSignin.hasPlayServices();
-      const response = await GoogleSignin.signIn();
 
+      // Forzar selector de cuenta: si ya hay sesión previa, cerrar sesión primero
+      const hasPrev = (GoogleSignin as any).hasPreviousSignIn
+        ? (GoogleSignin as any).hasPreviousSignIn()
+        : false;
+      if (hasPrev) {
+        await GoogleSignin.signOut();
+      }
+
+      const response = await GoogleSignin.signIn();
       if (isSuccessResponse(response)) {
         const { idToken, user } = response.data;
         const { name, email, photo } = user;
@@ -68,6 +76,7 @@ export const useGoogleSignIn = () => {
           name: name || undefined,
           email,
           picture: photo || undefined,
+          idToken: idToken || undefined,
         });
       }
     } catch (err) {

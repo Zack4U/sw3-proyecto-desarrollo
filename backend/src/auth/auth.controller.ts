@@ -8,12 +8,14 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
   RegisterBeneficiaryDto,
   RegisterEstablishmentDto,
+  RegisterBasicDto,
   GoogleAuthBeneficiaryDto,
   GoogleAuthEstablishmentDto,
   AuthResponseDto,
@@ -26,7 +28,43 @@ import { GoogleAuthGuard, JwtAuthGuard, LocalAuthGuard } from './guards';
 @ApiTags('authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  private readonly logger = new Logger(AuthController.name);
+
+  constructor(private readonly authService: AuthService) { }
+
+  /**
+   * Registro básico con email y password
+   */
+  @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Basic registration with email and password',
+    description: 'Create a new user account with email and password. User must complete profile after registration.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'User successfully registered with isActive=false',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input or passwords do not match',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'User with this email already exists',
+  })
+  async registerBasic(@Body() registerDto: RegisterBasicDto): Promise<AuthResponseDto> {
+    this.logger.log(`📝 Register basic attempt: ${registerDto.email}`);
+    try {
+      const result = await this.authService.registerBasic(registerDto);
+      this.logger.log(`✅ User registered successfully: ${registerDto.email}`);
+      return result;
+    } catch (error) {
+      this.logger.error(`❌ Registration failed for ${registerDto.email}:`, error);
+      throw error;
+    }
+  }
 
   /**
    * Registro de beneficiario

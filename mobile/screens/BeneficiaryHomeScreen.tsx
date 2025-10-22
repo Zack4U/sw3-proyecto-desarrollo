@@ -1,20 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { styles } from '../styles/HomeScreenStyle';
 import { useAuth } from '../hooks/useAuth';
-import { ProfileModal } from '../components';
+import { styles } from '../styles/HomeScreenStyle';
+import ProfileModal from '../components/ProfileModal';
 
-type RootStackParamList = {
-	Home: undefined;
-	FoodRegistration: undefined;
-};
-
-type HomeScreenProps = {
-	navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
-};
-
-export default function HomeScreen({ navigation }: Readonly<HomeScreenProps>) {
+// Pantalla para beneficiarios: muestra el mismo header que HomeScreen (establecimiento) y contenido en blanco
+export default function BeneficiaryHomeScreen() {
 	const { logout, user, isLoading } = useAuth();
 	const [profileModalVisible, setProfileModalVisible] = useState(false);
 
@@ -28,6 +19,7 @@ export default function HomeScreen({ navigation }: Readonly<HomeScreenProps>) {
 
 	return (
 		<View style={styles.container}>
+			{/* Header igual al de HomeScreen */}
 			<View style={styles.header}>
 				<Text style={styles.title}>ComiYa</Text>
 				<View style={styles.headerButtonsContainer}>
@@ -48,25 +40,10 @@ export default function HomeScreen({ navigation }: Readonly<HomeScreenProps>) {
 					</TouchableOpacity>
 				</View>
 			</View>
-			<View style={styles.contentContainer}>
-				<Text style={styles.subtitle}>
-					¡Bienvenido! Reduce el desperdicio de alimentos con nosotros.
-				</Text>
-				<View style={styles.menuContainer}>
-					{user?.role === 'ESTABLISHMENT' && (
-						<TouchableOpacity
-							style={[styles.menuButton, styles.establishmentButton]}
-							onPress={() => navigation.navigate('FoodRegistration')}
-						>
-							<Text style={styles.buttonIcon}>🍎</Text>
-							<Text style={styles.buttonText}>Registrar alimento</Text>
-							<Text style={styles.buttonDescription}>
-								Publica alimentos disponibles para la comunidad
-							</Text>
-						</TouchableOpacity>
-					)}
-				</View>
-			</View>
+
+			{/* Contenido en blanco por ahora */}
+			<View style={{ flex: 1, backgroundColor: 'transparent' }} />
+
 			<ProfileModal
 				visible={profileModalVisible}
 				user={user}

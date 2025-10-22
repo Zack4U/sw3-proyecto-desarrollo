@@ -25,6 +25,26 @@ class AuthService {
   }
 
   /**
+   * Registro básico con email y password
+   */
+  async registerBasic(data: {
+    email: string;
+    password: string;
+    confirmPassword: string;
+  }): Promise<AuthResponse> {
+    try {
+      const response = await api.post<AuthResponse>("/auth/register", {
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+      });
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
    * Registrar beneficiario
    */
   async registerBeneficiary(
@@ -76,6 +96,7 @@ class AuthService {
   async loginWithGoogle(data: GoogleAuthData): Promise<AuthResponse> {
     try {
       const response = await api.post<AuthResponse>("/auth/google/login", {
+        token: data.token, // Required by backend DTO
         email: data.email,
         name: data.name,
         picture: data.picture,
@@ -182,9 +203,33 @@ class AuthService {
    * Manejar errores
    */
   private handleError(error: any): Error {
-    if (error instanceof Error) {
-      return error;
+    console.error("Error de respuesta:", error?.response?.data);
+
+    if (error?.response?.data?.message) {
+      // Error del servidor con mensaje
+      return new Error(error.response.data.message);
     }
+
+    if (error?.response?.status) {
+      // Error HTTP sin mensaje específico
+      switch (error.response.status) {
+        case 400:
+          return new Error("Datos inválidos. Verifica la información ingresada.");
+        case 401:
+          return new Error("Credenciales inválidas");
+        case 409:
+          return new Error("El usuario ya existe");
+        case 500:
+          return new Error("Error interno del servidor. Intenta más tarde.");
+        default:
+          return new Error(`Error en la solicitud (${error.response.status})`);
+      }
+    }
+
+    if (error?.message) {
+      return new Error(error.message);
+    }
+
     return new Error("Error desconocido en la autenticación");
   }
 }

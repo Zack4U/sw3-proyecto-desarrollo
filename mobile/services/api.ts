@@ -33,6 +33,10 @@ export const setRefreshFailedCallback = (callback: () => void) => {
 api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     try {
+      console.log(`📤 Request: ${config.method?.toUpperCase()} ${config.url}`);
+      console.log(`📤 Base URL: ${config.baseURL}`);
+      console.log(`📤 Data:`, config.data);
+
       const accessToken = await SecureStore.getItemAsync("accessToken");
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
@@ -43,6 +47,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.error("❌ Request error:", error);
     return Promise.reject(error);
   }
 );
@@ -116,17 +121,26 @@ api.interceptors.response.use(
 
     // Manejar errores generales
     if (error.response) {
-      console.error("Error de respuesta:", error.response.data);
+      console.error("❌ Response error:", {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+      });
       const message =
         (error.response.data as any)?.message || "Error en el servidor";
       throw new Error(message);
     } else if (error.request) {
-      console.error("Error de red:", error.request);
+      console.error("❌ Network error - No response received");
+      console.error("Request config:", {
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        method: error.config?.method,
+      });
       throw new Error(
         "No se pudo conectar con el servidor. Verifica tu conexión."
       );
     } else {
-      console.error("Error:", error.message);
+      console.error("❌ Unknown error:", error.message);
       throw error;
     }
   }
