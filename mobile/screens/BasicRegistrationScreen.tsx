@@ -2,54 +2,45 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Input, FeedbackMessage } from '../components';
-import { styles } from '../styles/LoginScreenStyle';
+import { styles } from '../styles/BasicRegistrationScreenStyle';
 import { useAuth } from '../hooks/useAuth';
-import { RegisterEstablishmentData } from '../types/auth.types';
+import { testBackendConnection } from '../utils/networkDebug';
 
 type RootStackParamList = {
-	Home: undefined;
+	Welcome: undefined;
 	Login: undefined;
+	BasicRegistration: undefined;
+	CompleteProfile: undefined;
 };
 
-type EstablishmentRegistrationScreenProps = {
-	navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
+type Props = {
+	navigation: NativeStackNavigationProp<RootStackParamList, 'BasicRegistration'>;
 };
 
-interface FormErrors {
-	email?: string;
-	establishmentName?: string;
-	password?: string;
-	confirmPassword?: string;
-}
-
-export default function EstablishmentRegistrationScreen({
-	navigation,
-}: Readonly<EstablishmentRegistrationScreenProps>) {
+export default function BasicRegistrationScreen({ navigation }: Readonly<Props>) {
 	const [email, setEmail] = useState('');
-	const [establishmentName, setEstablishmentName] = useState('');
 	const [password, setPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
-	const [errors, setErrors] = useState<FormErrors>({});
-	const { registerEstablishment, isLoading, error, clearError } = useAuth();
+	const [errors, setErrors] = useState<{
+		email?: string;
+		password?: string;
+		confirmPassword?: string;
+	}>({});
+	const { registerBasic, isLoading, error, clearError } = useAuth();
 
-	const validate = (): boolean => {
-		const next: FormErrors = {};
+	const validate = () => {
+		const next: { email?: string; password?: string; confirmPassword?: string } = {};
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-		if (!email) next.email = 'El correo es obligatorio';
-		else if (!emailRegex.test(email)) next.email = 'Correo inválido';
-
-		if (!establishmentName)
-			next.establishmentName = 'El nombre del establecimiento es obligatorio';
-		else if (establishmentName.length < 3)
-			next.establishmentName = 'El nombre debe tener al menos 3 caracteres';
+		if (!email) next.email = 'El correo electrónico es obligatorio';
+		else if (!emailRegex.test(email)) next.email = 'Ingresa un correo válido';
 
 		if (!password) next.password = 'La contraseña es obligatoria';
 		else if (password.length < 8)
 			next.password = 'La contraseña debe tener al menos 8 caracteres';
 
-		if (!confirmPassword) next.confirmPassword = 'Confirma tu contraseña';
-		else if (confirmPassword !== password)
+		if (!confirmPassword) next.confirmPassword = 'Debes confirmar tu contraseña';
+		else if (password !== confirmPassword)
 			next.confirmPassword = 'Las contraseñas no coinciden';
 
 		setErrors(next);
@@ -61,16 +52,22 @@ export default function EstablishmentRegistrationScreen({
 
 		try {
 			clearError();
-			const data: RegisterEstablishmentData = {
-				email,
-				establishmentName,
-				password,
-				confirmPassword,
-			};
-			await registerEstablishment(data);
+
+			// Test de conexión antes de intentar el registro
+			console.log('🔍 Probando conexión con backend...');
+			await testBackendConnection();
+
+			console.log('📝 Intentando registrar usuario...');
+			await registerBasic({ email, password, confirmPassword });
+			// La navegación se maneja automáticamente en App.tsx
 		} catch (e) {
 			console.error('Registration error', e);
 		}
+	};
+
+	const onLoginPress = () => {
+		clearError();
+		navigation.navigate('Login');
 	};
 
 	return (
@@ -78,8 +75,8 @@ export default function EstablishmentRegistrationScreen({
 			<View style={styles.container}>
 				<View style={styles.card}>
 					<View style={styles.header}>
-						<Text style={styles.title}>Registrarse como Establecimiento</Text>
-						<Text style={styles.subtitle}>Crea tu cuenta para compartir alimentos</Text>
+						<Text style={styles.title}>Crear cuenta</Text>
+						<Text style={styles.subtitle}>Ingresa tus datos básicos para comenzar</Text>
 					</View>
 
 					<FeedbackMessage
@@ -100,18 +97,6 @@ export default function EstablishmentRegistrationScreen({
 								clearError();
 							}}
 							error={errors.email}
-							required
-							editable={!isLoading}
-						/>
-						<Input
-							label="Nombre del Establecimiento"
-							autoCapitalize="words"
-							value={establishmentName}
-							onChangeText={(t) => {
-								setEstablishmentName(t);
-								clearError();
-							}}
-							error={errors.establishmentName}
 							required
 							editable={!isLoading}
 						/>
@@ -143,7 +128,7 @@ export default function EstablishmentRegistrationScreen({
 
 					<View style={styles.actions}>
 						<Button
-							title="Registrarse"
+							title="Crear cuenta"
 							onPress={onSubmit}
 							variant="primary"
 							disabled={isLoading}
@@ -153,8 +138,8 @@ export default function EstablishmentRegistrationScreen({
 					<View style={styles.footer}>
 						<Text style={styles.footerText}>
 							¿Ya tienes cuenta?{' '}
-							<Text style={styles.linkText} onPress={() => navigation.navigate('Login')}>
-								Inicia sesión aquí
+							<Text style={styles.linkText} onPress={onLoginPress}>
+								Inicia sesión
 							</Text>
 						</Text>
 					</View>
