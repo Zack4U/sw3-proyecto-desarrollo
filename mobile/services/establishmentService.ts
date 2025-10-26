@@ -135,6 +135,12 @@ const getErrorMessage = (error: unknown): string => {
     return 'Ocurrió un error inesperado. Por favor intenta nuevamente.';
 };
 
+// Tipo para la respuesta paginada
+export interface PaginatedEstablishments {
+    data: EstablishmentResponse[];
+    total: number;
+}
+
 // Servicio para manejar operaciones de establecimientos
 export const establishmentService = {
     // Crear un nuevo establecimiento
@@ -162,10 +168,10 @@ export const establishmentService = {
         }
     },
 
-    // Obtener todos los establecimientos
-    getAll: async (): Promise<EstablishmentResponse[]> => {
+    // Obtener establecimientos paginados
+    getPaginated: async (page = 1, limit = 10): Promise<PaginatedEstablishments> => {
         try {
-            const response = await api.get<EstablishmentResponse[]>('/establishments');
+            const response = await api.get<PaginatedEstablishments>(`/establishments?page=${page}&limit=${limit}`);
             return response.data;
         } catch (error) {
             const errorMessage = getErrorMessage(error);
