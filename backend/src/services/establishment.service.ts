@@ -13,8 +13,28 @@ export class EstablishmentsService {
     });
   }
 
-  async findAll() {
-    return this.prisma.establishment.findMany();
+  async findAll(page?: number, limit?: number) {
+    // Si no hay paginación, devolver todos
+    if (!page || !limit) {
+      const data = await this.prisma.establishment.findMany();
+      return {
+        data,
+        total: data.length,
+      };
+    }
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prisma.establishment.findMany({
+        skip,
+        take: limit,
+        orderBy: { name: 'asc' },
+      }),
+      this.prisma.establishment.count(),
+    ]);
+    return {
+      data,
+      total,
+    };
   }
 
   async findOne(id: string) {
