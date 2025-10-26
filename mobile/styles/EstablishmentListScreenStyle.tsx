@@ -1,3 +1,4 @@
+
 import { StyleSheet } from 'react-native';
 import { Colors, Spacing, GlobalStyles } from './global';
 
@@ -63,5 +64,28 @@ export const styles = StyleSheet.create({
         marginBottom: 8,
         fontWeight: 'bold',
         fontSize: 16,
+    },
+    // Botones de paginación
+    paginationContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginVertical: Spacing.md,
+    },
+    paginationButton: {
+        ...GlobalStyles.buttonPrimary,
+        minWidth: 120,
+        marginHorizontal: 8,
+    },
+    paginationButtonDisabled: {
+        ...GlobalStyles.buttonDisabled,
+    },
+    paginationText: {
+        ...GlobalStyles.buttonTextPrimary,
+    },
+    paginationInfo: {
+        ...GlobalStyles.subtitle,
+        textAlign: 'center',
+        marginBottom: Spacing.sm,
     },
 });
