@@ -12,6 +12,7 @@ import { foodService, FOOD_CATEGORIES, UNIT_OF_MEASURE } from '../services/foodS
 import { styles } from '../styles/FoodRegistrationScreenStyle';
 import { FeedbackMessage } from '../components';
 import { useRequestState } from '../hooks/useRequestState';
+import { useAuth } from '../hooks/useAuth';
 
 type RootStackParamList = {
 	Home: undefined;
@@ -86,6 +87,17 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
 export default function FoodRegistrationScreen({
 	navigation,
 }: Readonly<FoodRegistrationScreenProps>) {
+	// Obtener el usuario autenticado y su establishmentId
+	const { user } = useAuth();
+
+	// Log para depuración
+	console.log('🔍 Usuario autenticado:', {
+		userId: user?.userId,
+		role: user?.role,
+		establishmentId: user?.establishmentId,
+		isActive: user?.isActive,
+	});
+
 	const [formData, setFormData] = useState({
 		name: '',
 		description: '',
@@ -93,10 +105,11 @@ export default function FoodRegistrationScreen({
 		quantity: '',
 		unitOfMeasure: '',
 		expiresAt: '',
-		// TODO: Obtener del contexto de autenticación o selección del usuario
-		// Debe ser un UUID válido de un establecimiento existente
-		establishmentId: '00000000-0000-0000-0000-000000000000', // UUID temporal
+		// Obtener establishmentId del contexto de autenticación
+		establishmentId: user?.establishmentId || '00000000-0000-0000-0000-000000000000',
 	});
+
+	console.log('📝 FormData establishmentId:', formData.establishmentId);
 
 	// Usar el hook personalizado para gestionar el estado de la petición
 	const requestState = useRequestState();
