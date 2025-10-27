@@ -6,6 +6,8 @@ import { SwaggerConfig } from './config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors();
+
   // Configuracion .env
   const PORT = process.env.PORT ?? 3001;
   const API_VERSION = process.env.API_VERSION ?? 'v1';

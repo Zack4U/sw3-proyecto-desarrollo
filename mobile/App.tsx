@@ -12,6 +12,7 @@ import RegisterOptionsScreen from './screens/RegisterOptionsScreen';
 import EstablishmentRegistrationScreen from './screens/EstablishmentRegistrationScreen';
 import BeneficiaryRegistrationScreen from './screens/BeneficiaryRegistrationScreen';
 import FoodRegistrationScreen from './screens/FoodRegistrationScreen';
+import EstablishmentListScreen from './screens/EstablishmentListScreen';
 import SplashScreen from './screens/SplashScreen';
 import CompleteProfileScreen from './screens/CompleteProfileScreen';
 
@@ -25,6 +26,7 @@ export type RootStackParamList = {
 	EstablishmentRegistration: undefined;
 	BeneficiaryRegistration: undefined;
 	FoodRegistration: undefined;
+	EstablishmentList: undefined;
 	CompleteProfile: undefined;
 };
 
@@ -57,48 +59,56 @@ function RootNavigator() {
 				// Stack de la app autenticada
 				<>
 					{/* Si el usuario no completó el perfil (isActive = false), mostrar CompleteProfile */}
-					{user?.isActive ? (
-						<>
-							{user?.role === 'ESTABLISHMENT' ? (
-								<>
-									<Stack.Screen
-										name="Home"
-										component={HomeScreen}
-										options={{
-											title: 'ComiYa',
-											headerShown: false,
-										}}
-									/>
-									<Stack.Screen
-										name="FoodRegistration"
-										component={FoodRegistrationScreen}
-										options={{
-											title: 'Registrar Alimento',
-										}}
-									/>
-								</>
-							) : (
-								<Stack.Screen
-									name="BeneficiaryHome"
-									component={BeneficiaryHomeScreen}
-									options={{
-										title: 'ComiYa',
-										headerShown: false, // usamos header personalizado dentro de la pantalla
-									}}
-								/>
-							)}
-						</>
-					) : (
-						<Stack.Screen
-							name="CompleteProfile"
-							component={CompleteProfileScreen}
-							options={{
-								title: 'Completar Perfil',
-								headerShown: true,
-								gestureEnabled: false, // No permitir swipe back
-							}}
-						/>
-					)}
+					   {user?.isActive ? (
+						   <>
+							   {user?.role === 'ESTABLISHMENT' ? (
+								   <>
+									   <Stack.Screen
+										   name="Home"
+										   component={HomeScreen}
+										   options={{
+											   title: 'ComiYa',
+											   headerShown: false,
+										   }}
+									   />
+									   <Stack.Screen
+										   name="FoodRegistration"
+										   component={FoodRegistrationScreen}
+										   options={{
+											   title: 'Registrar Alimento',
+										   }}
+									   />
+									   <Stack.Screen
+										   name="EstablishmentList"
+										   component={EstablishmentListScreen}
+										   options={{
+											   title: 'Establecimientos',
+											   headerShown: false,
+										   }}
+									   />
+								   </>
+							   ) : (
+								   <Stack.Screen
+									   name="BeneficiaryHome"
+									   component={BeneficiaryHomeScreen}
+									   options={{
+										   title: 'ComiYa',
+										   headerShown: false, // usamos header personalizado dentro de la pantalla
+									   }}
+								   />
+							   )}
+						   </>
+					   ) : (
+						   <Stack.Screen
+							   name="CompleteProfile"
+							   component={CompleteProfileScreen}
+							   options={{
+								   title: 'Completar Perfil',
+								   headerShown: true,
+								   gestureEnabled: false, // No permitir swipe back
+							   }}
+						   />
+					   )}
 				</>
 			) : (
 				// Stack de autenticación

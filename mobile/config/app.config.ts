@@ -7,11 +7,9 @@
 
 export const API_CONFIG = {
   // Cambia esta URL según tu entorno
-  BASE_URL: "http://10.0.2.2:3001/api/v1",
-
-  // Alternativas comunes:
-  // BASE_URL: 'http://localhost:3001/api/v1', // Para web o iOS
-  // BASE_URL: 'http://192.168.1.X:3001', // Para dispositivo físico (reemplaza X con tu IP)
+  BASE_URL: "http://10.0.2.2:3001/api/v1", // Emulador Android
+  // BASE_URL: 'http://localhost:3001/api/v1', // Web o iOS
+  // BASE_URL: 'http://192.168.1.X:3001', // Dispositivo físico (reemplaza X con tu IP)
 
   TIMEOUT: 10000, // 10 segundos
 };

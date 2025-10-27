@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { CreateEstablishmentDto } from 'src/dtos/Establishments/create-establishment.dto';
 import { UpdateEstablishmentDto } from 'src/dtos/Establishments/update-establishment.dto';
@@ -29,15 +29,28 @@ export class EstablishmentsController {
 
   @Get()
   @ApiOperation({
-    summary: 'Get all establishments',
-    description: 'Returns a list of all registered establishments',
+    summary: 'Get all establishments (paginated)',
+    description: 'Returns a paginated list of establishments. Use ?page=1&limit=10 for pagination.',
   })
   @ApiResponse({
     status: 200,
     description: 'List of establishments retrieved successfully',
   })
-  findAll() {
-    return this.establishmentsService.findAll();
+  async findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string
+  ) {
+    // page y limit opcionales, convertir a número si existen
+    const pageNum = page ? parseInt(page, 10) : undefined;
+    const limitNum = limit ? parseInt(limit, 10) : undefined;
+    const result = await this.establishmentsService.findAll(pageNum, limitNum);
+    // Si la respuesta es un array plano (caso legacy), adaptarla
+    if (Array.isArray(result)) {
+      console.log('Paginated establishments result:', result);
+      return { data: result, total: result.length };
+    }
+
+    return result;
   }
 
   @Get(':id')
