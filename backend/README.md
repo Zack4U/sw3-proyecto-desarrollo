@@ -46,12 +46,14 @@ $ npm install
 #### Opción A: Script Automático (Recomendado)
 
 **Windows (PowerShell):**
+
 ```bash
 $ cd scripts/setup_database
 $ ./setup-database.ps1
 ```
 
 **Linux/Mac (Bash):**
+
 ```bash
 $ cd scripts/setup_database
 $ chmod +x setup-database.sh
@@ -71,7 +73,7 @@ $ npm run prisma:generate
 $ npm run prisma:migrate
 
 # 4. Cargar datos de prueba
-$ npm run seed
+$ npm run prisma:seed
 ```
 
 ## 💻 Comandos Disponibles
@@ -150,13 +152,13 @@ $ npm run test:debug
 El proyecto incluye pruebas unitarias completas para los servicios principales:
 
 **Servicios (`src/services/*.spec.ts`):**
+
 - ✅ **EstablishmentsService** (100% cobertura)
   - `create()` - Creación de establecimientos con validación
   - `findAll()` - Obtención de todos los establecimientos
   - `findOne()` - Búsqueda por ID con manejo de casos no encontrados
   - `update()` - Actualización con validación de datos
   - `remove()` - Eliminación con manejo de errores
-  
 - ✅ **FoodsService** (100% cobertura)
   - `create()` - Creación de alimentos con conversión de estados
   - `findAll()` - Listado completo de alimentos
@@ -168,6 +170,7 @@ El proyecto incluye pruebas unitarias completas para los servicios principales:
   - `findByName()` - Búsqueda case-insensitive por nombre
 
 **Características de las pruebas:**
+
 - ✅ Mock completo de PrismaService para pruebas aisladas
 - ✅ Validación de casos de éxito y error
 - ✅ Pruebas de manejo de excepciones
@@ -176,6 +179,7 @@ El proyecto incluye pruebas unitarias completas para los servicios principales:
 - ✅ 30 tests pasando exitosamente
 
 **Métricas de Cobertura:**
+
 ```
 File                          | % Stmts | % Branch | % Funcs | % Lines
 ------------------------------|---------|----------|---------|--------
@@ -201,7 +205,6 @@ Una vez iniciado el servidor:
 - **API REST**: http://localhost:3000
 - **Swagger UI**: http://localhost:3000/api
 - **Prisma Studio**: http://localhost:5555 (después de ejecutar `npx prisma studio`)
-
 
 ## 🗂️ Estructura del Proyecto
 
@@ -344,22 +347,26 @@ src/services/
 Las pruebas cubren los siguientes escenarios:
 
 **✅ Operaciones CRUD:**
+
 - Crear entidades con datos válidos
 - Leer entidades individuales y colecciones
 - Actualizar entidades existentes
 - Eliminar entidades
 
 **✅ Validaciones:**
+
 - Manejo de datos inválidos
 - Validación de DTOs
 - Campos requeridos vs opcionales
 
 **✅ Manejo de Errores:**
+
 - NotFoundException para recursos no encontrados
 - Errores de base de datos
 - Validación de relaciones entre entidades
 
 **✅ Búsquedas Especializadas:**
+
 - Búsqueda de alimentos por establecimiento
 - Búsqueda de alimentos por categoría
 - Búsqueda de alimentos por nombre (case-insensitive)
@@ -401,18 +408,21 @@ npm run test:cov
 ## 🔍 Patrones y Mejores Prácticas
 
 ### DTOs (Data Transfer Objects)
+
 - Validación automática con `class-validator`
 - Documentación con `@ApiProperty` de Swagger
 - Separación entre Create y Update DTOs
 - Readonly properties para inmutabilidad
 
 ### Servicios
+
 - Inyección de dependencias
 - Responsabilidad única
 - Métodos async/await
 - Manejo de errores apropiado
 
 ### Controladores
+
 - Decoradores de NestJS para routing
 - Validación automática de entrada
 - Respuestas HTTP apropiadas

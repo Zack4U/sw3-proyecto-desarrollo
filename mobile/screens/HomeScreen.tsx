@@ -8,6 +8,7 @@ import { ProfileModal } from '../components';
 type RootStackParamList = {
 	Home: undefined;
 	FoodRegistration: undefined;
+	FoodManagement: undefined;
 };
 
 type HomeScreenProps = {
@@ -62,6 +63,18 @@ export default function HomeScreen({ navigation }: Readonly<HomeScreenProps>) {
 							<Text style={styles.buttonText}>Registrar alimento</Text>
 							<Text style={styles.buttonDescription}>
 								Publica alimentos disponibles para la comunidad
+							</Text>
+						</TouchableOpacity>
+					)}
+					{user?.role === 'ESTABLISHMENT' && (
+						<TouchableOpacity
+							style={[styles.menuButton, styles.establishmentButton, { marginTop: 12 }]}
+							onPress={() => navigation.navigate('FoodManagement')}
+						>
+							<Text style={styles.buttonIcon}>✏️</Text>
+							<Text style={styles.buttonText}>Editar alimento</Text>
+							<Text style={styles.buttonDescription}>
+								Actualiza o elimina alimentos ya registrados
 							</Text>
 						</TouchableOpacity>
 					)}
