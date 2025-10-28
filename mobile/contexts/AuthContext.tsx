@@ -290,13 +290,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 			}
 
 			// Token válido, restaurar sesión
-			dispatch({
-				type: 'RESTORE_SESSION',
-				payload: {
-					user: storedAuth.user,
-					accessToken: storedAuth.accessToken,
-				},
-			});
+			// Token válido, reconstruir user desde el token para asegurar fields como establishmentId
+			try {
+				const rebuiltUser = getUserFromToken(
+					storedAuth.accessToken,
+					storedAuth.user.email,
+					storedAuth.user.userId,
+					storedAuth.user.establishmentId
+				);
+				// Persistir el user reconstruido por si difiere (p. ej. establishmentId agregado en token)
+				await saveUser(rebuiltUser);
+				dispatch({
+					type: 'RESTORE_SESSION',
+					payload: {
+						user: rebuiltUser,
+						accessToken: storedAuth.accessToken,
+					},
+				});
+			} catch (err) {
+				console.error('Error reconstruyendo user desde token:', err);
+				// Fallback: restaurar con lo almacenado
+				dispatch({
+					type: 'RESTORE_SESSION',
+					payload: {
+						user: storedAuth.user,
+						accessToken: storedAuth.accessToken,
+					},
+				});
+			}
 
 			return true;
 		} catch (error) {
@@ -624,24 +645,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		validateStoredSession();
 	}, [validateStoredSession]);
 
-	const value: AuthContextType = {
-		user: state.user,
-		isLoading: state.isLoading,
-		isAuthenticated: state.isAuthenticated,
-		isInitializing: state.isInitializing,
-		accessToken: state.accessToken,
-		error: state.error,
-		login,
-		registerBasic,
-		registerBeneficiary,
-		registerEstablishment,
-		loginWithGoogle,
-		completeGoogleProfile,
-		logout,
-		refreshTokens,
-		validateStoredSession,
-		clearError,
-	};
+	const value: AuthContextType = React.useMemo(
+		() => ({
+			user: state.user,
+			isLoading: state.isLoading,
+			isAuthenticated: state.isAuthenticated,
+			isInitializing: state.isInitializing,
+			accessToken: state.accessToken,
+			error: state.error,
+			login,
+			registerBasic,
+			registerBeneficiary,
+			registerEstablishment,
+			loginWithGoogle,
+			completeGoogleProfile,
+			logout,
+			refreshTokens,
+			validateStoredSession,
+			clearError,
+		}),
+		[
+			state.user,
+			state.isLoading,
+			state.isAuthenticated,
+			state.isInitializing,
+			state.accessToken,
+			state.error,
+			login,
+			registerBasic,
+			registerBeneficiary,
+			registerEstablishment,
+			loginWithGoogle,
+			completeGoogleProfile,
+			logout,
+			refreshTokens,
+			validateStoredSession,
+			clearError,
+		]
+	);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

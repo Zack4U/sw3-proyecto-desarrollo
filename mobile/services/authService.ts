@@ -203,24 +203,39 @@ class AuthService {
    * Manejar errores
    */
   private handleError(error: any): Error {
-    console.error("Error de respuesta:", error?.response?.data);
+    // Loguear información completa para debugging
+    console.error('Error de respuesta (raw):', error?.response);
 
-    if (error?.response?.data?.message) {
-      // Error del servidor con mensaje
-      return new Error(error.response.data.message);
+    const respData = error?.response?.data;
+
+    // Si el backend envía un objeto con message y statusCode, construir un mensaje más informativo
+    if (respData && (respData.message || respData.statusCode)) {
+      let msg = respData.message || `Error en la solicitud (${error.response.status})`;
+      if (respData.statusCode) {
+        msg = `${msg} (code=${respData.statusCode})`;
+      }
+      // Incluir detalles adicionales si existen (p. ej. validation errors)
+      if (respData.errors || respData.details) {
+        try {
+          const details = respData.errors || respData.details;
+          msg = `${msg} - ${JSON.stringify(details)}`;
+        } catch (error_) {
+          // ignore stringify errors
+        }
+      }
+      return new Error(msg);
     }
 
     if (error?.response?.status) {
-      // Error HTTP sin mensaje específico
       switch (error.response.status) {
         case 400:
-          return new Error("Datos inválidos. Verifica la información ingresada.");
+          return new Error('Datos inválidos. Verifica la información ingresada.');
         case 401:
-          return new Error("Credenciales inválidas");
+          return new Error('Credenciales inválidas');
         case 409:
-          return new Error("El usuario ya existe");
+          return new Error('El usuario ya existe');
         case 500:
-          return new Error("Error interno del servidor. Intenta más tarde.");
+          return new Error('Error interno del servidor. Intenta más tarde.');
         default:
           return new Error(`Error en la solicitud (${error.response.status})`);
       }
@@ -230,7 +245,7 @@ class AuthService {
       return new Error(error.message);
     }
 
-    return new Error("Error desconocido en la autenticación");
+    return new Error('Error desconocido en la autenticación');
   }
 }
 
