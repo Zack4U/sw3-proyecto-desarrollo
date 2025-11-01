@@ -17,6 +17,7 @@ import FoodEditScreen from './screens/FoodEditScreen';
 import EstablishmentListScreen from './screens/EstablishmentListScreen';
 import SplashScreen from './screens/SplashScreen';
 import CompleteProfileScreen from './screens/CompleteProfileScreen';
+import { NotificationProvider } from './contexts/NotificationContext';
 
 export type RootStackParamList = {
 	Welcome: undefined;
@@ -205,7 +206,9 @@ export default function App() {
 		<AuthProvider>
 			<NavigationContainer>
 				<StatusBar style="auto" />
-				<RootNavigator />
+				<NotificationProvider>
+					<RootNavigator />
+				</NotificationProvider>
 			</NavigationContainer>
 		</AuthProvider>
 	);
