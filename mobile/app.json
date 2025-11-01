@@ -12,6 +12,12 @@
       "backgroundColor": "#2e7d32"
     },
 
+    "notification": {
+      "icon": "./assets/icon.svg",
+      "color": "#ffffff",
+      "androidMode": "default"
+    },
+
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.comiya.app"
