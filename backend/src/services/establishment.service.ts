@@ -43,6 +43,12 @@ export class EstablishmentsService {
     });
   }
 
+  async findByUserId(userId: string) {
+    return this.prisma.establishment.findFirst({
+      where: { userId },
+    });
+  }
+
   async update(id: string, dto: UpdateEstablishmentDto) {
     return this.prisma.establishment.update({
       where: { establishmentId: id },
@@ -104,11 +110,7 @@ export class EstablishmentsService {
     });
   }
 
-  async findByLocation(filters: {
-    departmentId?: string;
-    cityId?: string;
-    neighborhood?: string;
-  }) {
+  async findByLocation(filters: { departmentId?: string; cityId?: string; neighborhood?: string }) {
     const where: any = {};
 
     if (filters.cityId) {

@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EstablishmentsService } from './establishment.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateEstablishmentDto } from '../dtos/Establishments/create-establishment.dto';
-import { UpdateEstablishmentDto } from '../dtos/Establishments/update-establishment.dto';
+import { EstablishmentsService } from '../../src/services/establishment.service';
+import { PrismaService } from '../../src/prisma/prisma.service';
+import { CreateEstablishmentDto } from '../../src/dtos/Establishments/create-establishment.dto';
+import { UpdateEstablishmentDto } from '../../src/dtos/Establishments/update-establishment.dto';
 import { EstablishmentType } from '@prisma/client';
 
 describe('EstablishmentsService', () => {
@@ -14,8 +14,10 @@ describe('EstablishmentsService', () => {
       create: jest.fn(),
       findMany: jest.fn(),
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      count: jest.fn(),
     },
   };
 
@@ -150,7 +152,7 @@ describe('EstablishmentsService', () => {
 
       const result = await service.findAll();
 
-      expect(result).toEqual(establishments);
+      expect(result).toEqual({ data: establishments, total: 1 });
       expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
     });
 
@@ -159,7 +161,7 @@ describe('EstablishmentsService', () => {
 
       const result = await service.findAll();
 
-      expect(result).toEqual([]);
+      expect(result).toEqual({ data: [], total: 0 });
       expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
     });
   });
@@ -184,6 +186,29 @@ describe('EstablishmentsService', () => {
 
       expect(result).toBeNull();
       expect(mockPrismaService.establishment.findUnique).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('findByUserId', () => {
+    it('should return establishment by userId', async () => {
+      mockPrismaService.establishment.findFirst.mockResolvedValue(mockEstablishment);
+
+      const result = await service.findByUserId(mockEstablishment.userId);
+
+      expect(result).toEqual(mockEstablishment);
+      expect(mockPrismaService.establishment.findFirst).toHaveBeenCalledWith({
+        where: { userId: mockEstablishment.userId },
+      });
+      expect(mockPrismaService.establishment.findFirst).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return null if no establishment found for userId', async () => {
+      mockPrismaService.establishment.findFirst.mockResolvedValue(null);
+
+      const result = await service.findByUserId('non-existent-user-id');
+
+      expect(result).toBeNull();
+      expect(mockPrismaService.establishment.findFirst).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -212,9 +237,9 @@ describe('EstablishmentsService', () => {
       const error = new Error('Update failed');
       mockPrismaService.establishment.update.mockRejectedValue(error);
 
-      await expect(
-        service.update(mockEstablishment.establishmentId, updateDto),
-      ).rejects.toThrow('Update failed');
+      await expect(service.update(mockEstablishment.establishmentId, updateDto)).rejects.toThrow(
+        'Update failed',
+      );
       expect(mockPrismaService.establishment.update).toHaveBeenCalledTimes(1);
     });
   });
