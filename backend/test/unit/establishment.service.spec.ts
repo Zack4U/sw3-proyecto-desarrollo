@@ -152,7 +152,7 @@ describe('EstablishmentsService', () => {
 
       const result = await service.findAll();
 
-      expect(result).toEqual(establishments);
+      expect(result).toEqual({ data: establishments, total: 1 });
       expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
     });
 
@@ -161,7 +161,7 @@ describe('EstablishmentsService', () => {
 
       const result = await service.findAll();
 
-      expect(result).toEqual([]);
+      expect(result).toEqual({ data: [], total: 0 });
       expect(mockPrismaService.establishment.findMany).toHaveBeenCalledTimes(1);
     });
   });

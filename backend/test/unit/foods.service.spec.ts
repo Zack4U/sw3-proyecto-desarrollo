@@ -3,7 +3,7 @@ import { FoodsService } from '../../src/services/foods.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { CreateFoodDto } from '../../src/dtos/Foods/create-food.dto';
 import { UpdateFoodDto } from '../../src/dtos/Foods/update-food.dto';
-import { FoodStatus } from '@prisma/client';
+import { FoodStatus, FoodCategory, UnitOfMeasure } from '@prisma/client';
 
 describe('FoodsService', () => {
   let service: FoodsService;
@@ -23,9 +23,9 @@ describe('FoodsService', () => {
     foodId: '123e4567-e89b-12d3-a456-426614174002',
     name: 'Whole Wheat Bread',
     description: 'Fresh whole wheat bread',
-    category: 'Bakery',
+    category: FoodCategory.BAKERY,
     quantity: 10,
-    weightOfUnit: 'units',
+    unitOfMeasure: UnitOfMeasure.UNIT,
     status: FoodStatus.AVAILABLE,
     imageUrl: 'https://example.com/bread.jpg',
     expiresAt: new Date('2025-10-20'),
@@ -64,8 +64,8 @@ describe('FoodsService', () => {
         description: mockFood.description,
         category: mockFood.category,
         quantity: mockFood.quantity,
-        weightOfUnit: mockFood.weightOfUnit,
-        status: 'AVAILABLE',
+        unitOfMeasure: mockFood.unitOfMeasure,
+        status: FoodStatus.AVAILABLE,
         imageUrl: mockFood.imageUrl,
         expiresAt: mockFood.expiresAt,
         establishmentId: mockFood.establishmentId,
@@ -89,7 +89,7 @@ describe('FoodsService', () => {
       const createDto: CreateFoodDto = {
         name: mockFood.name,
         quantity: mockFood.quantity,
-        weightOfUnit: mockFood.weightOfUnit,
+        unitOfMeasure: mockFood.unitOfMeasure,
         expiresAt: mockFood.expiresAt,
         establishmentId: mockFood.establishmentId,
       };
@@ -110,7 +110,7 @@ describe('FoodsService', () => {
       const createDto: CreateFoodDto = {
         name: mockFood.name,
         quantity: mockFood.quantity,
-        weightOfUnit: mockFood.weightOfUnit,
+        unitOfMeasure: mockFood.unitOfMeasure,
         expiresAt: mockFood.expiresAt,
         establishmentId: mockFood.establishmentId,
       };
@@ -172,14 +172,12 @@ describe('FoodsService', () => {
       const updateDto: UpdateFoodDto = {
         name: 'Updated Bread',
         quantity: 15,
-        status: 'RESERVED',
       };
 
       const updatedFood = {
         ...mockFood,
         name: updateDto.name,
         quantity: updateDto.quantity,
-        status: FoodStatus.RESERVED,
       };
       mockPrismaService.food.update.mockResolvedValue(updatedFood);
 
@@ -191,7 +189,6 @@ describe('FoodsService', () => {
         data: {
           name: updateDto.name,
           quantity: updateDto.quantity,
-          status: FoodStatus.RESERVED,
         },
       });
       expect(mockPrismaService.food.update).toHaveBeenCalledTimes(1);
@@ -201,13 +198,13 @@ describe('FoodsService', () => {
       const updateDto: UpdateFoodDto = {
         name: 'Updated Bread',
         establishmentId: 'new-establishment-id',
-        status: FoodStatus.RESERVED,
+        status: FoodStatus.DELIVERED,
       };
 
       const updatedFood = {
         ...mockFood,
         name: updateDto.name,
-        status: FoodStatus.RESERVED,
+        status: FoodStatus.DELIVERED,
       };
 
       mockPrismaService.food.update.mockResolvedValue(updatedFood);
@@ -218,7 +215,7 @@ describe('FoodsService', () => {
         where: { foodId: mockFood.foodId },
         data: {
           name: updateDto.name,
-          status: FoodStatus.RESERVED,
+          status: FoodStatus.DELIVERED,
         },
       });
     });
@@ -284,11 +281,11 @@ describe('FoodsService', () => {
       const foods = [mockFood];
       mockPrismaService.food.findMany.mockResolvedValue(foods);
 
-      const result = await service.findByCategory('Bakery');
+      const result = await service.findByCategory(FoodCategory.BAKERY);
 
       expect(result).toEqual(foods);
       expect(mockPrismaService.food.findMany).toHaveBeenCalledWith({
-        where: { category: 'Bakery' },
+        where: { category: FoodCategory.BAKERY },
       });
       expect(mockPrismaService.food.findMany).toHaveBeenCalledTimes(1);
     });
@@ -296,7 +293,7 @@ describe('FoodsService', () => {
     it('should return an empty array if no foods found for category', async () => {
       mockPrismaService.food.findMany.mockResolvedValue([]);
 
-      const result = await service.findByCategory('NonExistent');
+      const result = await service.findByCategory(FoodCategory.FRUITS);
 
       expect(result).toEqual([]);
       expect(mockPrismaService.food.findMany).toHaveBeenCalledTimes(1);

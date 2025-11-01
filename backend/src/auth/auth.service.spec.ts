@@ -22,6 +22,9 @@ describe('AuthService', () => {
       create: jest.fn(),
       update: jest.fn(),
     },
+    establishment: {
+      findFirst: jest.fn(),
+    },
   };
 
   const mockJwtService = {

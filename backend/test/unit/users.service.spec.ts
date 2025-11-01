@@ -118,8 +118,8 @@ describe('UsersService', () => {
         phone: '+9876543210',
       };
 
-      mockPrismaService.user.findUnique.mockResolvedValueOnce(null);
-      mockPrismaService.user.findFirst.mockResolvedValueOnce(null);
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockPrismaService.user.findFirst.mockResolvedValue(null);
       mockPrismaService.user.update.mockResolvedValue({
         ...mockUser,
         ...updateDto,
@@ -144,7 +144,7 @@ describe('UsersService', () => {
         email: 'existing@example.com',
       };
 
-      mockPrismaService.user.findUnique.mockResolvedValueOnce(existingUser);
+      mockPrismaService.user.findUnique.mockResolvedValue(existingUser);
 
       await expect(service.update(mockUser.userId, updateDto)).rejects.toThrow(
         'Email already in use',
@@ -161,12 +161,19 @@ describe('UsersService', () => {
         documentNumber: '87654321',
       };
 
-      mockPrismaService.user.findUnique.mockResolvedValueOnce(null);
-      mockPrismaService.user.findFirst.mockResolvedValueOnce(existingUser);
+      mockPrismaService.user.findFirst.mockResolvedValue(existingUser);
 
       await expect(service.update(mockUser.userId, updateDto)).rejects.toThrow(
         'Document number already in use',
       );
+
+      expect(mockPrismaService.user.findFirst).toHaveBeenCalledWith({
+        where: {
+          documentNumber: '87654321',
+          userId: { not: mockUser.userId },
+        },
+      });
+      expect(mockPrismaService.user.update).not.toHaveBeenCalled();
     });
 
     it('should allow updating email for the same user', async () => {
@@ -179,8 +186,8 @@ describe('UsersService', () => {
         email: 'sameuser@example.com',
       };
 
-      mockPrismaService.user.findUnique.mockResolvedValueOnce(sameUser);
-      mockPrismaService.user.findFirst.mockResolvedValueOnce(null);
+      mockPrismaService.user.findUnique.mockResolvedValue(sameUser);
+      mockPrismaService.user.findFirst.mockResolvedValue(null);
       mockPrismaService.user.update.mockResolvedValue({
         ...mockUser,
         ...updateDto,
@@ -199,8 +206,8 @@ describe('UsersService', () => {
         phone: '+1111111111',
       };
 
-      mockPrismaService.user.findUnique.mockResolvedValueOnce(null);
-      mockPrismaService.user.findFirst.mockResolvedValueOnce(null);
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockPrismaService.user.findFirst.mockResolvedValue(null);
       mockPrismaService.user.update.mockResolvedValue({
         ...mockUser,
         phone: '+1111111111',
