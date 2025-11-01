@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FoodsService } from './foods.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateFoodDto } from '../dtos/Foods/create-food.dto';
-import { UpdateFoodDto } from '../dtos/Foods/update-food.dto';
+import { FoodsService } from '../../src/services/foods.service';
+import { PrismaService } from '../../src/prisma/prisma.service';
+import { CreateFoodDto } from '../../src/dtos/Foods/create-food.dto';
+import { UpdateFoodDto } from '../../src/dtos/Foods/update-food.dto';
 import { FoodStatus } from '@prisma/client';
 
 describe('FoodsService', () => {
@@ -228,9 +228,7 @@ describe('FoodsService', () => {
       const error = new Error('Update failed');
       mockPrismaService.food.update.mockRejectedValue(error);
 
-      await expect(service.update(mockFood.foodId, updateDto)).rejects.toThrow(
-        'Update failed',
-      );
+      await expect(service.update(mockFood.foodId, updateDto)).rejects.toThrow('Update failed');
       expect(mockPrismaService.food.update).toHaveBeenCalledTimes(1);
     });
   });
