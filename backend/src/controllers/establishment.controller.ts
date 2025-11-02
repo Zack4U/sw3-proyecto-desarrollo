@@ -1,5 +1,15 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { CreateEstablishmentDto } from 'src/dtos/Establishments/create-establishment.dto';
 import { UpdateEstablishmentDto } from 'src/dtos/Establishments/update-establishment.dto';
 import { EstablishmentsService } from 'src/services/establishment.service';
@@ -36,10 +46,7 @@ export class EstablishmentsController {
     status: 200,
     description: 'List of establishments retrieved successfully',
   })
-  async findAll(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string
-  ) {
+  async findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
     // page y limit opcionales, convertir a número si existen
     const pageNum = page ? parseInt(page, 10) : undefined;
     const limitNum = limit ? parseInt(limit, 10) : undefined;
@@ -51,6 +58,59 @@ export class EstablishmentsController {
     }
 
     return result;
+  }
+
+  @Get('available/food')
+  @ApiOperation({
+    summary: 'Get all establishments with available food count',
+    description:
+      'Returns establishments with their count of available food. Supports optional filters for pagination, city, department, and establishment type.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of establishments with available food count retrieved successfully',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for pagination',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of items per page',
+  })
+  @ApiQuery({ name: 'cityId', required: false, type: String, description: 'Filter by city ID' })
+  @ApiQuery({
+    name: 'departmentId',
+    required: false,
+    type: String,
+    description: 'Filter by department ID',
+  })
+  @ApiQuery({
+    name: 'establishmentType',
+    required: false,
+    type: String,
+    description: 'Filter by establishment type',
+  })
+  async findAllWithAvailableFood(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('cityId') cityId?: string,
+    @Query('departmentId') departmentId?: string,
+    @Query('establishmentType') establishmentType?: string,
+  ) {
+    const filters = {
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+      cityId,
+      departmentId,
+      establishmentType,
+    };
+
+    return this.establishmentsService.findAllWithAvailableFood(filters);
   }
 
   @Get(':id')
