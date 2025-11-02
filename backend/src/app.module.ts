@@ -13,6 +13,8 @@ import { CitiesController } from './controllers/city.controller';
 import { CitiesService } from './services/city.service';
 import { UsersService } from './services/users.service';
 import { UsersController } from './controllers/users.controller';
+import { GeolocationService } from './services/geolocation.service';
+import { GeolocationController } from './controllers/geolocation.controller';
 
 @Module({
   imports: [AuthModule],
@@ -23,6 +25,7 @@ import { UsersController } from './controllers/users.controller';
     DepartmentsController,
     CitiesController,
     UsersController,
+    GeolocationController,
   ],
   providers: [
     AppService,
@@ -32,6 +35,7 @@ import { UsersController } from './controllers/users.controller';
     DepartmentsService,
     CitiesService,
     UsersService,
+    GeolocationService,
   ],
 })
 export class AppModule {}

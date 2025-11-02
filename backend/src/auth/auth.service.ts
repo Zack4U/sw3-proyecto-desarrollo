@@ -27,7 +27,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   /**
    * Validar usuario por identifier (username, email o documentNumber) y contraseña
@@ -508,7 +508,7 @@ export class AuthService {
    * Actualiza los datos del usuario y establece isActive = true
    *
    * FLUJO COMPLETO:
-   * 1. Usuario hace login con Google (POST /auth/google/login) O 
+   * 1. Usuario hace login con Google (POST /auth/google/login) O
    *    Usuario crea cuenta básica (POST /auth/register)
    *    - Se crea usuario con isActive = false
    *    - Se retornan tokens de acceso y refresh
@@ -647,7 +647,12 @@ export class AuthService {
             establishmentType: (completeProfileDto.establishmentType as any) || null,
             userId,
             cityId: completeProfileDto.cityId,
-            location: { type: 'Point', coordinates: [] }, // Formato GeoJSON válido pero vacío
+            location: completeProfileDto.location
+              ? {
+                  type: completeProfileDto.location.type,
+                  coordinates: completeProfileDto.location.coordinates,
+                }
+              : { type: 'Point', coordinates: [] }, // Formato GeoJSON válido pero vacío si no se proporciona
           },
         });
       } catch (error: any) {
