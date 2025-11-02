@@ -142,4 +142,71 @@ export class EstablishmentsService {
       },
     });
   }
+
+  async findAllWithAvailableFood(filters?: {
+    page?: number;
+    limit?: number;
+    cityId?: string;
+    departmentId?: string;
+    establishmentType?: string;
+  }) {
+    const where: any = {};
+
+    // Aplicar filtros opcionales
+    if (filters?.cityId) {
+      where.cityId = filters.cityId;
+    } else if (filters?.departmentId) {
+      where.city = {
+        departmentId: filters.departmentId,
+      };
+    }
+
+    if (filters?.establishmentType) {
+      where.establishmentType = filters.establishmentType;
+    }
+
+    // Calcular paginación si se proporciona
+    const skip = filters?.page && filters?.limit ? (filters.page - 1) * filters.limit : undefined;
+    const take = filters?.limit;
+
+    // Obtener establecimientos con conteo de comida disponible
+    const establishments = await this.prisma.establishment.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { name: 'asc' },
+      include: {
+        foods: {
+          where: {
+            status: 'AVAILABLE',
+            expiresAt: {
+              gt: new Date(), // Mayor que la fecha actual
+            },
+          },
+        },
+      },
+    });
+
+    // Obtener el total de establecimientos (sin paginación)
+    const total = await this.prisma.establishment.count({ where });
+
+    // Contar la comida disponible para cada establecimiento
+    const establishmentsWithCount = establishments.map((establishment) => {
+      const foodAvailable = establishment.foods?.length || 0;
+      const { foods, ...establishmentData } = establishment;
+      return {
+        ...establishmentData,
+        foodAvailable,
+      };
+    });
+
+    // Calcular el total de comida disponible en todos los establecimientos
+    const totalAvailable = establishmentsWithCount.reduce((sum, est) => sum + est.foodAvailable, 0);
+
+    return {
+      totalAvailable,
+      total,
+      establishments: establishmentsWithCount,
+    };
+  }
 }
