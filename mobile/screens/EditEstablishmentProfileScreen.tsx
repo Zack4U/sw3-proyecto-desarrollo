@@ -14,12 +14,14 @@ import {
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAuth } from "../hooks/useAuth";
 import { useRequestState } from "../hooks/useRequestState";
+import { useAddressVerification } from "../hooks/useAddressVerification";
 import {
   profileService,
   EstablishmentProfile,
   UserProfile,
 } from "../services/profileService";
-import { FeedbackMessage } from "../components";
+import { locationService } from "../services/locationService";
+import { FeedbackMessage, AddressVerificationModal } from "../components";
 import { styles } from "../styles/EditEstablishmentProfileScreenStyle";
 import {
   getEstablishmentTypeOptions,
@@ -60,6 +62,7 @@ export default function EditEstablishmentProfileScreen({
     address: "",
     neighborhood: "",
     establishmentType: "",
+    cityId: "",
   });
 
   // Campos editables
@@ -73,14 +76,31 @@ export default function EditEstablishmentProfileScreen({
     address: "",
     neighborhood: "",
     establishmentType: "",
+    cityId: "",
   });
 
   // Estado para el modal del picker
   const [showEstablishmentTypePicker, setShowEstablishmentTypePicker] =
     useState(false);
+  const [showAddressVerification, setShowAddressVerification] = useState(false);
+  const [verifiedLocation, setVerifiedLocation] = useState<any>(null);
+  const [cityName, setCityName] = useState("");
+
+  // Estados para los modales de ciudad y departamento
+  const [showCityModal, setShowCityModal] = useState(false);
+  const [showDepartmentModal, setShowDepartmentModal] = useState(false);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [cities, setCities] = useState<any[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [loadingDepartments, setLoadingDepartments] = useState(false);
+
+  // Hooks
+  const addressVerification = useAddressVerification();
 
   useEffect(() => {
     loadProfile();
+    loadDepartments();
   }, []);
 
   const loadProfile = async () => {
@@ -106,6 +126,7 @@ export default function EditEstablishmentProfileScreen({
           address: data.establishment.address || "",
           neighborhood: data.establishment.neighborhood || "",
           establishmentType: data.establishment.establishmentType || "",
+          cityId: data.establishment.cityId || "",
         };
         console.log("💾 initialData:", initialData);
 
@@ -113,6 +134,12 @@ export default function EditEstablishmentProfileScreen({
         setEstablishment(data.establishment);
         setFormData(initialData);
         setOriginalData(initialData);
+
+        // Cargar el nombre de la ciudad si existe cityId
+        if (data.establishment.cityId) {
+          loadCityName(data.establishment.cityId);
+        }
+
         console.log("✅ Estados actualizados correctamente");
       } else {
         console.warn("⚠️ No establishment encontrado en la respuesta");
@@ -124,6 +151,66 @@ export default function EditEstablishmentProfileScreen({
       console.error("❌ Error en loadProfile:", errorMsg);
       requestState.setError(errorMsg);
       setLoading(false);
+    }
+  };
+
+  const loadDepartments = async () => {
+    try {
+      setLoadingDepartments(true);
+      const data = await locationService.getDepartments();
+      setDepartments(data);
+    } catch (error) {
+      console.error("Error loading departments:", error);
+    } finally {
+      setLoadingDepartments(false);
+    }
+  };
+
+  const loadCitiesByDepartment = async (department: any) => {
+    try {
+      setLoadingCities(true);
+      setSelectedDepartment(department);
+      const data = await locationService.getCitiesByDepartment(
+        department.departmentId
+      );
+      setCities(data);
+    } catch (error) {
+      console.error("Error loading cities:", error);
+    } finally {
+      setLoadingCities(false);
+    }
+  };
+
+  const loadCityName = async (cityId: string) => {
+    try {
+      // Necesitamos obtener primero todos los departamentos para buscar la ciudad
+      const depts = await locationService.getDepartments();
+      for (const dept of depts) {
+        const citiesList = await locationService.getCitiesByDepartment(
+          dept.departmentId
+        );
+        const city = citiesList.find((c) => c.cityId === cityId);
+        if (city) {
+          setCityName(city.name);
+          // También guardar el departamento para el selector
+          setSelectedDepartment(dept);
+          break;
+        }
+      }
+    } catch (error) {
+      console.error("Error loading city name:", error);
+      setCityName("Ciudad desconocida");
+    }
+  };
+
+  const handleSelectCity = (city: any) => {
+    setFormData((prev) => ({ ...prev, cityId: city.cityId }));
+    setCityName(city.name);
+    setShowCityModal(false);
+
+    // Limpiar error si existe
+    if (requestState.error || requestState.success) {
+      requestState.reset();
     }
   };
 
@@ -163,7 +250,8 @@ export default function EditEstablishmentProfileScreen({
       hasChanges("description") ||
       hasChanges("address") ||
       hasChanges("neighborhood") ||
-      hasChanges("establishmentType")
+      hasChanges("establishmentType") ||
+      hasChanges("cityId")
     );
   };
 
@@ -190,6 +278,24 @@ export default function EditEstablishmentProfileScreen({
     }
 
     return true;
+  };
+
+  const handleAddressVerified = (data: {
+    latitude: number;
+    longitude: number;
+    address: string;
+    location: {
+      type: "Point";
+      coordinates: [number, number];
+    };
+  }) => {
+    console.log("📍 [EDIT_PROFILE] Address verified with location:", data);
+    setVerifiedLocation(data);
+    setFormData((prev) => ({
+      ...prev,
+      address: data.address,
+    }));
+    setShowAddressVerification(false);
   };
 
   const handleSaveUserChanges = async () => {
@@ -269,6 +375,18 @@ export default function EditEstablishmentProfileScreen({
       if (formData.establishmentType) {
         updateData.establishmentType = formData.establishmentType;
       }
+      if (formData.cityId) {
+        updateData.cityId = formData.cityId;
+      }
+
+      // Agregar ubicación verificada si existe
+      if (verifiedLocation) {
+        updateData.location = verifiedLocation.location;
+        console.log(
+          "📍 [EDIT_PROFILE] Including verified location:",
+          verifiedLocation
+        );
+      }
 
       console.log("📤 Enviando updateData:", updateData);
       await profileService.updateEstablishmentProfile(updateData);
@@ -281,6 +399,7 @@ export default function EditEstablishmentProfileScreen({
         newOriginal.address = formData.address;
         newOriginal.neighborhood = formData.neighborhood;
         newOriginal.establishmentType = formData.establishmentType;
+        newOriginal.cityId = formData.cityId;
         setOriginalData(newOriginal);
         requestState.reset();
       }, 1500);
@@ -487,6 +606,54 @@ export default function EditEstablishmentProfileScreen({
             {hasChanges("address") && (
               <Text style={styles.modifiedBadge}>● MODIFICADO</Text>
             )}
+
+            {/* Botón para verificar dirección con Google Maps */}
+            <TouchableOpacity
+              onPress={() => setShowAddressVerification(true)}
+              disabled={!formData.address.trim() || requestState.loading}
+              style={{
+                backgroundColor: verifiedLocation ? "#4caf50" : "#2196f3",
+                paddingVertical: 10,
+                paddingHorizontal: 12,
+                borderRadius: 8,
+                marginTop: 8,
+                opacity:
+                  !formData.address.trim() || requestState.loading ? 0.6 : 1,
+              }}
+            >
+              <Text
+                style={{
+                  color: "#fff",
+                  textAlign: "center",
+                  fontWeight: "600",
+                  fontSize: 13,
+                }}
+              >
+                {verifiedLocation
+                  ? "✓ Dirección verificada"
+                  : "📍 Verificar dirección"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Ciudad *</Text>
+            <TouchableOpacity
+              style={[
+                styles.input,
+                hasChanges("cityId") && styles.inputModified,
+                { justifyContent: "center" },
+              ]}
+              onPress={() => setShowDepartmentModal(true)}
+              disabled={requestState.loading}
+            >
+              <Text style={{ color: cityName ? "#333" : "#999", fontSize: 14 }}>
+                {cityName || "Selecciona una ciudad"}
+              </Text>
+            </TouchableOpacity>
+            {hasChanges("cityId") && (
+              <Text style={styles.modifiedBadge}>● MODIFICADO</Text>
+            )}
           </View>
 
           <View style={styles.row}>
@@ -608,6 +775,148 @@ export default function EditEstablishmentProfileScreen({
           </View>
         </View>
       </Modal>
+
+      {/* Modal de Selección de Departamento */}
+      <Modal
+        visible={showDepartmentModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowDepartmentModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Selecciona un Departamento</Text>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => setShowDepartmentModal(false)}
+              >
+                <Text style={styles.modalCloseText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            {loadingDepartments ? (
+              <ActivityIndicator
+                size="large"
+                color="#2e7d32"
+                style={{ marginVertical: 20 }}
+              />
+            ) : (
+              <ScrollView style={styles.modalOptions}>
+                {departments.map((dept) => (
+                  <TouchableOpacity
+                    key={dept.departmentId}
+                    style={[
+                      styles.modalOption,
+                      selectedDepartment?.departmentId === dept.departmentId &&
+                        styles.modalOptionSelected,
+                    ]}
+                    onPress={() => {
+                      loadCitiesByDepartment(dept);
+                      setShowDepartmentModal(false);
+                      setShowCityModal(true);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.modalOptionText,
+                        selectedDepartment?.departmentId ===
+                          dept.departmentId && styles.modalOptionSelectedText,
+                      ]}
+                    >
+                      {dept.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de Selección de Ciudad */}
+      <Modal
+        visible={showCityModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCityModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                Selecciona una Ciudad
+                {selectedDepartment && ` - ${selectedDepartment.name}`}
+              </Text>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => setShowCityModal(false)}
+              >
+                <Text style={styles.modalCloseText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            {loadingCities ? (
+              <ActivityIndicator
+                size="large"
+                color="#2e7d32"
+                style={{ marginVertical: 20 }}
+              />
+            ) : (
+              <>
+                <ScrollView style={styles.modalOptions}>
+                  {cities.map((city) => (
+                    <TouchableOpacity
+                      key={city.cityId}
+                      style={[
+                        styles.modalOption,
+                        formData.cityId === city.cityId &&
+                          styles.modalOptionSelected,
+                      ]}
+                      onPress={() => handleSelectCity(city)}
+                    >
+                      <Text
+                        style={[
+                          styles.modalOptionText,
+                          formData.cityId === city.cityId &&
+                            styles.modalOptionSelectedText,
+                        ]}
+                      >
+                        {city.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+                <TouchableOpacity
+                  style={{
+                    padding: 15,
+                    backgroundColor: "#f5f5f5",
+                    borderTopWidth: 1,
+                    borderTopColor: "#ddd",
+                  }}
+                  onPress={() => {
+                    setShowCityModal(false);
+                    setShowDepartmentModal(true);
+                  }}
+                >
+                  <Text style={{ textAlign: "center", color: "#2e7d32" }}>
+                    ← Volver a Departamentos
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de verificación de dirección */}
+      <AddressVerificationModal
+        visible={showAddressVerification}
+        address={formData.address}
+        city={cityName || "Bogotá"}
+        onConfirm={handleAddressVerified}
+        onCancel={() => setShowAddressVerification(false)}
+      />
     </KeyboardAvoidingView>
   );
 }

@@ -42,6 +42,11 @@ export interface UpdateEstablishmentProfileData {
   address?: string;
   neighborhood?: string;
   establishmentType?: string;
+  cityId?: string;
+  location?: {
+    type: "Point";
+    coordinates: [number, number];
+  };
 }
 
 const profileService = {
