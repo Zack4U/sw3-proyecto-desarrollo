@@ -5,7 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class EstablishmentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(dto: CreateEstablishmentDto) {
     return this.prisma.establishment.create({
@@ -138,6 +138,39 @@ export class EstablishmentsService {
       orderBy: {
         name: 'asc',
       },
+    });
+  }
+
+  async searchEstablishments(filters: {
+    city?: string;
+    neighborhood?: string;
+    department?: string;
+  }) {
+    const where: any = {};
+
+    if (filters.city) {
+      where.city = {
+        name: { contains: filters.city, mode: 'insensitive' },
+      };
+    }
+
+    if (filters.neighborhood) {
+      where.neighborhood = { contains: filters.neighborhood, mode: 'insensitive' };
+    }
+
+    if (filters.department) {
+      where.city = {
+        ...where.city,
+        department: {
+          name: { contains: filters.department, mode: 'insensitive' },
+        },
+      };
+    }
+
+    return this.prisma.establishment.findMany({
+      where,
+      include: { city: { include: { department: true } } },
+      orderBy: { name: 'asc' },
     });
   }
 }

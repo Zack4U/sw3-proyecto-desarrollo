@@ -214,4 +214,14 @@ export const establishmentService = {
             throw new Error(errorMessage);
         }
     },
+    searchEstablishments: async (params: { city?: string; neighborhood?: string; department?: string }) => {
+        try {
+            const response = await api.get('/establishments/search', { params });
+            return response.data;
+        } catch (error) {
+            const errorMessage = getErrorMessage(error);
+            console.error('Error al buscar establecimientos:', errorMessage);
+            throw new Error(errorMessage);
+        }
+    },
 };
