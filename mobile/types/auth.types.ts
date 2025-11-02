@@ -78,6 +78,10 @@ export interface CompleteProfileDataEstablishment {
   cityId: string;
   description?: string;
   establishmentType?: string;
+  location?: {
+    type: "Point";
+    coordinates: [number, number];
+  };
 }
 
 export type CompleteProfileData =

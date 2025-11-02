@@ -1,5 +1,35 @@
-import { IsNotEmpty, IsString, IsEnum, IsOptional } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsEnum,
+  IsOptional,
+  ValidateNested,
+  IsArray,
+  IsNumber,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+
+/**
+ * DTO para la ubicación GeoJSON Point
+ */
+class GeoJSONPoint {
+  @ApiProperty({
+    description: 'Type of GeoJSON geometry',
+    example: 'Point',
+  })
+  @IsString()
+  type: 'Point';
+
+  @ApiProperty({
+    description: 'Coordinates [longitude, latitude]',
+    example: [-74.0721, 4.711],
+    type: [Number],
+  })
+  @IsArray()
+  @IsNumber({}, { each: true })
+  coordinates: [number, number];
+}
 
 /**
  * DTO para completar el perfil de un usuario después de Google login
@@ -117,36 +147,118 @@ export class CompleteProfileDto {
   @ApiProperty({
     description: 'Establishment type',
     enum: [
-      'RESTAURANT', 'COFFEE_SHOP', 'BAR', 'NIGHTCLUB', 'BAKERY',
-      'SUPERMARKET', 'GROCERY_STORE', 'FRUIT_SHOP', 'BUTCHER_SHOP', 'FOOD_TRUCK',
-      'HOTEL', 'HOSTEL', 'MOTEL', 'APART_HOTEL',
-      'CLOTHING_STORE', 'SHOE_STORE', 'JEWELRY_STORE', 'BOOKSTORE', 'STATIONERY_STORE',
-      'TOY_STORE', 'ELECTRONICS_STORE', 'SPORTS_STORE', 'PHARMACY', 'HARDWARE_STORE',
-      'PET_STORE', 'NURSERY',
-      'HAIR_SALON', 'BARBER_SHOP', 'BEAUTY_CENTER', 'SPA', 'GYM', 'LAUNDRY',
-      'AUTO_REPAIR_SHOP', 'MEDICAL_OFFICE', 'DENTAL_OFFICE', 'VETERINARY',
-      'CORPORATE_OFFICE', 'EDUCATIONAL_CENTER',
-      'CINEMA', 'THEATER', 'MUSEUM', 'ART_GALLERY', 'EVENT_CENTER',
-      'AMUSEMENT_PARK', 'BOWLING_ALLEY',
-      'SHOPPING_MALL', 'PARKING', 'OTHER'
+      'RESTAURANT',
+      'COFFEE_SHOP',
+      'BAR',
+      'NIGHTCLUB',
+      'BAKERY',
+      'SUPERMARKET',
+      'GROCERY_STORE',
+      'FRUIT_SHOP',
+      'BUTCHER_SHOP',
+      'FOOD_TRUCK',
+      'HOTEL',
+      'HOSTEL',
+      'MOTEL',
+      'APART_HOTEL',
+      'CLOTHING_STORE',
+      'SHOE_STORE',
+      'JEWELRY_STORE',
+      'BOOKSTORE',
+      'STATIONERY_STORE',
+      'TOY_STORE',
+      'ELECTRONICS_STORE',
+      'SPORTS_STORE',
+      'PHARMACY',
+      'HARDWARE_STORE',
+      'PET_STORE',
+      'NURSERY',
+      'HAIR_SALON',
+      'BARBER_SHOP',
+      'BEAUTY_CENTER',
+      'SPA',
+      'GYM',
+      'LAUNDRY',
+      'AUTO_REPAIR_SHOP',
+      'MEDICAL_OFFICE',
+      'DENTAL_OFFICE',
+      'VETERINARY',
+      'CORPORATE_OFFICE',
+      'EDUCATIONAL_CENTER',
+      'CINEMA',
+      'THEATER',
+      'MUSEUM',
+      'ART_GALLERY',
+      'EVENT_CENTER',
+      'AMUSEMENT_PARK',
+      'BOWLING_ALLEY',
+      'SHOPPING_MALL',
+      'PARKING',
+      'OTHER',
     ],
     example: 'RESTAURANT',
     required: false,
   })
   @IsOptional()
   @IsEnum([
-    'RESTAURANT', 'COFFEE_SHOP', 'BAR', 'NIGHTCLUB', 'BAKERY',
-    'SUPERMARKET', 'GROCERY_STORE', 'FRUIT_SHOP', 'BUTCHER_SHOP', 'FOOD_TRUCK',
-    'HOTEL', 'HOSTEL', 'MOTEL', 'APART_HOTEL',
-    'CLOTHING_STORE', 'SHOE_STORE', 'JEWELRY_STORE', 'BOOKSTORE', 'STATIONERY_STORE',
-    'TOY_STORE', 'ELECTRONICS_STORE', 'SPORTS_STORE', 'PHARMACY', 'HARDWARE_STORE',
-    'PET_STORE', 'NURSERY',
-    'HAIR_SALON', 'BARBER_SHOP', 'BEAUTY_CENTER', 'SPA', 'GYM', 'LAUNDRY',
-    'AUTO_REPAIR_SHOP', 'MEDICAL_OFFICE', 'DENTAL_OFFICE', 'VETERINARY',
-    'CORPORATE_OFFICE', 'EDUCATIONAL_CENTER',
-    'CINEMA', 'THEATER', 'MUSEUM', 'ART_GALLERY', 'EVENT_CENTER',
-    'AMUSEMENT_PARK', 'BOWLING_ALLEY',
-    'SHOPPING_MALL', 'PARKING', 'OTHER'
+    'RESTAURANT',
+    'COFFEE_SHOP',
+    'BAR',
+    'NIGHTCLUB',
+    'BAKERY',
+    'SUPERMARKET',
+    'GROCERY_STORE',
+    'FRUIT_SHOP',
+    'BUTCHER_SHOP',
+    'FOOD_TRUCK',
+    'HOTEL',
+    'HOSTEL',
+    'MOTEL',
+    'APART_HOTEL',
+    'CLOTHING_STORE',
+    'SHOE_STORE',
+    'JEWELRY_STORE',
+    'BOOKSTORE',
+    'STATIONERY_STORE',
+    'TOY_STORE',
+    'ELECTRONICS_STORE',
+    'SPORTS_STORE',
+    'PHARMACY',
+    'HARDWARE_STORE',
+    'PET_STORE',
+    'NURSERY',
+    'HAIR_SALON',
+    'BARBER_SHOP',
+    'BEAUTY_CENTER',
+    'SPA',
+    'GYM',
+    'LAUNDRY',
+    'AUTO_REPAIR_SHOP',
+    'MEDICAL_OFFICE',
+    'DENTAL_OFFICE',
+    'VETERINARY',
+    'CORPORATE_OFFICE',
+    'EDUCATIONAL_CENTER',
+    'CINEMA',
+    'THEATER',
+    'MUSEUM',
+    'ART_GALLERY',
+    'EVENT_CENTER',
+    'AMUSEMENT_PARK',
+    'BOWLING_ALLEY',
+    'SHOPPING_MALL',
+    'PARKING',
+    'OTHER',
   ])
   establishmentType?: string;
+
+  @ApiProperty({
+    description: 'Geographic location as GeoJSON Point (for establishment)',
+    example: { type: 'Point', coordinates: [-74.0721, 4.711] },
+    required: false,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => GeoJSONPoint)
+  location?: GeoJSONPoint;
 }
