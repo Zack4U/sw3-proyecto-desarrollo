@@ -83,6 +83,10 @@ export const styles = StyleSheet.create({
   markerCallout: {
     minWidth: 200,
     padding: Spacing.sm,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   markerTitle: {
     fontSize: FontSizes.lg,
