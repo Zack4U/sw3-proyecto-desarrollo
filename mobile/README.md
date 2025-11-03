@@ -7,8 +7,49 @@ Aplicación móvil de **ComiYa** desarrollada con React Native y Expo. Esta app 
 - **Node.js** (v16 o superior)
 - **npm** o **yarn**
 - **Expo Go** (app móvil para pruebas)
+- **Google Maps API Key** (para funcionalidad de mapas)
 
-### 1. Instalar dependencias
+## ⚙️ Configuración Inicial
+
+### 1. Configurar app.json
+
+El archivo `app.json` contiene la configuración de Expo y las API keys necesarias. Por seguridad, este archivo **no se sube a GitHub**.
+
+1. Copia el archivo de ejemplo:
+```bash
+cp app.json.example app.json
+```
+
+2. Edita `app.json` y reemplaza los valores de ejemplo:
+   - `android.config.googleMaps.apiKey`: Tu Google Maps API Key
+   - `plugins[1][1].androidGoogleMapsApiKey`: La misma Google Maps API Key
+   - `extra.eas.projectId`: Tu Expo EAS Project ID (si usas EAS)
+
+```json
+{
+  "expo": {
+    "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "TU_GOOGLE_MAPS_API_KEY_AQUI"
+        }
+      }
+    },
+    "plugins": [
+      [
+        "react-native-maps",
+        {
+          "androidGoogleMapsApiKey": "TU_GOOGLE_MAPS_API_KEY_AQUI"
+        }
+      ]
+    ]
+  }
+}
+```
+
+> **⚠️ Importante**: Nunca compartas tu `app.json` con API keys reales. El archivo está en `.gitignore` para evitar que se suba accidentalmente a GitHub.
+
+### 2. Instalar dependencias
 
 ```bash
 npm install

@@ -15,7 +15,7 @@ export interface CreateFoodData {
 }
 
 export interface FoodResponse {
-    food_id: string;
+    foodId: string;
     name: string;
     description?: string;
     category: string;
@@ -24,7 +24,7 @@ export interface FoodResponse {
     status: string;
     imageUrl?: string;
     expiresAt: string;
-    establishment_id: string;
+    establishmentId: string;
     createdAt: string;
     updatedAt: string;
 }

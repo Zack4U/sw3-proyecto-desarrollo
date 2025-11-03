@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { foodService, FOOD_CATEGORIES, UNIT_OF_MEASURE } from '../services/foodService';
+import { establishmentService } from '../services/establishmentService';
 import { styles } from '../styles/FoodRegistrationScreenStyle';
 import { FeedbackMessage } from '../components';
 import { useRequestState } from '../hooks/useRequestState';
@@ -153,12 +154,45 @@ export default function FoodRegistrationScreen({
 		}
 
 		// Validar que haya un establecimiento asociado
-		if (
-			!formData.establishmentId ||
-			formData.establishmentId === '00000000-0000-0000-0000-000000000000'
-		) {
+		// Validar que el usuario autenticado tenga establishmentId (priorizar user)
+		let establishmentIdToUse = user?.establishmentId;
+		// Si no viene en el user, intentar resolverlo buscando el establecimiento creado por este usuario
+		if (!establishmentIdToUse && user?.userId && user.role === 'ESTABLISHMENT') {
+			try {
+				// Buscar paginado hasta encontrar el establecimiento asociado al userId
+				let found: string | null = null;
+				const limit = 50;
+				let page = 1;
+				const maxPages = 5; // evitar loops largos
+				while (!found && page <= maxPages) {
+					const res = await establishmentService.getPaginated(page, limit);
+					const match = res.data.find((e) => e.userId === user.userId);
+					if (match) {
+						found = match.establishmentId;
+						break;
+					}
+					// si no lo encontramos y no hay más registros, salir
+					if (res.data.length < limit) break;
+					page++;
+				}
+				if (found) {
+					establishmentIdToUse = found;
+					// actualizar formData para reflejarlo
+					setFormData((s) => ({ ...s, establishmentId: found! }));
+					console.log('🔎 EstablishmentId resuelto desde servicio:', found);
+				} else {
+					console.debug(
+						'No se encontró establishment para el userId en las primeras páginas'
+					);
+				}
+			} catch (err) {
+				console.warn('Error buscando establecimiento por userId:', err);
+			}
+		}
+
+		if (!establishmentIdToUse) {
 			requestState.setError(
-				'Debes tener un establecimiento registrado para agregar alimentos'
+				'Por favor completa tu perfil de establecimiento o verifica que tu usuario tenga un establecimiento asignado'
 			);
 			return;
 		}
@@ -175,7 +209,8 @@ export default function FoodRegistrationScreen({
 				quantity: quantity,
 				unitOfMeasure: formData.unitOfMeasure,
 				expiresAt: formData.expiresAt,
-				establishmentId: formData.establishmentId,
+				// usar establishmentId resuelto (priorizar el del usuario autenticado)
+				establishmentId: establishmentIdToUse,
 			};
 
 			const response = await foodService.create(payload);

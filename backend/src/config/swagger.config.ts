@@ -17,6 +17,7 @@ export class SwaggerConfig {
       .setVersion('1.0')
       .addTag('health', 'Operaciones de salud del sistema')
       .addTag('authentication', 'Operaciones de autenticación y autorización')
+      .addTag('users', 'Operaciones relacionadas con usuarios')
       .addTag('establishments', 'Operaciones relacionadas con establecimientos')
       .addTag('foods', 'Operaciones relacionadas con alimentos')
       .addBearerAuth(

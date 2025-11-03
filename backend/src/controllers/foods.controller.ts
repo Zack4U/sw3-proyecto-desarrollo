@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { FoodCategory } from '@prisma/client';
 import { CreateFoodDto } from 'src/dtos/Foods/create-food.dto';
@@ -8,7 +8,9 @@ import { FoodsService } from 'src/services/foods.service';
 @ApiTags('foods')
 @Controller('foods')
 export class FoodsController {
-  constructor(private readonly foodsService: FoodsService) {}
+  private readonly logger = new Logger(FoodsController.name);
+
+  constructor(private readonly foodsService: FoodsService) { }
 
   @Post()
   @ApiOperation({
@@ -25,6 +27,7 @@ export class FoodsController {
     description: 'Invalid data',
   })
   create(@Body() dto: CreateFoodDto) {
+    this.logger.log(`Create food request received - payload: ${JSON.stringify(dto)}`);
     return this.foodsService.create(dto);
   }
 
@@ -41,31 +44,9 @@ export class FoodsController {
     return this.foodsService.findAll();
   }
 
-  @Get(':id')
-  @ApiOperation({
-    summary: 'Get a food by ID',
-    description: 'Returns the information of a specific food',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Food UUID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Food found',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Food not found',
-  })
-  async findOne(@Param('id') id: string) {
-    const food = await this.foodsService.findOne(id);
-    if (!food) {
-      throw new NotFoundException(`Food with ID ${id} not found`);
-    }
-    return food;
-  }
+  /* NOTE: get-by-id endpoint intentionally placed AFTER specific routes
+     like /establishment, /category and /name to avoid route conflicts where
+     a dynamic ':id' would match the literal path segment 'establishment'. */
 
   @Get('establishment/:establishmentId')
   @ApiOperation({
@@ -121,6 +102,32 @@ export class FoodsController {
     return this.foodsService.findByName(name);
   }
 
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Get a food by ID',
+    description: 'Returns the information of a specific food',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Food UUID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Food found',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Food not found',
+  })
+  async findOne(@Param('id') id: string) {
+    const food = await this.foodsService.findOne(id);
+    if (!food) {
+      throw new NotFoundException(`Food with ID ${id} not found`);
+    }
+    return food;
+  }
+
   @Put(':id')
   @ApiOperation({
     summary: 'Update a food',
@@ -145,6 +152,7 @@ export class FoodsController {
     description: 'Invalid data',
   })
   async update(@Param('id') id: string, @Body() dto: UpdateFoodDto) {
+    this.logger.log(`Update food request - id: ${id} payload: ${JSON.stringify(dto)}`);
     const updatedFood = await this.foodsService.update(id, dto);
     if (!updatedFood) {
       throw new NotFoundException(`Food with ID ${id} not found`);

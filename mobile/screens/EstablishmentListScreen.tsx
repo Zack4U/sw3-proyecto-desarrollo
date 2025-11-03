@@ -1,118 +1,419 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from "react";
 import {
-    View,
-    Text,
-    FlatList,
-    ActivityIndicator,
-    ScrollView,
-    Pressable,
-} from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { establishmentService, EstablishmentResponse, PaginatedEstablishments } from '../services/establishmentService';
-import { styles } from '../styles/EstablishmentListScreenStyle';
-import { FeedbackMessage, Card, Input } from '../components';
-import { GlobalStyles } from '../styles/global';
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  ActivityIndicator,
+} from "react-native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import MapView, { Marker, Callout } from "react-native-maps";
+import * as Location from "expo-location";
+import {
+  establishmentService,
+  EstablishmentResponse,
+  getEstablishmentTypeLabel,
+} from "../services/establishmentService";
+import { styles as listStyles } from "../styles/EstablishmentListScreenStyle";
+import { styles as mapStyles } from "../styles/EstablishmentMapScreenStyle";
+import { FeedbackMessage, Card, Input } from "../components";
 
 type RootStackParamList = {
-    Home: undefined;
-    EstablishmentList: undefined;
+  Home: undefined;
+  EstablishmentList: undefined;
 };
 
 type Props = {
-    navigation: NativeStackNavigationProp<RootStackParamList, 'EstablishmentList'>;
+  navigation: NativeStackNavigationProp<
+    RootStackParamList,
+    "EstablishmentList"
+  >;
 };
 
-export default function EstablishmentListScreen({ navigation }: Readonly<Props>) {
-    const [establishments, setEstablishments] = useState<EstablishmentResponse[]>([]);
-    const [total, setTotal] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [search, setSearch] = useState('');
-    const [page, setPage] = useState(1);
-    const [limit] = useState(10); // Puedes ajustar el tamaño de página aquí
+// Coordenadas de Bogotá como ubicación por defecto
+const BOGOTA_COORDS = {
+  latitude: 4.60971,
+  longitude: -74.08175,
+  latitudeDelta: 0.0922,
+  longitudeDelta: 0.0421,
+};
 
-    useEffect(() => {
-        setLoading(true);
-        establishmentService.getPaginated(page, limit)
-            .then(res => {
-                setEstablishments(res.data);
-                setTotal(res.total);
-            })
-            .catch(err => setError(err.message))
-            .finally(() => setLoading(false));
-    }, [page, limit]);
+export default function EstablishmentListScreen({
+  navigation,
+}: Readonly<Props>) {
+  const [establishments, setEstablishments] = useState<EstablishmentResponse[]>(
+    []
+  );
+  const [total, setTotal] = useState(0);
+  const [totalAvailable, setTotalAvailable] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10); // Puedes ajustar el tamaño de página aquí
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [initialMapRegion, setInitialMapRegion] = useState(BOGOTA_COORDS);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [hasLoadedLocation, setHasLoadedLocation] = useState(false);
 
-    const filteredEstablishments = establishments.filter(est =>
-        est.name.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    setLoading(true);
+
+    // En modo mapa, cargar todos sin paginación
+    // En modo lista, usar paginación
+    const filters = viewMode === "map" ? undefined : { page, limit };
+
+    establishmentService
+      .getWithAvailableFood(filters)
+      .then((res) => {
+        setEstablishments(res.establishments);
+        setTotal(res.total);
+        setTotalAvailable(res.totalAvailable);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [page, limit, viewMode]);
+
+  // Obtener ubicación del usuario cuando se cambia a vista de mapa (solo la primera vez)
+  useEffect(() => {
+    if (viewMode === "map" && !hasLoadedLocation) {
+      getUserLocation();
+    }
+  }, [viewMode, hasLoadedLocation]);
+
+  const getUserLocation = async () => {
+    try {
+      setLocationLoading(true);
+      const { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status === "granted") {
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
+
+        setInitialMapRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        });
+      } else {
+        // Si no hay permisos, usar Bogotá por defecto
+        setInitialMapRegion(BOGOTA_COORDS);
+      }
+      setHasLoadedLocation(true);
+    } catch (err) {
+      console.error("Error obteniendo ubicación:", err);
+      setInitialMapRegion(BOGOTA_COORDS);
+      setHasLoadedLocation(true);
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
+  const filteredEstablishments = establishments.filter((est) =>
+    est.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // Extraer coordenadas de los establecimientos para el mapa
+  const getEstablishmentCoordinates = (
+    establishment: EstablishmentResponse
+  ) => {
+    try {
+      if (!establishment.location) {
+        return null;
+      }
+
+      // Manejar diferentes formatos de location
+      let coordinates;
+
+      if (
+        establishment.location.coordinates &&
+        Array.isArray(establishment.location.coordinates)
+      ) {
+        coordinates = establishment.location.coordinates;
+      } else if (typeof establishment.location === "string") {
+        // Si location viene como string, parsearlo
+        const parsed = JSON.parse(establishment.location);
+        coordinates = parsed.coordinates;
+      } else if (
+        establishment.location.type === "Point" &&
+        establishment.location.coordinates
+      ) {
+        // Formato GeoJSON
+        coordinates = establishment.location.coordinates;
+      } else {
+        return null;
+      }
+
+      // Validar que tenemos coordenadas válidas
+      if (!Array.isArray(coordinates) || coordinates.length < 2) {
+        return null;
+      }
+
+      const [longitude, latitude] = coordinates;
+
+      // Validar que sean números válidos
+      if (
+        typeof latitude !== "number" ||
+        typeof longitude !== "number" ||
+        isNaN(latitude) ||
+        isNaN(longitude)
+      ) {
+        return null;
+      }
+
+      // Validar rangos de coordenadas válidas
+      if (
+        latitude < -90 ||
+        latitude > 90 ||
+        longitude < -180 ||
+        longitude > 180
+      ) {
+        return null;
+      }
+
+      return { latitude, longitude };
+    } catch (err) {
+      console.error(
+        "Error parsing location for establishment:",
+        establishment.name,
+        err
+      );
+    }
+    return null;
+  };
+
+  const renderToggleButtons = () => (
+    <View style={mapStyles.toggleContainer}>
+      <Pressable
+        style={[
+          mapStyles.toggleButton,
+          viewMode === "list" && mapStyles.toggleButtonActive,
+        ]}
+        onPress={() => setViewMode("list")}
+      >
+        <Text>📋</Text>
+        <Text
+          style={[
+            mapStyles.toggleButtonText,
+            viewMode === "list" && mapStyles.toggleButtonTextActive,
+          ]}
+        >
+          Lista
+        </Text>
+      </Pressable>
+      <Pressable
+        style={[
+          mapStyles.toggleButton,
+          viewMode === "map" && mapStyles.toggleButtonActive,
+        ]}
+        onPress={() => setViewMode("map")}
+      >
+        <Text>🗺️</Text>
+        <Text
+          style={[
+            mapStyles.toggleButtonText,
+            viewMode === "map" && mapStyles.toggleButtonTextActive,
+          ]}
+        >
+          Mapa
+        </Text>
+      </Pressable>
+    </View>
+  );
+
+  const renderHeader = useCallback(
+    () => (
+      <View>
+        <View style={listStyles.filtersContainer}>
+          <Input
+            label="Buscar"
+            labelStyle={listStyles.label}
+            placeholder="Buscar por nombre..."
+            value={search}
+            onChangeText={setSearch}
+            style={listStyles.input}
+          />
+        </View>
+
+        {loading && (
+          <FeedbackMessage
+            type="loading"
+            message="Cargando establecimientos..."
+            visible={true}
+          />
+        )}
+
+        {error && (
+          <FeedbackMessage type="error" message={error} visible={true} />
+        )}
+      </View>
+    ),
+    [search, loading, error]
+  );
+
+  const renderFooter = useCallback(
+    () => (
+      <View>
+        <View style={listStyles.paginationContainer}>
+          <Text style={listStyles.paginationInfo}>
+            Página {page} de {Math.ceil(total / limit) || 1}
+          </Text>
+        </View>
+        <View style={listStyles.paginationContainer}>
+          <Pressable
+            style={[
+              listStyles.paginationButton,
+              page <= 1 && listStyles.paginationButtonDisabled,
+            ]}
+            onPress={() => page > 1 && setPage(page - 1)}
+            disabled={page <= 1}
+          >
+            <Text style={listStyles.paginationText}>Anterior</Text>
+          </Pressable>
+          <Pressable
+            style={[
+              listStyles.paginationButton,
+              page >= Math.ceil(total / limit) &&
+                listStyles.paginationButtonDisabled,
+            ]}
+            onPress={() => page < Math.ceil(total / limit) && setPage(page + 1)}
+            disabled={page >= Math.ceil(total / limit)}
+          >
+            <Text style={listStyles.paginationText}>Siguiente</Text>
+          </Pressable>
+        </View>
+      </View>
+    ),
+    [page, total, limit]
+  );
+
+  const renderListView = () => (
+    <FlatList
+      data={filteredEstablishments}
+      keyExtractor={(item) => item.establishmentId}
+      renderItem={({ item }) => (
+        <Card style={listStyles.card}>
+          <Text style={{ fontSize: 28, marginBottom: 8 }}>🏢</Text>
+          <Text style={listStyles.name}>{item.name}</Text>
+          <Text style={listStyles.address}>{item.address}</Text>
+          <Text style={listStyles.type}>
+            {getEstablishmentTypeLabel(item.establishmentType)}
+          </Text>
+          {item.foodAvailable !== undefined && (
+            <Text style={listStyles.foodAvailable}>
+              🍽️ {item.foodAvailable} alimento
+              {item.foodAvailable !== 1 ? "s" : ""} disponible
+              {item.foodAvailable !== 1 ? "s" : ""}
+            </Text>
+          )}
+          <View style={listStyles.divider} />
+        </Card>
+      )}
+      contentContainerStyle={listStyles.list}
+      ListHeaderComponent={renderHeader}
+      ListFooterComponent={renderFooter}
+      ListEmptyComponent={
+        loading ? null : (
+          <View style={{ padding: 16 }}>
+            <Text style={{ textAlign: "center", color: "#666" }}>
+              No se encontraron establecimientos.
+            </Text>
+          </View>
+        )
+      }
+    />
+  );
+
+  const renderMapView = () => {
+    // Filtrar establecimientos con coordenadas válidas
+    const establishmentsWithCoords = establishments.filter((est) => {
+      const coords = getEstablishmentCoordinates(est);
+      return coords !== null;
+    });
+
+    console.log(
+      `Establecimientos con coordenadas válidas: ${establishmentsWithCoords.length} de ${establishments.length}`
     );
 
     return (
-        <ScrollView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Establecimientos Registrados</Text>
-                <Text style={styles.subtitle}>Lista de puntos de donación</Text>
-            </View>
+      <View style={mapStyles.mapContainer}>
+        {(loading || locationLoading) && (
+          <View style={mapStyles.loadingContainer}>
+            <ActivityIndicator size="large" color="#3CA55C" />
+            <Text style={mapStyles.loadingText}>
+              {locationLoading
+                ? "Obteniendo ubicación..."
+                : "Cargando establecimientos..."}
+            </Text>
+          </View>
+        )}
 
-            <View style={styles.filtersContainer}>
-                <Input
-                    label="Buscar"
-                    labelStyle={styles.label}
-                    placeholder="Buscar por nombre..."
-                    value={search}
-                    onChangeText={setSearch}
-                    style={styles.input}
-                />
-            </View>
+        {error && (
+          <View style={mapStyles.errorContainer}>
+            <Text style={mapStyles.errorText}>{error}</Text>
+          </View>
+        )}
 
-            {loading && (
-                <FeedbackMessage type="loading" message="Cargando establecimientos..." visible={true} />
-            )}
+        <MapView
+          style={mapStyles.map}
+          initialRegion={initialMapRegion}
+          showsUserLocation={true}
+          showsMyLocationButton={true}
+        >
+          {establishments.map((establishment) => {
+            const coords = getEstablishmentCoordinates(establishment);
+            if (!coords) return null;
 
-            {error && (
-                <FeedbackMessage type="error" message={error} visible={true} />
-            )}
-
-            <FlatList
-                data={filteredEstablishments}
-                keyExtractor={item => item.establishmentId}
-                renderItem={({ item }) => (
-                    <Card style={styles.card}>
-                        <Text style={{ fontSize: 28, marginBottom: 8 }}>🏢</Text>
-                        <Text style={styles.name}>{item.name}</Text>
-                        <Text style={styles.address}>{item.address}</Text>
-                        <Text style={styles.type}>{item.establishmentType}</Text>
-                        <View style={styles.divider} />
-                    </Card>
-                )}
-                contentContainerStyle={styles.list}
-            />
-
-            {/* Controles de paginación */}
-                <View style={styles.paginationContainer}>
-                    <Text style={styles.paginationInfo}>Página {page} de {Math.ceil(total / limit) || 1}</Text>
-                </View>
-                <View style={styles.paginationContainer}>
-                    <Pressable
-                        style={[
-                            styles.paginationButton,
-                            page <= 1 && styles.paginationButtonDisabled,
-                        ]}
-                        onPress={() => page > 1 && setPage(page - 1)}
-                        disabled={page <= 1}
-                    >
-                        <Text style={styles.paginationText}>Anterior</Text>
-                    </Pressable>
-                    <Pressable
-                        style={[
-                            styles.paginationButton,
-                            page >= Math.ceil(total / limit) && styles.paginationButtonDisabled,
-                        ]}
-                        onPress={() => page < Math.ceil(total / limit) && setPage(page + 1)}
-                        disabled={page >= Math.ceil(total / limit)}
-                    >
-                        <Text style={styles.paginationText}>Siguiente</Text>
-                    </Pressable>
-                </View>
-        </ScrollView>
+            return (
+              <Marker
+                key={establishment.establishmentId}
+                coordinate={coords}
+                title={establishment.name}
+                description={establishment.address}
+                pinColor="#3CA55C"
+              >
+                <Callout>
+                  <View style={mapStyles.markerCallout}>
+                    <Text style={mapStyles.markerTitle}>
+                      {establishment.name}
+                    </Text>
+                    <Text style={mapStyles.markerAddress}>
+                      {establishment.address}
+                    </Text>
+                    <Text style={mapStyles.markerType}>
+                      {getEstablishmentTypeLabel(
+                        establishment.establishmentType
+                      )}
+                    </Text>
+                    {establishment.foodAvailable !== undefined && (
+                      <Text style={mapStyles.markerFoodAvailable}>
+                        🍽️ {establishment.foodAvailable} alimento
+                        {establishment.foodAvailable !== 1 ? "s" : ""}{" "}
+                        disponible{establishment.foodAvailable !== 1 ? "s" : ""}
+                      </Text>
+                    )}
+                  </View>
+                </Callout>
+              </Marker>
+            );
+          })}
+        </MapView>
+      </View>
     );
+  };
+
+  return (
+    <View style={mapStyles.container}>
+      <View style={mapStyles.header}>
+        <Text style={mapStyles.title}>Establecimientos Registrados</Text>
+        <Text style={mapStyles.subtitle}>Puntos de donación</Text>
+      </View>
+
+      {renderToggleButtons()}
+
+      {viewMode === "list" ? renderListView() : renderMapView()}
+    </View>
+  );
 }

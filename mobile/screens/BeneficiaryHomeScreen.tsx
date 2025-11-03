@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../hooks/useAuth';
 import { styles } from '../styles/HomeScreenStyle';
 import ProfileModal from '../components/ProfileModal';
@@ -8,8 +9,8 @@ import Button from '../components/Button';
 
 export default function BeneficiaryHomeScreen() {
   const { logout, user, isLoading } = useAuth();
+  const navigation = useNavigation<NativeStackNavigationProp<Record<string, object | undefined>>>();
   const [profileModalVisible, setProfileModalVisible] = useState(false);
-  const navigation = useNavigation();
 
   const handleLogout = async () => {
     try {
@@ -44,7 +45,20 @@ export default function BeneficiaryHomeScreen() {
       </View>
 
       {/* Contenido principal */}
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 15, paddingHorizontal: 20 }}>
+        {/* Botón para ver la lista completa */}
+        <TouchableOpacity
+          style={[styles.menuButton, styles.beneficiaryButton]}
+          onPress={() => navigation.navigate('EstablishmentList' as never)}
+        >
+          <Text style={styles.buttonIcon}>🏢</Text>
+          <Text style={styles.buttonText}>Ver establecimientos</Text>
+          <Text style={styles.buttonDescription}>
+            Explora los puntos de donación cercanos
+          </Text>
+        </TouchableOpacity>
+
+        {/* Botón para buscar por ciudad o barrio */}
         <Button
           title="🔍 Buscar Establecimientos"
           onPress={() => navigation.navigate('SearchEstablishments' as never)}
