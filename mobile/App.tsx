@@ -15,6 +15,7 @@ import FoodRegistrationScreen from "./screens/FoodRegistrationScreen";
 import FoodManagementScreen from "./screens/FoodManagementScreen";
 import FoodEditScreen from "./screens/FoodEditScreen";
 import EstablishmentListScreen from "./screens/EstablishmentListScreen";
+import AvailableFoodListScreen from "./screens/AvailableFoodListScreen";
 import SplashScreen from "./screens/SplashScreen";
 import CompleteProfileScreen from "./screens/CompleteProfileScreen";
 import EditEstablishmentProfileScreen from "./screens/EditEstablishmentProfileScreen";
@@ -33,6 +34,7 @@ export type RootStackParamList = {
   FoodManagement: undefined;
   FoodEdit: { foodId: string };
   EstablishmentList: undefined;
+  AvailableFoodList: { establishmentId?: string };
   CompleteProfile: undefined;
   EditEstablishmentProfile: undefined;
 };
@@ -138,6 +140,14 @@ function RootNavigator() {
                 options={{
                   title: "Establecimientos",
                   headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name="AvailableFoodList"
+                component={AvailableFoodListScreen}
+                options={{
+                  title: "Alimentos Disponibles",
+                  headerShown: true,
                 }}
               />
             </>

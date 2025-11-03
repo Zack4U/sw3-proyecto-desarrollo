@@ -47,6 +47,19 @@ export const styles = StyleSheet.create({
     marginTop: Spacing.xs,
     fontSize: 14,
   },
+  viewFoodsButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: 8,
+    marginTop: Spacing.md,
+    alignItems: "center",
+  },
+  viewFoodsButtonText: {
+    color: Colors.textLight,
+    fontSize: 14,
+    fontWeight: "600",
+  },
   divider: {
     ...GlobalStyles.divider,
     marginTop: 12,

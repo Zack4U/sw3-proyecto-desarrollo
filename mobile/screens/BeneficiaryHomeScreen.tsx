@@ -60,6 +60,17 @@ export default function BeneficiaryHomeScreen() {
 							Explora los puntos de donación cercanos
 						</Text>
 					</TouchableOpacity>
+
+					<TouchableOpacity
+						style={[styles.menuButton, styles.beneficiaryButton]}
+						onPress={() => navigation.navigate('AvailableFoodList' as any)}
+					>
+						<Text style={styles.buttonIcon}>🍽️</Text>
+						<Text style={styles.buttonText}>Ver alimentos disponibles</Text>
+						<Text style={styles.buttonDescription}>
+							Explora todos los alimentos donados
+						</Text>
+					</TouchableOpacity>
 				</View>
 			</View>
 
