@@ -41,7 +41,48 @@ Desarrollado con [NestJS](https://github.com/nestjs/nest), [Prisma](https://www.
 $ npm install
 ```
 
-### 2. Configurar Base de Datos
+### 2. Configurar Variables de Entorno
+
+El proyecto requiere configurar variables de entorno para funcionar correctamente.
+
+1. **Crear archivo `.env`** en la raíz del proyecto backend:
+```bash
+$ cp .env.example .env
+```
+
+2. **Editar `.env`** con tus configuraciones:
+```bash
+# Database
+DATABASE_URL="postgresql://comiya_user:password@localhost:5432/comiya_business"
+
+# Server
+PORT=3000
+NODE_ENV=development
+
+# JWT Secrets
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_REFRESH_SECRET=your-super-secret-refresh-key-change-this-in-production
+JWT_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+
+# Google OAuth (obtener de: https://console.cloud.google.com)
+GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# Google Maps API (para verificación de direcciones)
+GOOGLE_MAPS_API_KEY=your-google-maps-api-key
+
+# Frontend URL (para CORS)
+FRONTEND_URL=http://localhost:8081
+
+```
+
+> **⚠️ Importante:** 
+> - Nunca subas el archivo `.env` a Git (ya está en `.gitignore`)
+> - Cambia los secrets en producción
+> - El archivo `.env.example` contiene todas las variables necesarias
+
+### 3. Configurar Base de Datos
 
 #### Opción A: Script Automático (Recomendado)
 
