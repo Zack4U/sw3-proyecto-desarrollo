@@ -8,7 +8,6 @@
 2. npm run prisma:reset
 3. npm run prisma:push
 4. Probar cambios
-5. git commit prisma/
 
 # ✅ PRODUCCIÓN (Deploy)
 1. git pull origin main
@@ -21,7 +20,7 @@
 
 ## 🔄 Dos Enfoques Principales
 
-### 1️⃣ `prisma db push` - Desarrollo Rápido ⚡
+### 1️⃣ `prisma db push` - Desarrollo Rápido ⭐ (RECOMENDADO)
 
 ```
 ┌─────────────────────┐
@@ -51,7 +50,7 @@
 
 ---
 
-### 2️⃣ `prisma migrate dev` - Desarrollo Profesional ⭐ (RECOMENDADO)
+### 2️⃣ `prisma migrate dev` - Desarrollo Profesional 
 
 ```
 ┌─────────────────────────┐

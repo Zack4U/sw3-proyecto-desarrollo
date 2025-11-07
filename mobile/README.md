@@ -19,6 +19,7 @@ Aplicación móvil de **ComiYa** desarrollada con React Native y Expo. Esta app 
 - **Expo Go** (app móvil para pruebas en iOS/Android)
 - **Google Maps API Key** (para funcionalidad de mapas)
 - **Google OAuth Client ID** (para autenticación con Google)
+- **Android Studio** (para simulacion de dispositivo Android o similar)
 
 ## ⚙️ Configuración Inicial
 
@@ -28,20 +29,41 @@ El proyecto usa `.env` para configuración sensible. **Este archivo NO se sube a
 
 1. Copia el archivo de ejemplo:
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 ```
 
 2. Edita `.env` y agrega tus credenciales:
 ```bash
-# API Backend
-EXPO_PUBLIC_API_URL=http://localhost:3000
-EXPO_PUBLIC_API_TIMEOUT=10000
+# Ejemplo de archivo de configuración de entorno
+# Copia este archivo como .env y ajusta los valores según tu entorno
 
-# Google OAuth
-EXPO_PUBLIC_GOOGLE_CLIENT_ID=tu-client-id.apps.googleusercontent.com
+# URL del backend
+# Para desarrollo local (emulador iOS o web)
+API_BASE_URL=http://localhost:3000
 
-# Google Maps
-EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=tu-google-maps-api-key
+# Para emulador Android
+# API_BASE_URL=http://10.0.2.2:3000
+
+# Para dispositivo físico (reemplaza con tu IP)
+# API_BASE_URL=http://192.168.1.X:3000
+
+# Timeout de peticiones (en milisegundos)
+API_TIMEOUT=10000
+
+# Google Maps API Key
+# Obtén la clave de: https://console.cloud.google.com
+# Habilita: Geocoding API, Maps JavaScript API, Places API
+GOOGLE_MAPS_API_KEY=your-google-maps-api-key
+
+# Google OAuth 2.0 Client IDs
+# Obtén las credenciales de: https://console.cloud.google.com
+# Para web
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=your-google-web-client-id.apps.googleusercontent.com
+# Para iOS
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=your-google-ios-client-id.apps.googleusercontent.com
+# Para Android
+EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=your-google-android-client-id.apps.googleusercontent.com
+
 ```
 
 ### 2. Configurar app.json
@@ -81,7 +103,7 @@ cp app.json.example app.json
 }
 ```
 
-> **⚠️ Importante**: Los archivos `.env` y `app.json` están en `.gitignore` para proteger tus credenciales.
+> **⚠️ Importante**: Los archivos `.env.local` y `app.json` están en `.gitignore` para proteger tus credenciales.
 
 ### 3. Instalar Dependencias
 
@@ -91,7 +113,7 @@ npm install
 
 ### 4. Configurar Backend
 
-Asegúrate de que el backend esté corriendo. Actualiza la URL en `.env`:
+Asegúrate de que el backend esté corriendo. Actualiza la URL en `.env.local`:
 
 ```bash
 # Para emulador Android
@@ -131,7 +153,181 @@ Una vez iniciado el servidor, verás un código QR en la terminal. Puedes:
   - En iOS: Usa la cámara del iPhone
   - En Android: Usa la app Expo Go
 
-- **🖥️ Emulador Android**:
+- **🖥️ Emulador Android**: Presiona `a` en la terminal
+- **🖥️ Emulador iOS** (solo macOS): Presiona `i` en la terminal
+- **🌐 Navegador Web**: Presiona `w` en la terminal
+
+## 📲 Crear Build de Desarrollo (Development Build)
+
+Expo ofrece dos formas de ejecutar tu aplicación: con **Expo Go** (más rápido para desarrollo) o con **Development Build** (necesario para módulos nativos personalizados).
+
+### ¿Cuándo usar Development Build?
+
+Usa Development Build si:
+- ✅ Necesitas módulos nativos que no soporta Expo Go
+- ✅ Quieres usar plugins nativos personalizados
+- ✅ Necesitas capacidades específicas de la plataforma
+- ✅ Quieres un build más cercano a producción
+
+**⚠️ Importante**: Siempre crear una Development Build si:
+-  Actualiza o modifica las dependencias o librerias
+-  Actualiza o modifica las variables de entorno (.env)
+-  Actualiza o modifica Manifest de Expo (app.json | eas.json)
+
+### Requisitos Previos
+
+1. **Cuenta de Expo**:
+```bash
+npx expo login
+```
+
+2. **EAS CLI** (Expo Application Services):
+```bash
+npm install -g eas-cli
+```
+
+3. **Configurar proyecto EAS**:
+```bash
+eas build:configure
+```
+
+Esto creará el archivo `eas.json` con la configuración de builds. **Omitir si ya existe eas.json**
+
+### Crear Development Build
+
+#### Para Android
+
+1. **Build APK para desarrollo**:
+```bash
+npx eas build --profile development --platform android
+```
+
+2. **Instalar en tu dispositivo**:
+   - Una vez completado, recibirás un link de descarga
+   - Descarga el APK en tu dispositivo Android
+   - Instala el APK (habilita "Instalación de fuentes desconocidas")
+
+#### Para iOS (requiere macOS)
+
+1. **Build para simulador**:
+```bash
+npx eas build --profile development --platform ios --local
+```
+
+2. **Build para dispositivo físico**:
+```bash
+npx eas build --profile development --platform ios
+```
+   - Necesitarás una cuenta de Apple Developer
+   - Registra tu dispositivo en la Apple Developer Console
+
+3. **Instalar**:
+   - Simulador: El build se instalará automáticamente
+   - Dispositivo: Usa TestFlight o instalación ad-hoc
+
+### Configuración de eas.json
+
+Ejemplo de configuración para Development Builds:
+
+```json
+{
+  "cli": {
+    "version": ">= 5.2.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "android": {
+        "buildType": "aab"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
+```
+
+### Ventajas del Development Build
+
+- ✅ **Módulos nativos personalizados**: Usa cualquier módulo nativo
+- ✅ **Hot reload**: Actualización en tiempo real del código JS
+- ✅ **Debugging mejorado**: Más cercano a la app de producción
+- ✅ **Testing completo**: Prueba todas las funcionalidades nativas
+- ✅ **Configuración nativa**: Personaliza AndroidManifest.xml, Info.plist, etc.
+
+### Diferencias entre Expo Go y Development Build
+
+| Característica | Expo Go | Development Build |
+|----------------|---------|-------------------|
+| **Instalación** | Descarga de tiendas | Build personalizado |
+| **Módulos nativos** | Solo los incluidos | Cualquiera |
+| **Tiempo de setup** | Instantáneo | ~15-20 min (primera vez) |
+| **Actualización** | Automática | Manual |
+| **Depuración** | Limitada | Completa |
+| **Producción** | No | Similar |
+
+### Comandos Útiles
+
+```bash
+# Ver builds anteriores
+eas build:list
+
+# Cancelar build en progreso
+eas build:cancel
+
+# Ver detalles de un build
+eas build:view [BUILD_ID]
+
+# Construir localmente (más rápido, requiere Android Studio/Xcode)
+eas build --platform android --profile development --local
+
+# Limpiar caché de EAS
+eas build:configure --clear-cache
+```
+
+### Troubleshooting
+
+#### Error: "Build failed"
+```bash
+# Ver logs completos
+eas build:view [BUILD_ID]
+
+# Limpiar caché y reintentar
+npx expo prebuild --clean
+eas build --platform android --profile development --clear-cache
+```
+
+#### Error: "Could not connect to development server"
+- Asegúrate de que tu dispositivo y computadora estén en la misma red
+- Verifica que el firewall no bloquee las conexiones
+- Usa `npx expo start --dev-client --tunnel` para crear un túnel
+
+#### Build muy lento
+- Usa `--local` para construir en tu máquina
+- Verifica que tengas Android Studio/Xcode configurado
+- Considera usar caché de dependencias
+
+### Recursos
+
+- 📄 [Documentación oficial de EAS Build](https://docs.expo.dev/build/introduction/)
+- 📄 [Development Builds](https://docs.expo.dev/development/introduction/)
+- 📄 [Migrar de Expo Go a Development Build](https://docs.expo.dev/develop/development-builds/introduction/)
 
 ## 📦 Dependencias Principales
 
