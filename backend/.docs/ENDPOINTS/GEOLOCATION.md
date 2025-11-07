@@ -8,13 +8,19 @@ Documentación de endpoints para verificación de direcciones y coordenadas usan
 
 ## 📋 Tabla de Contenidos
 
-- [Verificar Dirección](#1-verificar-dirección)
-- [Verificar Coordenadas](#2-verificar-coordenadas)
-- [Formato de Ubicación](#-formato-de-ubicación)
-- [Uso Típico](#%EF%B8%8F-uso-típico)
-- [Permisos](#-permisos)
-- [Configuración](#%EF%B8%8F-configuración)
-- [Manejo de Errores](#-manejo-de-errores)
+- [🌍 Geolocation Endpoints](#-geolocation-endpoints)
+  - [📋 Tabla de Contenidos](#-tabla-de-contenidos)
+  - [📋 Endpoints Disponibles](#-endpoints-disponibles)
+    - [1. Verificar Dirección](#1-verificar-dirección)
+    - [2. Verificar Coordenadas](#2-verificar-coordenadas)
+  - [📍 Formato de Ubicación](#-formato-de-ubicación)
+  - [🗺️ Uso Típico](#%EF%B8%8F-uso-típico)
+  - [🔒 Permisos](#-permisos)
+  - [⚙️ Configuración](#%EF%B8%8F-configuración)
+  - [🐛 Manejo de Errores](#-manejo-de-errores)
+  - [💡 Mejores Prácticas](#-mejores-prácticas)
+  - [📊 Límites de Google Maps API](#-límites-de-google-maps-api)
+  - [🔗 Ver También](#-ver-también)
 
 ---
 

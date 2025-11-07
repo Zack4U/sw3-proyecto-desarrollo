@@ -8,11 +8,30 @@ Documentación completa de todos los endpoints de autenticación del sistema Com
 
 ## 📋 Tabla de Contenidos
 
-- [Registro](#registro)
-- [Login](#login)
-- [Google OAuth](#google-oauth)
-- [Gestión de Sesión](#gestión-de-sesión)
-- [Perfil](#perfil)
+- [🔐 Authentication Endpoints](#-authentication-endpoints)
+  - [📋 Tabla de Contenidos](#-tabla-de-contenidos)
+  - [🆕 Registro](#-registro)
+    - [1. Registro Básico](#1-registro-básico)
+    - [2. Registro de Beneficiario (Legacy)](#2-registro-de-beneficiario-legacy)
+    - [3. Registro de Establecimiento (Legacy)](#3-registro-de-establecimiento-legacy)
+    - [4. Completar Perfil](#4-completar-perfil)
+  - [🔑 Login](#-login)
+    - [1. Login Local](#1-login-local)
+  - [🔄 Google OAuth](#-google-oauth)
+    - [1. Google Login (Común)](#1-google-login-común)
+    - [2. Google Login Beneficiario (Legacy)](#2-google-login-beneficiario-legacy)
+    - [3. Google Login Establecimiento (Legacy)](#3-google-login-establecimiento-legacy)
+  - [🔄 Gestión de Sesión](#-gestión-de-sesión)
+    - [1. Refresh Token](#1-refresh-token)
+    - [2. Logout](#2-logout)
+    - [3. Validar Token](#3-validar-token)
+  - [👤 Perfil](#-perfil)
+    - [1. Obtener Perfil](#1-obtener-perfil)
+    - [2. Cambiar Contraseña](#2-cambiar-contraseña)
+  - [🔒 Autenticación](#-autenticación)
+  - [📝 Notas](#-notas)
+  - [🐛 Códigos de Error Comunes](#-códigos-de-error-comunes)
+  - [🔗 Ver También](#-ver-también)
 
 ---
 

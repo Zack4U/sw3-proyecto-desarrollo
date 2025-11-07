@@ -8,15 +8,24 @@ Documentación de endpoints para gestión de departamentos (estados/provincias).
 
 ## 📋 Tabla de Contenidos
 
-- [Crear Departamento](#1-crear-departamento)
-- [Listar Todos los Departamentos](#2-listar-todos-los-departamentos)
-- [Obtener Departamento por ID](#3-obtener-departamento-por-id)
-- [Actualizar Departamento](#4-actualizar-departamento)
-- [Eliminar Departamento](#5-eliminar-departamento)
-- [Jerarquía Geográfica](#-jerarquía-geográfica)
-- [Departamentos de Colombia](#-departamentos-de-colombia)
-- [Casos de Uso Comunes](#-casos-de-uso-comunes)
-- [Permisos](#-permisos)
+- [🗺️ Departments Endpoints](#%EF%B8%8F-departments-endpoints)
+  - [📋 Tabla de Contenidos](#-tabla-de-contenidos)
+  - [📋 Endpoints Disponibles](#-endpoints-disponibles)
+    - [1. Crear Departamento](#1-crear-departamento)
+    - [2. Listar Todos los Departamentos](#2-listar-todos-los-departamentos)
+    - [3. Obtener Departamento por ID](#3-obtener-departamento-por-id)
+    - [4. Actualizar Departamento](#4-actualizar-departamento)
+    - [5. Eliminar Departamento](#5-eliminar-departamento)
+  - [🗂️ Jerarquía Geográfica](#%EF%B8%8F-jerarquía-geográfica)
+  - [📍 Departamentos de Colombia](#-departamentos-de-colombia)
+  - [💡 Casos de Uso Comunes](#-casos-de-uso-comunes)
+  - [🔒 Permisos](#-permisos)
+  - [🐛 Manejo de Errores](#-manejo-de-errores)
+  - [📊 Estadísticas](#-estadísticas)
+  - [🔗 Ver También](#-ver-también)
+  - [💡 Mejores Prácticas](#-mejores-prácticas)
+  - [🔍 Búsqueda y Filtrado](#-búsqueda-y-filtrado)
+  - [📝 Notas de Implementación](#-notas-de-implementación)
 
 ---
 

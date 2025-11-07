@@ -6,14 +6,21 @@ Documentación de endpoints para gestión de alimentos.
 
 ---
 
-## 📋 Índice
+## 📋 Tabla de Contenidos
 
-- [Crear Alimento](#crear-alimento)
-- [Listar Alimentos](#listar-alimentos)
-- [Obtener Alimento](#obtener-alimento)
-- [Actualizar Alimento](#actualizar-alimento)
-- [Eliminar Alimento](#eliminar-alimento)
-- [Búsquedas y Filtros](#búsquedas-y-filtros)
+- [🍽️ Foods Endpoints](#%EF%B8%8F-foods-endpoints)
+  - [📋 Tabla de Contenidos](#-tabla-de-contenidos)
+  - [🆕 Crear Alimento](#-crear-alimento)
+  - [📜 Listar Alimentos](#-listar-alimentos)
+  - [🔍 Obtener Alimento](#-obtener-alimento)
+  - [✏️ Actualizar Alimento](#%EF%B8%8F-actualizar-alimento)
+  - [🗑️ Eliminar Alimento](#%EF%B8%8F-eliminar-alimento)
+  - [🔍 Búsquedas y Filtros](#-búsquedas-y-filtros)
+  - [📊 Enums](#-enums)
+  - [🔒 Permisos](#-permisos)
+  - [🐛 Códigos de Error](#-códigos-de-error)
+  - [📝 Notas](#-notas)
+  - [🔗 Ver También](#-ver-también)
 
 ---
 

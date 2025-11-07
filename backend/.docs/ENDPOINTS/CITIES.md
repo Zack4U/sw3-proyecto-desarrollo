@@ -8,15 +8,21 @@ Documentación de endpoints para gestión de ciudades.
 
 ## 📋 Tabla de Contenidos
 
-- [Crear Ciudad](#1-crear-ciudad)
-- [Listar Todas las Ciudades](#2-listar-todas-las-ciudades)
-- [Obtener Ciudad por ID](#3-obtener-ciudad-por-id)
-- [Obtener Ciudades por Departamento](#4-obtener-ciudades-por-departamento)
-- [Actualizar Ciudad](#5-actualizar-ciudad)
-- [Eliminar Ciudad](#6-eliminar-ciudad)
-- [Jerarquía Geográfica](#-jerarquía-geográfica)
-- [Casos de Uso Comunes](#-casos-de-uso-comunes)
-- [Permisos](#-permisos)
+- [🏙️ Cities Endpoints](#%EF%B8%8F-cities-endpoints)
+  - [📋 Tabla de Contenidos](#-tabla-de-contenidos)
+  - [📋 Endpoints Disponibles](#-endpoints-disponibles)
+    - [1. Crear Ciudad](#1-crear-ciudad)
+    - [2. Listar Todas las Ciudades](#2-listar-todas-las-ciudades)
+    - [3. Obtener Ciudad por ID](#3-obtener-ciudad-por-id)
+    - [4. Obtener Ciudades por Departamento](#4-obtener-ciudades-por-departamento)
+    - [5. Actualizar Ciudad](#5-actualizar-ciudad)
+    - [6. Eliminar Ciudad](#6-eliminar-ciudad)
+  - [🗂️ Jerarquía Geográfica](#%EF%B8%8F-jerarquía-geográfica)
+  - [💡 Casos de Uso Comunes](#-casos-de-uso-comunes)
+  - [🔒 Permisos](#-permisos)
+  - [📊 Principales Ciudades de Colombia](#-principales-ciudades-de-colombia)
+  - [🐛 Manejo de Errores](#-manejo-de-errores)
+  - [🔗 Ver También](#-ver-también)
 
 ---
 

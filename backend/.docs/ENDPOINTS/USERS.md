@@ -8,13 +8,18 @@ Documentación de endpoints para gestión de perfiles de usuario.
 
 ## 📋 Tabla de Contenidos
 
-- [Obtener Perfil del Usuario Autenticado](#1-obtener-perfil-del-usuario-autenticado)
-- [Actualizar Perfil del Usuario](#2-actualizar-perfil-del-usuario)
-- [Actualizar Perfil de Establecimiento](#3-actualizar-perfil-de-establecimiento)
-- [Enumeraciones](#-enumeraciones)
-- [Permisos](#-permisos)
-- [Relaciones](#-relaciones)
-- [Casos de Uso](#-casos-de-uso)
+- [👤 Users Endpoints](#-users-endpoints)
+  - [📋 Tabla de Contenidos](#-tabla-de-contenidos)
+  - [📋 Endpoints Disponibles](#-endpoints-disponibles)
+    - [1. Obtener Perfil del Usuario Autenticado](#1-obtener-perfil-del-usuario-autenticado)
+    - [2. Actualizar Perfil del Usuario](#2-actualizar-perfil-del-usuario)
+    - [3. Actualizar Perfil de Establecimiento](#3-actualizar-perfil-de-establecimiento)
+  - [📝 Enumeraciones](#-enumeraciones)
+  - [🔒 Permisos](#-permisos)
+  - [🔄 Relaciones](#-relaciones)
+  - [💡 Casos de Uso](#-casos-de-uso)
+  - [🐛 Manejo de Errores](#-manejo-de-errores)
+  - [🔗 Ver También](#-ver-también)
 
 ---
 
