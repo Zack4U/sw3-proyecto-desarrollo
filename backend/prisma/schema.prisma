@@ -1,10 +1,10 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 // ====================
@@ -12,23 +12,23 @@ datasource db {
 // ====================
 
 model Department {
-  departmentId String @id @default(uuid())
-  name         String @unique
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  cities       City[]
+    departmentId String   @id @default(uuid())
+    name         String   @unique
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    cities       City[]
 }
 
 model City {
-  cityId        String @id @default(uuid())
-  name          String
-  departmentId  String
-  department    Department @relation(fields: [departmentId], references: [departmentId])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  establishments Establishment[]
+    cityId         String          @id @default(uuid())
+    name           String
+    departmentId   String
+    department     Department      @relation(fields: [departmentId], references: [departmentId])
+    createdAt      DateTime        @default(now())
+    updatedAt      DateTime        @updatedAt
+    establishments Establishment[]
 
-  @@unique([name, departmentId])
+    @@unique([name, departmentId])
 }
 
 // ====================
@@ -75,8 +75,9 @@ model Beneficiary {
     updatedAt     DateTime @updatedAt
 
     // Relación: Un beneficiario pertenece a un usuario
-    User       User   @relation(fields: [userUserId], references: [userId])
-    userUserId String @db.Uuid
+    User       User     @relation(fields: [userUserId], references: [userId])
+    userUserId String   @db.Uuid
+    pickups    Pickup[]
 }
 
 // ====================
@@ -102,7 +103,8 @@ model Establishment {
     city   City   @relation(fields: [cityId], references: [cityId])
     cityId String
 
-    foods  Food[]
+    foods   Food[]
+    pickups Pickup[]
 }
 
 // ====================
@@ -126,6 +128,60 @@ model Food {
     // Relación: Un alimento pertenece a un establecimiento
     establishment   Establishment @relation(fields: [establishmentId], references: [establishmentId], onDelete: Cascade)
     establishmentId String        @db.Uuid
+    pickups         Pickup[]
+}
+
+model Pickup {
+    pickupId String @id @default(uuid()) @db.Uuid
+
+    // Relaciones
+    beneficiary   Beneficiary @relation(fields: [beneficiaryId], references: [beneficiaryId])
+    beneficiaryId String      @db.Uuid
+
+    establishment   Establishment @relation(fields: [establishmentId], references: [establishmentId])
+    establishmentId String        @db.Uuid
+
+    food   Food   @relation(fields: [foodId], references: [foodId])
+    foodId String @db.Uuid
+
+    // Información de la cita
+    status        PickupStatus @default(PENDING)
+    scheduledDate DateTime     @db.Timestamp
+
+    // Cantidades
+    requestedQuantity Float // Cantidad solicitada
+    deliveredQuantity Float? // Cantidad real entregada (null hasta completar)
+    unitOfMeasure     UnitOfMeasure
+
+    // Confirmaciones y tiempos
+    confirmedAt      DateTime? @db.Timestamp
+    visitConfirmedAt DateTime? @db.Timestamp // Cuando llega al establecimiento
+    completedAt      DateTime? @db.Timestamp
+    cancelledAt      DateTime? @db.Timestamp
+
+    // Notas y observaciones
+    beneficiaryNotes   String? // Notas del beneficiario al solicitar
+    establishmentNotes String? // Notas del establecimiento
+    cancellationReason String? // Razón de cancelación
+
+    // Auditoría
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([beneficiaryId])
+    @@index([establishmentId])
+    @@index([foodId])
+    @@index([status])
+    @@index([scheduledDate])
+}
+
+enum PickupStatus {
+    PENDING // Solicitud creada, esperando confirmación
+    CONFIRMED // Establecimiento confirmó la cita
+    IN_PROGRESS // Beneficiario llegó al establecimiento
+    COMPLETED // Entrega completada
+    CANCELLED // Cancelada por beneficiario
+    REJECTED // Rechazada por establecimiento
 }
 
 enum DocumentType {
