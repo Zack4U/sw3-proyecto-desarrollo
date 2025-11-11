@@ -59,11 +59,16 @@ export default function BeneficiaryHomeScreen() {
         </TouchableOpacity>
 
         {/* Botón para buscar por ciudad o barrio */}
-        <Button
-          title="🔍 Buscar Establecimientos"
+        <TouchableOpacity
+          style={[styles.menuButton, styles.beneficiaryButton]}
           onPress={() => navigation.navigate('SearchEstablishments' as never)}
-          fullWidth
-        />
+        >
+          <Text style={styles.buttonIcon}>🔍</Text>
+          <Text style={styles.buttonText}>Buscar establecimientos</Text>
+          <Text style={styles.buttonDescription}>
+            Filtra por ciudad o barrio
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Modal de perfil */}
