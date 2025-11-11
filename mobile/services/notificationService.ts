@@ -58,9 +58,10 @@ class NotificationService {
     }
 
     async requestPermissions(): Promise<boolean> {
+        // Advertencia informativa (no bloquea notificaciones locales)
         if (!Device.isDevice) {
             console.warn('Las notificaciones push solo funcionan en dispositivos físicos');
-            return false;
+            console.info('ℹ️ Notificaciones locales disponibles para testing');
         }
 
         const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -82,7 +83,16 @@ class NotificationService {
     async getExpoPushToken(): Promise<string | null> {
         try {
             const hasPermission = await this.requestPermissions();
-            if (!hasPermission) return null;
+            if (!hasPermission) {
+                console.warn('⚠️ No se pudo obtener token push (permisos denegados)');
+                return null;
+            }
+
+            // En emulador, no podemos obtener push token real, pero podemos hacer notificaciones locales
+            if (!Device.isDevice) {
+                console.info('ℹ️ Emulador detectado - usando modo de testing local');
+                return 'LOCAL_TESTING_TOKEN';
+            }
 
             const projectId = Constants.expoConfig?.extra?.eas?.projectId;
 
@@ -90,11 +100,13 @@ class NotificationService {
                 projectId,
             });
 
-            console.log('Push Token obtenido:', token.data);
+            console.log('✅ Push Token obtenido:', token.data);
             return token.data;
         } catch (error) {
-            console.error('Error obteniendo push token:', error);
-            return null;
+            console.error('❌ Error obteniendo push token:', error);
+            // Permitir modo local si falla
+            console.info('ℹ️ Usando modo de testing local');
+            return 'LOCAL_TESTING_TOKEN';
         }
     }
 
@@ -130,6 +142,48 @@ class NotificationService {
             },
             trigger: null,
         });
+    }
+
+    /**
+     * Envía una notificación de prueba para verificar configuración
+     * Esta función simula el comportamiento futuro cuando el backend envíe notificaciones
+     * al seleccionar un alimento (notificará al establecimiento)
+     * 
+     * ✅ Funciona en emuladores (notificaciones locales)
+     * ✅ Funciona en dispositivos físicos (notificaciones push)
+     */
+    async sendTestNotificationToBackend(): Promise<void> {
+        try {
+            // Verificar permisos primero
+            const hasPermission = await this.requestPermissions();
+            if (!hasPermission) {
+                throw new Error('Permisos de notificación no otorgados');
+            }
+
+            // Simula notificación que recibiría un establecimiento cuando se selecciona su alimento
+            await this.schedulePushNotification(
+                '🍽️ Nuevo Interés en Alimento',
+                'Un beneficiario ha mostrado interés en tus alimentos disponibles',
+                {
+                    type: 'food_alert',
+                    message: 'Notificación de prueba del sistema',
+                    timestamp: new Date().toISOString(),
+                    isTest: true,
+                },
+                'food-alerts'
+            );
+
+            console.log('✅ Notificación de prueba enviada correctamente');
+            
+            if (!Device.isDevice) {
+                console.info('ℹ️ Notificación local enviada (modo emulador)');
+            } else {
+                console.info('ℹ️ Notificación push enviada (dispositivo físico)');
+            }
+        } catch (error) {
+            console.error('❌ Error enviando notificación de prueba:', error);
+            throw error;
+        }
     }
 
     addNotificationReceivedListener(

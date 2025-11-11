@@ -72,6 +72,26 @@ export const styles = StyleSheet.create({
 	button: {
 		marginBottom: Spacing.md,
 	},
+	divider: {
+		height: 1,
+		backgroundColor: Colors.border,
+		marginVertical: Spacing.md,
+	},
+	testButton: {
+		borderColor: Colors.accent,
+		borderWidth: 2,
+		marginBottom: Spacing.xs,
+	},
+	tokenStatus: {
+		fontSize: FontSizes.sm,
+		color: Colors.success,
+		textAlign: 'center',
+		marginTop: Spacing.xs,
+		fontWeight: FontWeights.semibold,
+	},
+	loader: {
+		marginTop: Spacing.sm,
+	},
 	featuresRow: {
 		marginTop: Spacing.lg,
 		flexDirection: 'row',

@@ -80,11 +80,7 @@ export const useNotifications = () => {
     };
 
     const sendTestNotification = async () => {
-        await notificationService.schedulePushNotification(
-            'Notificación de Prueba',
-            'Esta es una notificación de prueba local',
-            { type: 'system', message: 'Test' }
-        );
+        await notificationService.sendTestNotificationToBackend();
     };
 
     return {
