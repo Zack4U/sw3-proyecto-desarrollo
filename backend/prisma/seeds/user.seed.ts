@@ -1,4 +1,6 @@
 import { PrismaClient, UserRole, DocumentType } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+
 
 export async function seedUsers(prisma: PrismaClient) {
   console.log('👥 Creando usuarios...');
@@ -91,6 +93,18 @@ export async function seedUsers(prisma: PrismaClient) {
       role: UserRole.ESTABLISHMENT,
       isVerified: true,
       isActive: true,
+    },
+    {
+      userId: 'b23e4567-e89b-12d3-a456-426614174200',
+      username: 'beneficiario_prueba',
+      email: 'beneficiario@comiya.com',
+      phone: '+57 300 123 4567',
+      documentNumber: '99999999Z',
+      documentType: DocumentType.CC,
+      role: UserRole.BENEFICIARY,
+      isVerified: true,
+      isActive: true,
+      password: await bcrypt.hash('password', 10),
     },
   ];
 

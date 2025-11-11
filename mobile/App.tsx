@@ -2,7 +2,10 @@ import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AuthProvider } from "./contexts/AuthContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import { useAuth } from "./hooks/useAuth";
+
+// ─── Screens ─────────────────────────────────────────────
 import HomeScreen from "./screens/HomeScreen";
 import BeneficiaryHomeScreen from "./screens/BeneficiaryHomeScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
@@ -19,8 +22,9 @@ import AvailableFoodListScreen from "./screens/AvailableFoodListScreen";
 import SplashScreen from "./screens/SplashScreen";
 import CompleteProfileScreen from "./screens/CompleteProfileScreen";
 import EditEstablishmentProfileScreen from "./screens/EditEstablishmentProfileScreen";
-import { NotificationProvider } from "./contexts/NotificationContext";
+import SearchEstablishmentsScreen from "./screens/SearchEstablishmentsScreen";
 
+// ─── Tipado de Rutas ─────────────────────────────────────
 export type RootStackParamList = {
   Welcome: undefined;
   Home: undefined;
@@ -37,22 +41,20 @@ export type RootStackParamList = {
   AvailableFoodList: { establishmentId?: string };
   CompleteProfile: undefined;
   EditEstablishmentProfile: undefined;
+  SearchEstablishments: undefined;
 };
 
+// ─── Creación del Stack ──────────────────────────────────
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 /**
- * Componente navegador basado en el estado de autenticación
+ * 📱 RootNavigator: controla qué pantallas mostrar
+ * dependiendo de si el usuario está autenticado o no.
  */
 function RootNavigator() {
   const { isAuthenticated, isInitializing, user } = useAuth();
 
-  if (isInitializing) {
-    return <SplashScreen />;
-  }
-
-  // Calcular initialRouteName dinámicamente según el estado del usuario.
-  // Evita que React Navigation intente usar una screen que no está registrada.
+  // Calcular initialRouteName dinámicamente según el estado del usuario
   let initialRouteName: keyof RootStackParamList = "Welcome";
   if (isAuthenticated) {
     if (!user?.isActive) {
@@ -64,76 +66,75 @@ function RootNavigator() {
     }
   }
 
+  if (isInitializing) {
+    return <SplashScreen />;
+  }
+
   return (
     <Stack.Navigator
       initialRouteName={initialRouteName}
       screenOptions={{
-        headerStyle: {
-          backgroundColor: "#2e7d32",
-        },
+        headerStyle: { backgroundColor: "#2e7d32" },
         headerTintColor: "#fff",
-        headerTitleStyle: {
-          fontWeight: "bold",
-        },
+        headerTitleStyle: { fontWeight: "bold" },
       }}
     >
       {isAuthenticated ? (
-        // Stack de la app autenticada
         <>
-          {/* Si el usuario no completó el perfil (isActive = false), mostrar CompleteProfile */}
           {user?.isActive ? (
             <>
+              {/* ─── Establecimientos ─── */}
               {user?.role === "ESTABLISHMENT" ? (
                 <>
                   <Stack.Screen
                     name="Home"
                     component={HomeScreen}
+                    options={{ title: "ComiYa", headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="FoodRegistration"
+                    component={FoodRegistrationScreen}
+                    options={{ title: "Registrar Alimento" }}
+                  />
+                  <Stack.Screen
+                    name="FoodManagement"
+                    component={FoodManagementScreen}
+                    options={{ title: "Administrar Alimentos" }}
+                  />
+                  <Stack.Screen
+                    name="FoodEdit"
+                    component={FoodEditScreen}
+                    options={{ title: "Editar Alimento" }}
+                  />
+                  <Stack.Screen
+                    name="EditEstablishmentProfile"
+                    component={EditEstablishmentProfileScreen}
+                    options={{ title: "Editar Perfil" }}
+                  />
+                </>
+              ) : (
+                <>
+                  {/* ─── Beneficiarios ─── */}
+                  <Stack.Screen
+                    name="BeneficiaryHome"
+                    component={BeneficiaryHomeScreen}
                     options={{
                       title: "ComiYa",
                       headerShown: false,
                     }}
                   />
                   <Stack.Screen
-                    name="FoodRegistration"
-                    component={FoodRegistrationScreen}
+                    name="SearchEstablishments"
+                    component={SearchEstablishmentsScreen}
                     options={{
-                      title: "Registrar Alimento",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="FoodManagement"
-                    component={FoodManagementScreen}
-                    options={{
-                      title: "Administrar Alimentos",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="FoodEdit"
-                    component={FoodEditScreen}
-                    options={{
-                      title: "Editar Alimento",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="EditEstablishmentProfile"
-                    component={EditEstablishmentProfileScreen}
-                    options={{
-                      title: "Editar Perfil",
+                      title: "Buscar Establecimientos",
+                      headerShown: false,
                     }}
                   />
                 </>
-              ) : (
-                <Stack.Screen
-                  name="BeneficiaryHome"
-                  component={BeneficiaryHomeScreen}
-                  options={{
-                    title: "ComiYa",
-                    headerShown: false, // usamos header personalizado dentro de la pantalla
-                  }}
-                />
               )}
 
-              {/* Pantalla accesible para ambos roles cuando el perfil está activo */}
+              {/* Pantalla compartida para ambos roles */}
               <Stack.Screen
                 name="EstablishmentList"
                 component={EstablishmentListScreen}
@@ -152,6 +153,7 @@ function RootNavigator() {
               />
             </>
           ) : (
+            // Usuario autenticado pero sin completar el perfil
             <Stack.Screen
               name="CompleteProfile"
               component={CompleteProfileScreen}
@@ -164,39 +166,27 @@ function RootNavigator() {
           )}
         </>
       ) : (
-        // Stack de autenticación
         <>
+          {/* ─── Usuario no autenticado ─── */}
           <Stack.Screen
             name="Welcome"
             component={WelcomeScreen}
-            options={{
-              title: "ComiYa",
-              headerShown: false,
-            }}
+            options={{ title: "ComiYa", headerShown: false }}
           />
           <Stack.Screen
             name="Login"
             component={LoginScreen}
-            options={{
-              title: "Iniciar sesión",
-              headerShown: false,
-            }}
+            options={{ title: "Iniciar sesión", headerShown: false }}
           />
           <Stack.Screen
             name="BasicRegistration"
             component={BasicRegistrationScreen}
-            options={{
-              title: "Crear cuenta",
-              headerShown: true,
-            }}
+            options={{ title: "Crear cuenta", headerShown: true }}
           />
           <Stack.Screen
             name="RegisterOptions"
             component={RegisterOptionsScreen}
-            options={{
-              title: "Crear cuenta",
-              headerShown: true,
-            }}
+            options={{ title: "Crear cuenta", headerShown: true }}
           />
           <Stack.Screen
             name="EstablishmentRegistration"
@@ -220,6 +210,7 @@ function RootNavigator() {
   );
 }
 
+// ─── App Principal ───────────────────────────────────────
 export default function App() {
   return (
     <AuthProvider>

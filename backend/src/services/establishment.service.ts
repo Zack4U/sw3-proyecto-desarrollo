@@ -14,7 +14,6 @@ export class EstablishmentsService {
   }
 
   async findAll(page?: number, limit?: number) {
-    // Si no hay paginación, devolver todos
     if (!page || !limit) {
       const data = await this.prisma.establishment.findMany();
       return {
@@ -22,6 +21,7 @@ export class EstablishmentsService {
         total: data.length,
       };
     }
+
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
       this.prisma.establishment.findMany({
@@ -31,10 +31,8 @@ export class EstablishmentsService {
       }),
       this.prisma.establishment.count(),
     ]);
-    return {
-      data,
-      total,
-    };
+
+    return { data, total };
   }
 
   async findOne(id: string) {
@@ -66,11 +64,7 @@ export class EstablishmentsService {
     return this.prisma.establishment.findMany({
       where: { cityId },
       include: {
-        city: {
-          include: {
-            department: true,
-          },
-        },
+        city: { include: { department: true } },
       },
     });
   }
@@ -78,16 +72,10 @@ export class EstablishmentsService {
   async findByDepartment(departmentId: string) {
     return this.prisma.establishment.findMany({
       where: {
-        city: {
-          departmentId,
-        },
+        city: { departmentId },
       },
       include: {
-        city: {
-          include: {
-            department: true,
-          },
-        },
+        city: { include: { department: true } },
       },
     });
   }
@@ -95,17 +83,10 @@ export class EstablishmentsService {
   async findByNeighborhood(neighborhood: string) {
     return this.prisma.establishment.findMany({
       where: {
-        neighborhood: {
-          contains: neighborhood,
-          mode: 'insensitive',
-        },
+        neighborhood: { contains: neighborhood, mode: 'insensitive' },
       },
       include: {
-        city: {
-          include: {
-            department: true,
-          },
-        },
+        city: { include: { department: true } },
       },
     });
   }
@@ -116,33 +97,57 @@ export class EstablishmentsService {
     if (filters.cityId) {
       where.cityId = filters.cityId;
     } else if (filters.departmentId) {
-      where.city = {
-        departmentId: filters.departmentId,
-      };
+      where.city = { departmentId: filters.departmentId };
     }
 
     if (filters.neighborhood) {
-      where.neighborhood = {
-        contains: filters.neighborhood,
-        mode: 'insensitive',
-      };
+      where.neighborhood = { contains: filters.neighborhood, mode: 'insensitive' };
     }
 
     return this.prisma.establishment.findMany({
       where,
       include: {
-        city: {
-          include: {
-            department: true,
-          },
-        },
+        city: { include: { department: true } },
       },
-      orderBy: {
-        name: 'asc',
-      },
+      orderBy: { name: 'asc' },
     });
   }
 
+  // ✅ Nuevo método: búsqueda flexible por ciudad, barrio o departamento
+  async searchEstablishments(filters: {
+    city?: string;
+    neighborhood?: string;
+    department?: string;
+  }) {
+    const where: any = {};
+
+    if (filters.city) {
+      where.city = {
+        name: { contains: filters.city, mode: 'insensitive' },
+      };
+    }
+
+    if (filters.neighborhood) {
+      where.neighborhood = { contains: filters.neighborhood, mode: 'insensitive' };
+    }
+
+    if (filters.department) {
+      where.city = {
+        ...where.city,
+        department: {
+          name: { contains: filters.department, mode: 'insensitive' },
+        },
+      };
+    }
+
+    return this.prisma.establishment.findMany({
+      where,
+      include: { city: { include: { department: true } } },
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  // ✅ Método del branch develop: listar establecimientos con comida disponible
   async findAllWithAvailableFood(filters?: {
     page?: number;
     limit?: number;
@@ -152,24 +157,19 @@ export class EstablishmentsService {
   }) {
     const where: any = {};
 
-    // Aplicar filtros opcionales
     if (filters?.cityId) {
       where.cityId = filters.cityId;
     } else if (filters?.departmentId) {
-      where.city = {
-        departmentId: filters.departmentId,
-      };
+      where.city = { departmentId: filters.departmentId };
     }
 
     if (filters?.establishmentType) {
       where.establishmentType = filters.establishmentType;
     }
 
-    // Calcular paginación si se proporciona
     const skip = filters?.page && filters?.limit ? (filters.page - 1) * filters.limit : undefined;
     const take = filters?.limit;
 
-    // Obtener establecimientos con conteo de comida disponible
     const establishments = await this.prisma.establishment.findMany({
       where,
       skip,
@@ -179,34 +179,25 @@ export class EstablishmentsService {
         foods: {
           where: {
             status: 'AVAILABLE',
-            expiresAt: {
-              gt: new Date(), // Mayor que la fecha actual
-            },
+            expiresAt: { gt: new Date() },
           },
         },
       },
     });
 
-    // Obtener el total de establecimientos (sin paginación)
     const total = await this.prisma.establishment.count({ where });
 
-    // Contar la comida disponible para cada establecimiento
     const establishmentsWithCount = establishments.map((establishment) => {
       const foodAvailable = establishment.foods?.length || 0;
       const { foods, ...establishmentData } = establishment;
-      return {
-        ...establishmentData,
-        foodAvailable,
-      };
+      return { ...establishmentData, foodAvailable };
     });
 
-    // Calcular el total de comida disponible en todos los establecimientos
-    const totalAvailable = establishmentsWithCount.reduce((sum, est) => sum + est.foodAvailable, 0);
+    const totalAvailable = establishmentsWithCount.reduce(
+      (sum, est) => sum + est.foodAvailable,
+      0,
+    );
 
-    return {
-      totalAvailable,
-      total,
-      establishments: establishmentsWithCount,
-    };
+    return { totalAvailable, total, establishments: establishmentsWithCount };
   }
 }

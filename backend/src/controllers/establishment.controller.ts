@@ -17,8 +17,13 @@ import { EstablishmentsService } from 'src/services/establishment.service';
 @ApiTags('establishments')
 @Controller('establishments')
 export class EstablishmentsController {
-  constructor(private readonly establishmentsService: EstablishmentsService) {}
+  constructor(
+    private readonly establishmentsService: EstablishmentsService,
+  ) {}
 
+  // ────────────────────────────────
+  // CREATE
+  // ────────────────────────────────
   @Post()
   @ApiOperation({
     summary: 'Create a new establishment',
@@ -37,10 +42,39 @@ export class EstablishmentsController {
     return this.establishmentsService.create(dto);
   }
 
+  // ────────────────────────────────
+  // SEARCH (must be before :id!)
+  // ────────────────────────────────
+  @Get('search')
+  @ApiOperation({
+    summary: 'Search establishments by city, department, or neighborhood',
+    description:
+      'Returns a list of establishments matching the search query parameters.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of establishments matching the search query',
+  })
+  async searchEstablishments(
+    @Query('city') city?: string,
+    @Query('department') department?: string,
+    @Query('neighborhood') neighborhood?: string,
+  ) {
+    return this.establishmentsService.searchEstablishments({
+      city,
+      department,
+      neighborhood,
+    });
+  }
+
+  // ────────────────────────────────
+  // GET ALL (optional pagination)
+  // ────────────────────────────────
   @Get()
   @ApiOperation({
     summary: 'Get all establishments (paginated)',
-    description: 'Returns a paginated list of establishments. Use ?page=1&limit=10 for pagination.',
+    description:
+      'Returns a paginated list of establishments. Use ?page=1&limit=10 for pagination.',
   })
   @ApiResponse({
     status: 200,
@@ -50,10 +84,10 @@ export class EstablishmentsController {
     // page y limit opcionales, convertir a número si existen
     const pageNum = page ? parseInt(page, 10) : undefined;
     const limitNum = limit ? parseInt(limit, 10) : undefined;
+
     const result = await this.establishmentsService.findAll(pageNum, limitNum);
-    // Si la respuesta es un array plano (caso legacy), adaptarla
+
     if (Array.isArray(result)) {
-      console.log('Paginated establishments result:', result);
       return { data: result, total: result.length };
     }
 
@@ -139,6 +173,9 @@ export class EstablishmentsController {
     return establishment;
   }
 
+  // ────────────────────────────────
+  // UPDATE
+  // ────────────────────────────────
   @Put(':id')
   @ApiOperation({
     summary: 'Update an establishment',
@@ -158,11 +195,10 @@ export class EstablishmentsController {
     status: 404,
     description: 'Establishment not found',
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid data',
-  })
-  async update(@Param('id') id: string, @Body() dto: UpdateEstablishmentDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateEstablishmentDto,
+  ) {
     const establishment = await this.establishmentsService.findOne(id);
     if (!establishment) {
       throw new NotFoundException(`Establishment with ID ${id} not found`);
@@ -170,6 +206,9 @@ export class EstablishmentsController {
     return this.establishmentsService.update(id, dto);
   }
 
+  // ────────────────────────────────
+  // DELETE
+  // ────────────────────────────────
   @Delete(':id')
   @ApiOperation({
     summary: 'Delete an establishment',
@@ -196,6 +235,9 @@ export class EstablishmentsController {
     return this.establishmentsService.remove(id);
   }
 
+  // ────────────────────────────────
+  // BY CITY
+  // ────────────────────────────────
   @Get('city/:cityId')
   @ApiOperation({
     summary: 'Get establishments by city',
@@ -214,6 +256,9 @@ export class EstablishmentsController {
     return this.establishmentsService.findByCity(cityId);
   }
 
+  // ────────────────────────────────
+  // BY DEPARTMENT
+  // ────────────────────────────────
   @Get('department/:departmentId')
   @ApiOperation({
     summary: 'Get establishments by department',
@@ -232,6 +277,9 @@ export class EstablishmentsController {
     return this.establishmentsService.findByDepartment(departmentId);
   }
 
+  // ────────────────────────────────
+  // BY NEIGHBORHOOD
+  // ────────────────────────────────
   @Get('neighborhood/:neighborhood')
   @ApiOperation({
     summary: 'Get establishments by neighborhood',

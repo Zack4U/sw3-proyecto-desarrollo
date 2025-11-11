@@ -34,7 +34,6 @@ export interface EstablishmentResponse {
 
 // Tipos de establecimiento (deben coincidir con el enum EstablishmentType del backend)
 export const ESTABLISHMENT_TYPES = [
-  // Comida y Bebidas
   { value: "RESTAURANT", label: "Restaurante" },
   { value: "COFFEE_SHOP", label: "Cafetería" },
   { value: "BAR", label: "Bar" },
@@ -45,14 +44,10 @@ export const ESTABLISHMENT_TYPES = [
   { value: "FRUIT_SHOP", label: "Frutería" },
   { value: "BUTCHER_SHOP", label: "Carnicería" },
   { value: "FOOD_TRUCK", label: "Food Truck" },
-
-  // Alojamiento
   { value: "HOTEL", label: "Hotel" },
   { value: "HOSTEL", label: "Hostal" },
   { value: "MOTEL", label: "Motel" },
   { value: "APART_HOTEL", label: "Apart Hotel" },
-
-  // Comercio Minorista
   { value: "CLOTHING_STORE", label: "Tienda de Ropa" },
   { value: "SHOE_STORE", label: "Zapatería" },
   { value: "JEWELRY_STORE", label: "Joyería" },
@@ -65,8 +60,6 @@ export const ESTABLISHMENT_TYPES = [
   { value: "HARDWARE_STORE", label: "Ferretería" },
   { value: "PET_STORE", label: "Tienda de Mascotas" },
   { value: "NURSERY", label: "Vivero" },
-
-  // Servicios
   { value: "HAIR_SALON", label: "Peluquería" },
   { value: "BARBER_SHOP", label: "Barbería" },
   { value: "BEAUTY_CENTER", label: "Centro de Belleza" },
@@ -79,8 +72,6 @@ export const ESTABLISHMENT_TYPES = [
   { value: "VETERINARY", label: "Veterinaria" },
   { value: "CORPORATE_OFFICE", label: "Oficina Corporativa" },
   { value: "EDUCATIONAL_CENTER", label: "Centro Educativo" },
-
-  // Entretenimiento y Cultura
   { value: "CINEMA", label: "Cine" },
   { value: "THEATER", label: "Teatro" },
   { value: "MUSEUM", label: "Museo" },
@@ -88,21 +79,12 @@ export const ESTABLISHMENT_TYPES = [
   { value: "EVENT_CENTER", label: "Centro de Eventos" },
   { value: "AMUSEMENT_PARK", label: "Parque de Diversiones" },
   { value: "BOWLING_ALLEY", label: "Bolera" },
-
-  // Otros
   { value: "SHOPPING_MALL", label: "Centro Comercial" },
   { value: "PARKING", label: "Estacionamiento" },
   { value: "OTHER", label: "Otro" },
 ];
 
-/**
- * Traduce el tipo de establecimiento de inglés a español
- * @param establishmentType - El tipo de establecimiento en inglés (ej: 'RESTAURANT')
- * @returns El nombre en español (ej: 'Restaurante') o el valor original si no se encuentra
- */
-export const getEstablishmentTypeLabel = (
-  establishmentType: string
-): string => {
+export const getEstablishmentTypeLabel = (establishmentType: string): string => {
   const type = ESTABLISHMENT_TYPES.find((t) => t.value === establishmentType);
   return type ? type.label : establishmentType;
 };
@@ -110,18 +92,12 @@ export const getEstablishmentTypeLabel = (
 // Función helper para formatear mensajes de error
 const getErrorMessage = (error: unknown): string => {
   if (axios.isAxiosError(error)) {
-    // Error de respuesta del servidor
     if (error.response) {
       const status = error.response.status;
       const data = error.response.data;
-
-      // Mensajes específicos según el código de estado
       switch (status) {
         case 400:
-          return (
-            data?.message ||
-            "Datos inválidos. Por favor verifica la información ingresada."
-          );
+          return data?.message || "Datos inválidos. Por favor verifica la información ingresada.";
         case 401:
           return "No autorizado. Por favor inicia sesión nuevamente.";
         case 403:
@@ -136,127 +112,72 @@ const getErrorMessage = (error: unknown): string => {
           return data?.message || `Error del servidor (${status})`;
       }
     }
-
-    // Error de red
     if (error.request) {
       return "No se pudo conectar con el servidor. Verifica tu conexión a internet.";
     }
   }
-
-  // Error genérico
   if (error instanceof Error) {
     return error.message;
   }
-
   return "Ocurrió un error inesperado. Por favor intenta nuevamente.";
 };
 
-// Tipo para la respuesta paginada
 export interface PaginatedEstablishments {
   data: EstablishmentResponse[];
   total: number;
 }
 
-// Tipo para la respuesta de establecimientos con comida disponible
 export interface EstablishmentsWithAvailableFood {
   totalAvailable: number;
   total: number;
   establishments: EstablishmentResponse[];
 }
 
-// Servicio para manejar operaciones de establecimientos
 export const establishmentService = {
-  // Crear un nuevo establecimiento
-  create: async (
-    data: CreateEstablishmentData
-  ): Promise<EstablishmentResponse> => {
+  create: async (data: CreateEstablishmentData): Promise<EstablishmentResponse> => {
     try {
-      // Formatear el payload según lo que espera el backend
-      const payload = {
-        establishmentId: data.establishmentId,
-        name: data.name,
-        description: data.description,
-        address: data.address,
-        neighborhood: data.neighborhood,
-        location: data.location, // Debe ser un objeto GeoJSON
-        establishmentType: data.establishmentType,
-        userId: data.userId,
-        cityId: data.cityId,
-      };
-
-      const response = await api.post<EstablishmentResponse>(
-        "/establishments",
-        payload
-      );
+      const response = await api.post<EstablishmentResponse>("/establishments", data);
       return response.data;
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      console.error("Error al crear establecimiento:", errorMessage);
-      throw new Error(errorMessage);
+      throw new Error(getErrorMessage(error));
     }
   },
 
-  // Obtener establecimientos paginados
-  getPaginated: async (
-    page = 1,
-    limit = 10
-  ): Promise<PaginatedEstablishments> => {
+  getPaginated: async (page = 1, limit = 10): Promise<PaginatedEstablishments> => {
     try {
-      const response = await api.get<PaginatedEstablishments>(
-        `/establishments?page=${page}&limit=${limit}`
-      );
+      const response = await api.get<PaginatedEstablishments>(`/establishments?page=${page}&limit=${limit}`);
       return response.data;
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      console.error("Error al obtener establecimientos:", errorMessage);
-      throw new Error(errorMessage);
+      throw new Error(getErrorMessage(error));
     }
   },
 
-  // Obtener un establecimiento por ID
   getById: async (id: string): Promise<EstablishmentResponse> => {
     try {
-      const response = await api.get<EstablishmentResponse>(
-        `/establishments/${id}`
-      );
+      const response = await api.get<EstablishmentResponse>(`/establishments/${id}`);
       return response.data;
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      console.error("Error al obtener establecimiento:", errorMessage);
-      throw new Error(errorMessage);
+      throw new Error(getErrorMessage(error));
     }
   },
 
-  // Actualizar un establecimiento
-  update: async (
-    id: string,
-    data: Partial<CreateEstablishmentData>
-  ): Promise<EstablishmentResponse> => {
+  update: async (id: string, data: Partial<CreateEstablishmentData>): Promise<EstablishmentResponse> => {
     try {
-      const response = await api.put<EstablishmentResponse>(
-        `/establishments/${id}`,
-        data
-      );
+      const response = await api.put<EstablishmentResponse>(`/establishments/${id}`, data);
       return response.data;
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      console.error("Error al actualizar establecimiento:", errorMessage);
-      throw new Error(errorMessage);
+      throw new Error(getErrorMessage(error));
     }
   },
 
-  // Eliminar un establecimiento
   delete: async (id: string): Promise<void> => {
     try {
       await api.delete(`/establishments/${id}`);
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      console.error("Error al eliminar establecimiento:", errorMessage);
-      throw new Error(errorMessage);
+      throw new Error(getErrorMessage(error));
     }
   },
 
-  // Obtener establecimientos con comida disponible
   getWithAvailableFood: async (filters?: {
     page?: number;
     limit?: number;
@@ -266,29 +187,26 @@ export const establishmentService = {
   }): Promise<EstablishmentsWithAvailableFood> => {
     try {
       const params = new URLSearchParams();
-
       if (filters?.page) params.append("page", filters.page.toString());
       if (filters?.limit) params.append("limit", filters.limit.toString());
       if (filters?.cityId) params.append("cityId", filters.cityId);
-      if (filters?.departmentId)
-        params.append("departmentId", filters.departmentId);
-      if (filters?.establishmentType)
-        params.append("establishmentType", filters.establishmentType);
-
+      if (filters?.departmentId) params.append("departmentId", filters.departmentId);
+      if (filters?.establishmentType) params.append("establishmentType", filters.establishmentType);
       const queryString = params.toString();
-      const url = `/establishments/available/food${
-        queryString ? `?${queryString}` : ""
-      }`;
-
+      const url = `/establishments/available/food${queryString ? `?${queryString}` : ""}`;
       const response = await api.get<EstablishmentsWithAvailableFood>(url);
       return response.data;
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      console.error(
-        "Error al obtener establecimientos con comida disponible:",
-        errorMessage
-      );
-      throw new Error(errorMessage);
+      throw new Error(getErrorMessage(error));
+    }
+  },
+
+  searchEstablishments: async (params: { city?: string; neighborhood?: string; department?: string }) => {
+    try {
+      const response = await api.get('/establishments/search', { params });
+      return response.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error));
     }
   },
 };
