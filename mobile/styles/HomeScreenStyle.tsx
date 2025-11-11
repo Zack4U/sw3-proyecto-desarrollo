@@ -85,6 +85,12 @@ export const styles = StyleSheet.create({
     borderLeftWidth: 5,
     borderLeftColor: Colors.secondary,
   },
+  notificationTestButton: {
+    borderLeftWidth: 5,
+    borderLeftColor: Colors.accent,
+    borderWidth: 2,
+    borderColor: Colors.accent,
+  },
   // foodButton removed for simplified menu
   buttonIcon: {
     fontSize: 48,
@@ -100,5 +106,11 @@ export const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.textSecondary,
     textAlign: "center",
+  },
+  tokenStatusSmall: {
+    fontSize: FontSizes.xs,
+    color: Colors.success,
+    marginTop: Spacing.xs,
+    fontWeight: FontWeights.semibold,
   },
 });
