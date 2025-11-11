@@ -45,30 +45,41 @@ export default function BeneficiaryHomeScreen() {
       </View>
 
       {/* Contenido principal */}
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 15, paddingHorizontal: 20 }}>
-        {/* Botón para ver la lista completa */}
-        <TouchableOpacity
-          style={[styles.menuButton, styles.beneficiaryButton]}
-          onPress={() => navigation.navigate('EstablishmentList' as never)}
-        >
-          <Text style={styles.buttonIcon}>🏢</Text>
-          <Text style={styles.buttonText}>Ver establecimientos</Text>
-          <Text style={styles.buttonDescription}>
-            Explora los puntos de donación cercanos
-          </Text>
-        </TouchableOpacity>
+      <View style={styles.contentContainer}>
+        <View style={styles.menuContainer}>
+          <TouchableOpacity
+            style={[styles.menuButton, styles.beneficiaryButton]}
+            onPress={() => navigation.navigate('EstablishmentList' as never)}
+          >
+            <Text style={styles.buttonIcon}>🏢</Text>
+            <Text style={styles.buttonText}>Ver establecimientos</Text>
+            <Text style={styles.buttonDescription}>
+              Explora los puntos de donación cercanos
+            </Text>
+          </TouchableOpacity>
 
-        {/* Botón para buscar por ciudad o barrio */}
-        <TouchableOpacity
-          style={[styles.menuButton, styles.beneficiaryButton]}
-          onPress={() => navigation.navigate('SearchEstablishments' as never)}
-        >
-          <Text style={styles.buttonIcon}>🔍</Text>
-          <Text style={styles.buttonText}>Buscar establecimientos</Text>
-          <Text style={styles.buttonDescription}>
-            Filtra por ciudad o barrio
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.menuButton, styles.beneficiaryButton]}
+            onPress={() => navigation.navigate('SearchEstablishments' as never)}
+          >
+            <Text style={styles.buttonIcon}>🔍</Text>
+            <Text style={styles.buttonText}>Buscar establecimientos</Text>
+            <Text style={styles.buttonDescription}>
+              Filtra por ciudad o barrio
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.menuButton, styles.beneficiaryButton]}
+            onPress={() => navigation.navigate('AvailableFoodList' as never)}
+          >
+            <Text style={styles.buttonIcon}>🍽️</Text>
+            <Text style={styles.buttonText}>Ver alimentos disponibles</Text>
+            <Text style={styles.buttonDescription}>
+              Explora todos los alimentos donados
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Modal de perfil */}

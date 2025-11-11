@@ -69,7 +69,27 @@ export const FOOD_CATEGORIES = [
     { value: 'OTHERS', label: 'Otros' },
 ];
 
-// Unidades de medida (deben coincidir con el enum UnitOfMeasure del backend)
+/**
+ * Traduce la categoría de alimento de inglés a español
+ * @param category - La categoría en inglés (ej: 'BAKERY')
+ * @returns El nombre en español (ej: 'Panadería') o el valor original si no se encuentra
+ */
+export const getFoodCategoryLabel = (category: string): string => {
+    const cat = FOOD_CATEGORIES.find((c) => c.value === category);
+    return cat ? cat.label : category;
+};
+
+/**
+ * Traduce la unidad de medida de inglés a español
+ * @param unit - La unidad en inglés (ej: 'KILOGRAM')
+ * @returns El nombre en español (ej: 'Kilogramos (kg)') o el valor original si no se encuentra
+ */
+export const getUnitOfMeasureLabel = (unit: string): string => {
+    const unitObj = UNIT_OF_MEASURE.find((u) => u.value === unit);
+    return unitObj ? unitObj.label : unit;
+};
+
+// Función helper para formatear mensajes de error
 export const UNIT_OF_MEASURE = [
     { value: 'UNIT', label: 'Unidad' },
     { value: 'DOZEN', label: 'Docena' },

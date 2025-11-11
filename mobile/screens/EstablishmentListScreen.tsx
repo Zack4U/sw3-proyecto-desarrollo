@@ -193,14 +193,13 @@ export default function EstablishmentListScreen({
         ]}
         onPress={() => setViewMode("list")}
       >
-        <Text>📋</Text>
         <Text
           style={[
             mapStyles.toggleButtonText,
             viewMode === "list" && mapStyles.toggleButtonTextActive,
           ]}
         >
-          Lista
+          📋 Lista
         </Text>
       </Pressable>
       <Pressable
@@ -210,14 +209,13 @@ export default function EstablishmentListScreen({
         ]}
         onPress={() => setViewMode("map")}
       >
-        <Text>🗺️</Text>
         <Text
           style={[
             mapStyles.toggleButtonText,
             viewMode === "map" && mapStyles.toggleButtonTextActive,
           ]}
         >
-          Mapa
+          🗺️ Mapa
         </Text>
       </Pressable>
     </View>
@@ -308,6 +306,18 @@ export default function EstablishmentListScreen({
               {item.foodAvailable !== 1 ? "s" : ""}
             </Text>
           )}
+          {!!(item.foodAvailable && item.foodAvailable > 0) && (
+            <Pressable
+              style={listStyles.viewFoodsButton}
+              onPress={() =>
+                navigation.navigate("AvailableFoodList" as any, {
+                  establishmentId: item.establishmentId,
+                })
+              }
+            >
+              <Text style={listStyles.viewFoodsButtonText}>Ver Alimentos</Text>
+            </Pressable>
+          )}
           <View style={listStyles.divider} />
         </Card>
       )}
@@ -327,82 +337,91 @@ export default function EstablishmentListScreen({
   );
 
   const renderMapView = () => {
-    // Filtrar establecimientos con coordenadas válidas
-    const establishmentsWithCoords = establishments.filter((est) => {
-      const coords = getEstablishmentCoordinates(est);
-      return coords !== null;
-    });
+  // Filtrar establecimientos con coordenadas válidas
+  const establishmentsWithCoords = establishments.filter((est) => {
+    const coords = getEstablishmentCoordinates(est);
+    return coords !== null;
+  });
 
-    console.log(
-      `Establecimientos con coordenadas válidas: ${establishmentsWithCoords.length} de ${establishments.length}`
-    );
+  return (
+    <View style={mapStyles.mapContainer}>
+      {(loading || locationLoading) && (
+        <View style={mapStyles.loadingContainer}>
+          <ActivityIndicator size="large" color="#3CA55C" />
+          <Text style={mapStyles.loadingText}>
+            {locationLoading ? "Obteniendo ubicación..." : "Cargando establecimientos..."}
+          </Text>
+        </View>
+      )}
 
-    return (
-      <View style={mapStyles.mapContainer}>
-        {(loading || locationLoading) && (
-          <View style={mapStyles.loadingContainer}>
-            <ActivityIndicator size="large" color="#3CA55C" />
-            <Text style={mapStyles.loadingText}>
-              {locationLoading
-                ? "Obteniendo ubicación..."
-                : "Cargando establecimientos..."}
-            </Text>
-          </View>
-        )}
+      {error && (
+        <View style={mapStyles.errorContainer}>
+          <Text style={mapStyles.errorText}>{String(error)}</Text>
+        </View>
+      )}
 
-        {error && (
-          <View style={mapStyles.errorContainer}>
-            <Text style={mapStyles.errorText}>{error}</Text>
-          </View>
-        )}
+      <MapView
+        style={mapStyles.map}
+        initialRegion={initialMapRegion}
+        showsUserLocation
+        showsMyLocationButton
+      >
+        {establishmentsWithCoords.map((establishment) => {
+          const coords = getEstablishmentCoordinates(establishment)!;
 
-        <MapView
-          style={mapStyles.map}
-          initialRegion={initialMapRegion}
-          showsUserLocation={true}
-          showsMyLocationButton={true}
-        >
-          {establishments.map((establishment) => {
-            const coords = getEstablishmentCoordinates(establishment);
-            if (!coords) return null;
-
-            return (
-              <Marker
-                key={establishment.establishmentId}
-                coordinate={coords}
-                title={establishment.name}
-                description={establishment.address}
-                pinColor="#3CA55C"
+          return (
+            <Marker
+              key={`marker-${establishment.establishmentId}`}
+              coordinate={coords}
+              title={String(establishment.name ?? "")}
+              description={String(establishment.address ?? "")}
+              pinColor="#3CA55C"
+              // ✅ Navega usando onCalloutPress del Marker (mejor en Android)
+              onCalloutPress={() => {
+                if (establishment.foodAvailable && establishment.foodAvailable > 0) {
+                  navigation.navigate("AvailableFoodList" as any, {
+                    establishmentId: establishment.establishmentId,
+                  });
+                }
+              }}
+            >
+              {/* ✅ Claves: key única, tooltip y collapsable={false} en el root */}
+              <Callout
+                key={`callout-${establishment.establishmentId}`}
+                tooltip
               >
-                <Callout>
-                  <View style={mapStyles.markerCallout}>
-                    <Text style={mapStyles.markerTitle}>
-                      {establishment.name}
+                <View collapsable={false} style={mapStyles.markerCallout}>
+                  <Text style={mapStyles.markerTitle}>
+                    {String(establishment.name ?? "")}
+                  </Text>
+                  <Text style={mapStyles.markerAddress}>
+                    {String(establishment.address ?? "")}
+                  </Text>
+                  <Text style={mapStyles.markerType}>
+                    {String(getEstablishmentTypeLabel(establishment.establishmentType) ?? "")}
+                  </Text>
+                  {establishment.foodAvailable !== undefined && (
+                    <Text style={mapStyles.markerFoodAvailable}>
+                      {`🍽️ ${String(establishment.foodAvailable)} alimento${
+                        establishment.foodAvailable !== 1 ? "s" : ""
+                      } disponible${establishment.foodAvailable !== 1 ? "s" : ""}`}
                     </Text>
-                    <Text style={mapStyles.markerAddress}>
-                      {establishment.address}
+                  )}
+                  {!!(establishment.foodAvailable && establishment.foodAvailable > 0) && (
+                    <Text style={mapStyles.markerCallout}>
+                      👉 Toca para ver alimentos
                     </Text>
-                    <Text style={mapStyles.markerType}>
-                      {getEstablishmentTypeLabel(
-                        establishment.establishmentType
-                      )}
-                    </Text>
-                    {establishment.foodAvailable !== undefined && (
-                      <Text style={mapStyles.markerFoodAvailable}>
-                        🍽️ {establishment.foodAvailable} alimento
-                        {establishment.foodAvailable !== 1 ? "s" : ""}{" "}
-                        disponible{establishment.foodAvailable !== 1 ? "s" : ""}
-                      </Text>
-                    )}
-                  </View>
-                </Callout>
-              </Marker>
-            );
-          })}
-        </MapView>
-      </View>
-    );
-  };
+                  )}
+                </View>
+              </Callout>
+            </Marker>
+          );
+        })}
+      </MapView>
+    </View>
+  );
+};
+
 
   return (
     <View style={mapStyles.container}>
@@ -410,9 +429,7 @@ export default function EstablishmentListScreen({
         <Text style={mapStyles.title}>Establecimientos Registrados</Text>
         <Text style={mapStyles.subtitle}>Puntos de donación</Text>
       </View>
-
       {renderToggleButtons()}
-
       {viewMode === "list" ? renderListView() : renderMapView()}
     </View>
   );

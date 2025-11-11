@@ -26,6 +26,7 @@ model Establishment {
 
 **Opción A: Desarrollo rápido (sin migración)**
 ```bash
+npx prisma reset
 npx prisma db push
 npx prisma generate
 ```
