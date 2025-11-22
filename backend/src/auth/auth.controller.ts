@@ -9,6 +9,8 @@ import {
   HttpStatus,
   BadRequestException,
   Logger,
+  Param,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -22,6 +24,8 @@ import {
   LoginDto,
   GoogleLoginCommonDto,
   CompleteProfileDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
 } from '../dtos/Auth';
 import { GoogleAuthGuard, JwtAuthGuard, LocalAuthGuard } from './guards';
 
@@ -441,5 +445,123 @@ export class AuthController {
     @Body() completeProfileDto: CompleteProfileDto,
   ): Promise<AuthResponseDto> {
     return this.authService.completeUserProfile(req.user.userId, completeProfileDto);
+  }
+
+  /**
+   * Solicitar recuperación de contraseña
+   */
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Request password reset',
+    description:
+      'Request a password reset for the given email. A reset token will be sent to the email if it exists.',
+  })
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset instructions sent (if email exists)',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example:
+            'Si el correo electrónico está registrado, recibirás instrucciones para recuperar tu contraseña',
+        },
+        token: {
+          type: 'string',
+          example: '550e8400-e29b-41d4-a716-446655440000',
+          description: 'Reset token (only in development mode)',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid email format',
+  })
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    this.logger.log(`Forgot password request for: ${forgotPasswordDto.email}`);
+    return this.authService.requestPasswordReset(forgotPasswordDto.email);
+  }
+
+  /**
+   * Validar token de recuperación
+   */
+  @Get('validate-reset-token/:token')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Validate password reset token',
+    description: 'Check if a password reset token is valid and not expired',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token is valid',
+    schema: {
+      type: 'object',
+      properties: {
+        valid: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Token válido' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token is invalid, expired, or already used',
+    schema: {
+      type: 'object',
+      properties: {
+        valid: { type: 'boolean', example: false },
+        message: { type: 'string', example: 'Token inválido o expirado' },
+      },
+    },
+  })
+  async validateResetToken(@Param('token') token: string) {
+    this.logger.log(`Validating reset token: ${token.substring(0, 8)}...`);
+
+    const isValid = await this.authService.validateResetToken(token);
+
+    if (!isValid) {
+      throw new UnauthorizedException('Token inválido o expirado');
+    }
+
+    return {
+      valid: true,
+      message: 'Token válido',
+    };
+  }
+
+  /**
+   * Restablecer contraseña
+   */
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reset password',
+    description: 'Reset user password using a valid reset token',
+  })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Password successfully reset',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Contraseña actualizada exitosamente' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid password format or Google account',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid, expired, or already used token',
+  })
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    this.logger.log(`Reset password attempt with token: ${resetPasswordDto.token.substring(0, 8)}...`);
+    return this.authService.resetPassword(resetPasswordDto.token, resetPasswordDto.newPassword);
   }
 }

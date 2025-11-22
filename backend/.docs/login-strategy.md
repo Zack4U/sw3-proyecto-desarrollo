@@ -32,6 +32,9 @@ src/dtos/Auth/
 ├── login.dto.ts             # DTO para login local
 ├── register.dto.ts          # DTO para registro
 ├── google-auth.dto.ts       # DTO para Google
+├── forgot-password.dto.ts   # DTO para olvido de contraseña
+├── reset-password.dto.ts    # DTO para resetear la contraseña
+├── validate-token.dto.ts    # DTO para validar el Token
 └── auth-response.dto.ts     # DTO de respuesta
 ```
 
@@ -183,6 +186,88 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
+### 7. **Solicitar Reset de Contraseña**
+
+```http
+POST /api/v1/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "user@example.com"
+}
+```
+
+**Respuesta (200):**
+```json
+{
+  "message": "Si el correo electrónico está registrado, recibirá instrucciones para recuperar tu contraseña",
+  "token": "78Qc80db-d8b3-40ab-b996-c93beeca5ce6"
+}
+```
+
+**Response (200):**
+```json
+{
+  "message": "Si el correo electrónico está registrado, recibirá instrucciones para recuperar tu contraseña",
+  "token": "78Qc80db-d8b3-40ab-b996-c93beeca5ce6"
+}
+```
+
+---
+
+### 8. **Validar Token de Reset**
+
+```http
+GET /api/v1/auth/validate-reset-token/{token}
+```
+
+**Respuesta (200):**
+```json
+{
+  "valid": true,
+  "message": "Token válido"
+}
+```
+
+**Response (200):**
+```json
+{
+  "valid": true,
+  "message": "Token válido"
+}
+```
+
+---
+
+### 9. **Resetear Contraseña**
+
+```http
+POST /api/v1/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "78Qc80db-d8b3-40ab-b996-c93beeca5ce6",
+  "newPassword": "NewSecurePass123!"
+}
+```
+
+**Respuesta (200):**
+```json
+{
+  "message": "Contraseña actualizada exitosamente"
+}
+```
+
+
+**Response (200):**
+```json
+{
+  "message": "Contraseña actualizada exitosamente"
+}
+```
+
+---
+
 ## 🔧 Configuración de Variables de Entorno
 
 Copia el archivo `.env.example` a `.env` y actualiza los valores:
@@ -275,6 +360,13 @@ Usuario usa Google → Credenciales enviadas → Usuario encontrado o creado →
 Cliente envía refresh token → Token validado → Nuevo access token generado → Token retornado
 ```
 
+### Recuperación de Contraseña
+```
+Usuario solicita reset → Token generado → Email enviado → Token validado → Nueva contraseña establecida
+```
+
+---
+
 ## 🛡️ Seguridad
 
 ✅ **Contraseñas hasheadas** con bcrypt (salt rounds: 10)  
@@ -283,6 +375,8 @@ Cliente envía refresh token → Token validado → Nuevo access token generado 
 ✅ **CORS configurado** en producción  
 ✅ **HTTPS recomendado** en producción  
 ✅ **Validación de entrada** con class-validator  
+✅ **Reset tokens** con expiración de 1 hora  
+✅ **Tokens no almacenados en BD** (JWT auto-contenidos)
 
 ## 📝 Notas Importantes
 
@@ -291,6 +385,8 @@ Cliente envía refresh token → Token validado → Nuevo access token generado 
 - **Expiración**: Configure tiempos según su política de seguridad
 - **Cambio de secretos**: Si cambias los secretos JWT, todos los tokens se invalidarán
 - **Google OAuth**: Requiere configuración en Google Cloud Console
+- **Reset tokens**: Se envían por correo electrónico al usuario registrado
+- **Identifier**: Permite login con email, username o número de documento
 
 ## 🧪 Testing
 

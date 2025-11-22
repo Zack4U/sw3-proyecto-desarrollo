@@ -28,6 +28,10 @@ Documentación completa de todos los endpoints de autenticación del sistema Com
   - [👤 Perfil](#-perfil)
     - [1. Obtener Perfil](#1-obtener-perfil)
     - [2. Cambiar Contraseña](#2-cambiar-contraseña)
+  - [🔐 Recuperación de Contraseña](#-recuperación-de-contraseña)
+    - [1. Solicitar Reset de Contraseña](#1-solicitar-reset-de-contraseña)
+    - [2. Validar Token de Reset](#2-validar-token-de-reset)
+    - [3. Resetear Contraseña](#3-resetear-contraseña)
   - [🔒 Autenticación](#-autenticación)
   - [📝 Notas](#-notas)
   - [🐛 Códigos de Error Comunes](#-códigos-de-error-comunes)
@@ -95,6 +99,16 @@ Registro completo de beneficiario en un solo paso.
 ```
 
 **Response (201):** Similar al registro básico
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyODljNzAtMjJjc-c2E1N-xxxxxxxxxxxxxx",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyODljNzAtMjJjYzhjY",
+  "user": {
+    "userId": "289c70-22cc-70-22cc-4510-939f-466c46770d82",
+    "email": "test.recovery@example.com"
+  }
+}
+```
 
 ---
 
@@ -218,6 +232,19 @@ El `identifier` puede ser:
 **Errores:**
 - `401` - Credenciales inválidas
 - `404` - Usuario no encontrado
+
+**Response (200):**
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "userId": "289c70-22cc-8ca2-3156-4b70-c3dcb37-501e",
+    "email": "test@example.com",
+    "role": "BENEFICIARY"
+  }
+}
+```
 
 ---
 
@@ -444,6 +471,80 @@ Authorization: Bearer {token}
 
 ---
 
+## 🔐 Recuperación de Contraseña
+
+### 1. Solicitar Reset de Contraseña
+
+Solicitar un token de reset de contraseña para un email registrado.
+
+**Endpoint:** `POST /auth/forgot-password`
+
+**Body:**
+```json
+{
+  "email": "test.recovery@example.com"
+}
+```
+
+**Response (200):**
+```json
+{
+  "message": "Si el correo electrónico está registrado, recibirá instrucciones para recuperar tu contraseña",
+  "token": "78Qc80db-d8b3-40ab-b996-c93beeca5ce6"
+}
+```
+
+---
+
+### 2. Validar Token de Reset
+
+Verificar si un token de reset de contraseña es válido y no ha expirado.
+
+**Endpoint:** `GET /auth/validate-reset-token/{token}`
+
+**Parameters:**
+```
+token (string, required) - Token de reset recibido por correo
+```
+
+**Response (200):**
+```json
+{
+  "valid": true,
+  "message": "Token válido"
+}
+```
+
+---
+
+### 3. Resetear Contraseña
+
+Resetear la contraseña usando un token válido.
+
+**Endpoint:** `POST /auth/reset-password`
+
+**Body:**
+```json
+{
+  "token": "78Qc80db-d8b3-40ab-b996-c93beeca5ce6",
+  "newPassword": "MySecurePassword123!"
+}
+```
+
+**Response (200):**
+```json
+{
+  "message": "Contraseña actualizada exitosamente"
+}
+```
+
+**Errores:**
+- `400` - Token inválido o expirado
+- `400` - La contraseña no cumple los requisitos
+- `400` - El token ha expirado
+
+---
+
 ## 🔒 Autenticación
 
 Todos los endpoints marcados con 🔐 requieren autenticación JWT:
@@ -470,6 +571,7 @@ Las contraseñas deben cumplir:
 
 - **Access Token**: Expira en 15 minutos
 - **Refresh Token**: Expira en 7 días
+- **Reset Token**: Expira en 1 hora
 
 ### Roles de Usuario
 
