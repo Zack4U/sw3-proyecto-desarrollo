@@ -3,6 +3,7 @@ import {
   BadRequestException,
   UnauthorizedException,
   ConflictException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -24,6 +25,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
@@ -668,5 +670,191 @@ export class AuthService {
     }
 
     throw new BadRequestException('Invalid role provided');
+  }
+
+  /**
+   * Solicitar recuperación de contraseña
+   * Genera un token único y lo almacena en la base de datos
+   *
+   * @param email - Email del usuario
+   * @returns Mensaje de confirmación y token (solo en desarrollo)
+   */
+  async requestPasswordReset(
+    email: string,
+  ): Promise<{ message: string; token?: string }> {
+    this.logger.log(`Password reset requested for email: ${email}`);
+
+    // Buscar usuario por email
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    // Por seguridad, NO se revela si el correo existe o no
+    // Siempre se devuelve el mismo mensaje
+    if (!user) {
+      this.logger.warn(`Password reset requested for non-existent email: ${email}`);
+      return {
+        message:
+          'Si el correo electrónico está registrado, recibirás instrucciones para recuperar tu contraseña',
+      };
+    }
+
+    // Validar que el usuario tenga contraseña (no sea cuenta de Google)
+    if (!user.password) {
+      this.logger.warn(`Password reset requested for Google account: ${email}`);
+      return {
+        message:
+          'Si el correo electrónico está registrado, recibirás instrucciones para recuperar tu contraseña',
+      };
+    }
+
+    // Generar token único
+    const token = uuidv4();
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 10); // Token válido por 10 minutos
+
+    // Invalidar tokens anteriores del usuario que no hayan sido usados
+    await this.prisma.passwordResetToken.updateMany({
+      where: {
+        userId: user.userId,
+        used: false,
+      },
+      data: {
+        used: true,
+      },
+    });
+
+    // Crear nuevo token
+    await this.prisma.passwordResetToken.create({
+      data: {
+        id: uuidv4(),
+        token,
+        userId: user.userId,
+        expiresAt,
+      },
+    });
+
+    this.logger.log(`Password reset token created for user: ${user.userId}`);
+
+    // TODO: Implementar envío de email cuando el servicio esté disponible
+    // await this.emailService.sendPasswordResetEmail(user.email, token);
+
+    // TEMPORAL: En desarrollo, devolver el token en la respuesta
+    // IMPORTANTE: Eliminar esto en producción
+    const isDevelopment = process.env.NODE_ENV === 'development';
+
+    if (isDevelopment) {
+      this.logger.debug(`[DEV ONLY] Reset token: ${token}`);
+    }
+
+    return {
+      message:
+        'Si el correo electrónico está registrado, recibirás instrucciones para recuperar tu contraseña',
+      ...(isDevelopment && { token }), // Solo incluir token en desarrollo
+    };
+  }
+
+  /**
+   * Validar token de recuperación de contraseña
+   *
+   * @param token - Token a validar
+   * @returns true si el token es válido, false en caso contrario
+   */
+  async validateResetToken(
+    token: string
+  ): Promise<boolean> {
+    this.logger.log(`Validating reset token: ${token.substring(0, 8)}...`);
+
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { token },
+    });
+
+    // Validar que el token existe
+    if (!resetToken) {
+      this.logger.warn(`Token not found: ${token.substring(0, 8)}...`);
+      return false;
+    }
+
+    // Validar que no haya sido usado
+    if (resetToken.used) {
+      this.logger.warn(`Token already used: ${token.substring(0, 8)}...`);
+      return false;
+    }
+
+    // Validar que no haya expirado
+    if (new Date() > resetToken.expiresAt) {
+      this.logger.warn(`Token expired: ${token.substring(0, 8)}...`);
+      return false;
+    }
+
+    this.logger.log(`Token is valid: ${token.substring(0, 8)}...`);
+    return true;
+  }
+
+  /**
+   * Restablecer contraseña usando token válido
+   *
+   * @param token - Token de recuperación
+   * @param newPassword - Nueva contraseña
+   * @returns Mensaje de confirmación
+   */
+  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+    this.logger.log(`Password reset attempt with token: ${token.substring(0, 8)}...`);
+
+    // Buscar token con información del usuario
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { token },
+      include: { user: true },
+    });
+
+    // Validar que el token existe
+    if (!resetToken) {
+      this.logger.warn(`Invalid token: ${token.substring(0, 8)}...`);
+      throw new UnauthorizedException('Token inválido o expirado');
+    }
+
+    // Validar que no haya sido usado
+    if (resetToken.used) {
+      this.logger.warn(`Token already used: ${token.substring(0, 8)}...`);
+      throw new UnauthorizedException('Este token ya ha sido utilizado');
+    }
+
+    // Validar que no haya expirado
+    if (new Date() > resetToken.expiresAt) {
+      this.logger.warn(`Token expired: ${token.substring(0, 8)}...`);
+      throw new UnauthorizedException('El token ha expirado. Solicita uno nuevo');
+    }
+
+    // Validar que el usuario existe y tiene contraseña
+    if (!resetToken.user) {
+      this.logger.error(`User not found for token: ${token.substring(0, 8)}...`);
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    if (!resetToken.user.password) {
+      this.logger.warn(`Cannot reset password for Google account: ${resetToken.user.email}`);
+      throw new BadRequestException(
+        'Esta cuenta está vinculada con Google. No puedes cambiar la contraseña',
+      );
+    }
+
+    // Hash de la nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Actualizar contraseña y marcar token como usado en una transacción
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { userId: resetToken.userId },
+        data: { password: hashedPassword },
+      }),
+      this.prisma.passwordResetToken.update({
+        where: { id: resetToken.id },
+        data: { used: true },
+      }),
+    ]);
+
+    this.logger.log(`Password successfully reset for user: ${resetToken.user.email}`);
+
+    return { message: 'Contraseña actualizada exitosamente' };
   }
 }
