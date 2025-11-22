@@ -9,3 +9,6 @@ export * from './google-auth-beneficiary.dto';
 export * from './google-auth-establishment.dto';
 export * from './google-login-common.dto';
 export * from './complete-profile.dto';
+export * from './forgot-password.dto';
+export * from './reset-password.dto';
+export * from './validate-token.dto';
