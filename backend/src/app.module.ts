@@ -15,9 +15,10 @@ import { UsersService } from './services/users.service';
 import { UsersController } from './controllers/users.controller';
 import { GeolocationService } from './services/geolocation.service';
 import { GeolocationController } from './controllers/geolocation.controller';
+import { EmailModule } from './notifications/email.module';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, EmailModule],
   controllers: [
     AppController,
     EstablishmentsController,
