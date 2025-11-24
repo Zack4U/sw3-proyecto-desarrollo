@@ -22,6 +22,7 @@ import {
 } from '../dtos/Auth';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
+import { EmailService } from 'src/notifications/email.service';
 
 @Injectable()
 export class AuthService {
@@ -29,6 +30,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   /**
@@ -118,6 +120,10 @@ export class AuthService {
         isActive: true,
       },
     });
+
+    this.emailService
+      .sendWelcomeEmail(user.email, user.username || 'User')
+      .catch((err) =>this.logger.error('Error sending welcome email:', err));
 
     // Generar tokens
     return this.generateTokens(user);
