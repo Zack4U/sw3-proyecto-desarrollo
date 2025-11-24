@@ -31,7 +31,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private emailService: EmailService,
-  ) {}
+  ) { }
 
   /**
    * Validar usuario por identifier (username, email o documentNumber) y contraseña
@@ -123,7 +123,7 @@ export class AuthService {
 
     this.emailService
       .sendWelcomeEmail(user.email, user.username || 'User')
-      .catch((err) =>this.logger.error('Error sending welcome email:', err));
+      .catch((err) => this.logger.error('Error sending welcome email:', err));
 
     // Generar tokens
     return this.generateTokens(user);
@@ -414,6 +414,9 @@ export class AuthService {
       data: { password: hashedPassword },
     });
 
+    this.emailService.sendConfirmationEmail(user.email)
+      .catch((err) => this.logger.error('Error sending password change email:', err));
+
     return { success: true, message: 'Password changed successfully' };
   }
 
@@ -657,9 +660,9 @@ export class AuthService {
             cityId: completeProfileDto.cityId,
             location: completeProfileDto.location
               ? {
-                  type: completeProfileDto.location.type,
-                  coordinates: completeProfileDto.location.coordinates,
-                }
+                type: completeProfileDto.location.type,
+                coordinates: completeProfileDto.location.coordinates,
+              }
               : { type: 'Point', coordinates: [] }, // Formato GeoJSON válido pero vacío si no se proporciona
           },
         });
@@ -742,8 +745,11 @@ export class AuthService {
 
     this.logger.log(`Password reset token created for user: ${user.userId}`);
 
-    // TODO: Implementar envío de email cuando el servicio esté disponible
-    // await this.emailService.sendPasswordResetEmail(user.email, token);
+    // Enviar correo de recuperación de contraseña
+    this.emailService
+      .sendPasswordResetEmail(user.email, token)
+      .catch(err => this.logger.error('Error enviando correo de recuperación:', err));
+
 
     // TEMPORAL: En desarrollo, devolver el token en la respuesta
     // IMPORTANTE: Eliminar esto en producción
