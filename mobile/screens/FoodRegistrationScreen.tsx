@@ -85,11 +85,14 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
 	);
 };
 
+import { useToast } from '../hooks/useToast';
+
 export default function FoodRegistrationScreen({
 	navigation,
 }: Readonly<FoodRegistrationScreenProps>) {
 	// Obtener el usuario autenticado y su establishmentId
 	const { user } = useAuth();
+	const toast = useToast();
 
 	// Log para depuración
 	console.log('🔍 Usuario autenticado:', {
@@ -132,14 +135,18 @@ export default function FoodRegistrationScreen({
 			!formData.unitOfMeasure ||
 			!formData.expiresAt
 		) {
-			requestState.setError('Por favor completa todos los campos obligatorios');
+			const errorMsg = 'Por favor completa todos los campos obligatorios';
+			requestState.setError(errorMsg);
+			toast.warning(errorMsg, 'Campos incompletos');
 			return;
 		}
 
 		// Validar que la cantidad sea un número positivo
 		const quantity = Number.parseFloat(formData.quantity);
 		if (Number.isNaN(quantity) || quantity <= 0) {
-			requestState.setError('La cantidad debe ser un número positivo');
+			const errorMsg = 'La cantidad debe ser un número positivo';
+			requestState.setError(errorMsg);
+			toast.warning(errorMsg, 'Cantidad inválida');
 			return;
 		}
 
@@ -149,7 +156,9 @@ export default function FoodRegistrationScreen({
 		today.setHours(0, 0, 0, 0);
 
 		if (expiresAt < today) {
-			requestState.setError('La fecha de expiración debe ser posterior a hoy');
+			const errorMsg = 'La fecha de expiración debe ser posterior a hoy';
+			requestState.setError(errorMsg);
+			toast.warning(errorMsg, 'Fecha inválida');
 			return;
 		}
 
@@ -191,9 +200,10 @@ export default function FoodRegistrationScreen({
 		}
 
 		if (!establishmentIdToUse) {
-			requestState.setError(
-				'Por favor completa tu perfil de establecimiento o verifica que tu usuario tenga un establecimiento asignado'
-			);
+			const errorMsg =
+				'Por favor completa tu perfil de establecimiento o verifica que tu usuario tenga un establecimiento asignado';
+			requestState.setError(errorMsg);
+			toast.error(errorMsg, 'Error de establecimiento');
 			return;
 		}
 
@@ -219,6 +229,7 @@ export default function FoodRegistrationScreen({
 
 			// Marcar como exitoso
 			requestState.setSuccess();
+			toast.success('Alimento registrado exitosamente', '¡Listo!');
 
 			// Esperar un momento para que el usuario vea el mensaje de éxito
 			setTimeout(() => {
@@ -234,6 +245,7 @@ export default function FoodRegistrationScreen({
 			}
 
 			requestState.setError(errorMessage);
+			toast.error(errorMessage, 'Error al registrar');
 		}
 	};
 
