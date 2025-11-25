@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { BadRequestException, UnauthorizedException, ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
+import { EmailService } from 'src/notifications/email.service';
 
 // Mock de bcrypt y uuid
 jest.mock('bcrypt');
@@ -60,6 +61,14 @@ describe('AuthService', () => {
     updatedAt: new Date(),
   };
 
+  const mockEmailService = {
+    sendWelcomeEmail: jest.fn().mockResolvedValue(null),
+    sendPasswordResetEmail: jest.fn().mockResolvedValue(null),
+    sendConfirmationEmail: jest.fn().mockResolvedValue(null),
+  };
+
+
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -71,6 +80,10 @@ describe('AuthService', () => {
         {
           provide: JwtService,
           useValue: mockJwtService,
+        },
+        {
+          provide: EmailService,
+          useValue: mockEmailService,
         },
       ],
     }).compile();

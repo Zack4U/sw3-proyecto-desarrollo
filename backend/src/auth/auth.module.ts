@@ -6,6 +6,7 @@ import { AuthController } from './auth.controller';
 import { PrismaService } from '../prisma/prisma.service';
 import { LocalStrategy, JwtStrategy, GoogleStrategy } from './strategies';
 import { LoggerModule } from '../common/logger';
+import { EmailModule } from 'src/notifications/email.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { LoggerModule } from '../common/logger';
       signOptions: { expiresIn: parseInt(process.env.JWT_EXPIRATION || '3600') },
     }),
     LoggerModule,
+    EmailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, PrismaService, LocalStrategy, JwtStrategy, GoogleStrategy],
