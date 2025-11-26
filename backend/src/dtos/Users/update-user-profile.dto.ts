@@ -25,4 +25,19 @@ export class UpdateUserProfileDto {
   @IsOptional()
   @IsEnum(['CC', 'TI', 'CE', 'RC', 'PAS', 'PPT', 'NIT'])
   documentType?: string;
+
+  @ApiProperty({ example: 'johndoe', required: false })
+  @IsOptional()
+  @IsString()
+  username?: string;
+
+  @ApiProperty({ example: 'John', required: false })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiProperty({ example: 'Doe', required: false })
+  @IsOptional()
+  @IsString()
+  lastName?: string;
 }
