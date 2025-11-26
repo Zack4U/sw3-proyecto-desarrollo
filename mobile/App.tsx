@@ -1,47 +1,48 @@
-import { StatusBar } from "expo-status-bar";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { AuthProvider } from "./contexts/AuthContext";
-import { NotificationProvider } from "./contexts/NotificationContext";
-import { useAuth } from "./hooks/useAuth";
+import { StatusBar } from 'expo-status-bar';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Toast from 'react-native-toast-message';
+import { AuthProvider } from './contexts/AuthContext';
+import { NotificationProvider } from './contexts/NotificationContext';
+import { useAuth } from './hooks/useAuth';
 
 // ─── Screens ─────────────────────────────────────────────
-import HomeScreen from "./screens/HomeScreen";
-import BeneficiaryHomeScreen from "./screens/BeneficiaryHomeScreen";
-import WelcomeScreen from "./screens/WelcomeScreen";
-import LoginScreen from "./screens/LoginScreen";
-import BasicRegistrationScreen from "./screens/BasicRegistrationScreen";
-import RegisterOptionsScreen from "./screens/RegisterOptionsScreen";
-import EstablishmentRegistrationScreen from "./screens/EstablishmentRegistrationScreen";
-import BeneficiaryRegistrationScreen from "./screens/BeneficiaryRegistrationScreen";
-import FoodRegistrationScreen from "./screens/FoodRegistrationScreen";
-import FoodManagementScreen from "./screens/FoodManagementScreen";
-import FoodEditScreen from "./screens/FoodEditScreen";
-import EstablishmentListScreen from "./screens/EstablishmentListScreen";
-import AvailableFoodListScreen from "./screens/AvailableFoodListScreen";
-import SplashScreen from "./screens/SplashScreen";
-import CompleteProfileScreen from "./screens/CompleteProfileScreen";
-import EditEstablishmentProfileScreen from "./screens/EditEstablishmentProfileScreen";
-import SearchEstablishmentsScreen from "./screens/SearchEstablishmentsScreen";
+import HomeScreen from './screens/HomeScreen';
+import BeneficiaryHomeScreen from './screens/BeneficiaryHomeScreen';
+import WelcomeScreen from './screens/WelcomeScreen';
+import LoginScreen from './screens/LoginScreen';
+import BasicRegistrationScreen from './screens/BasicRegistrationScreen';
+import RegisterOptionsScreen from './screens/RegisterOptionsScreen';
+import EstablishmentRegistrationScreen from './screens/EstablishmentRegistrationScreen';
+import BeneficiaryRegistrationScreen from './screens/BeneficiaryRegistrationScreen';
+import FoodRegistrationScreen from './screens/FoodRegistrationScreen';
+import FoodManagementScreen from './screens/FoodManagementScreen';
+import FoodEditScreen from './screens/FoodEditScreen';
+import EstablishmentListScreen from './screens/EstablishmentListScreen';
+import AvailableFoodListScreen from './screens/AvailableFoodListScreen';
+import SplashScreen from './screens/SplashScreen';
+import CompleteProfileScreen from './screens/CompleteProfileScreen';
+import EditEstablishmentProfileScreen from './screens/EditEstablishmentProfileScreen';
+import SearchEstablishmentsScreen from './screens/SearchEstablishmentsScreen';
 
 // ─── Tipado de Rutas ─────────────────────────────────────
 export type RootStackParamList = {
-  Welcome: undefined;
-  Home: undefined;
-  BeneficiaryHome: undefined;
-  Login: undefined;
-  BasicRegistration: undefined;
-  RegisterOptions: undefined;
-  EstablishmentRegistration: undefined;
-  BeneficiaryRegistration: undefined;
-  FoodRegistration: undefined;
-  FoodManagement: undefined;
-  FoodEdit: { foodId: string };
-  EstablishmentList: undefined;
-  AvailableFoodList: { establishmentId?: string };
-  CompleteProfile: undefined;
-  EditEstablishmentProfile: undefined;
-  SearchEstablishments: undefined;
+	Welcome: undefined;
+	Home: undefined;
+	BeneficiaryHome: undefined;
+	Login: undefined;
+	BasicRegistration: undefined;
+	RegisterOptions: undefined;
+	EstablishmentRegistration: undefined;
+	BeneficiaryRegistration: undefined;
+	FoodRegistration: undefined;
+	FoodManagement: undefined;
+	FoodEdit: { foodId: string };
+	EstablishmentList: undefined;
+	AvailableFoodList: { establishmentId?: string };
+	CompleteProfile: undefined;
+	EditEstablishmentProfile: undefined;
+	SearchEstablishments: undefined;
 };
 
 // ─── Creación del Stack ──────────────────────────────────
@@ -52,174 +53,175 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
  * dependiendo de si el usuario está autenticado o no.
  */
 function RootNavigator() {
-  const { isAuthenticated, isInitializing, user } = useAuth();
+	const { isAuthenticated, isInitializing, user } = useAuth();
 
-  // Calcular initialRouteName dinámicamente según el estado del usuario
-  let initialRouteName: keyof RootStackParamList = "Welcome";
-  if (isAuthenticated) {
-    if (!user?.isActive) {
-      initialRouteName = "CompleteProfile";
-    } else if (user?.role === "ESTABLISHMENT") {
-      initialRouteName = "Home";
-    } else {
-      initialRouteName = "BeneficiaryHome";
-    }
-  }
+	// Calcular initialRouteName dinámicamente según el estado del usuario
+	let initialRouteName: keyof RootStackParamList = 'Welcome';
+	if (isAuthenticated) {
+		if (!user?.isActive) {
+			initialRouteName = 'CompleteProfile';
+		} else if (user?.role === 'ESTABLISHMENT') {
+			initialRouteName = 'Home';
+		} else {
+			initialRouteName = 'BeneficiaryHome';
+		}
+	}
 
-  if (isInitializing) {
-    return <SplashScreen />;
-  }
+	if (isInitializing) {
+		return <SplashScreen />;
+	}
 
-  return (
-    <Stack.Navigator
-      initialRouteName={initialRouteName}
-      screenOptions={{
-        headerStyle: { backgroundColor: "#2e7d32" },
-        headerTintColor: "#fff",
-        headerTitleStyle: { fontWeight: "bold" },
-      }}
-    >
-      {isAuthenticated ? (
-        <>
-          {user?.isActive ? (
-            <>
-              {/* ─── Establecimientos ─── */}
-              {user?.role === "ESTABLISHMENT" ? (
-                <>
-                  <Stack.Screen
-                    name="Home"
-                    component={HomeScreen}
-                    options={{ title: "ComiYa", headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="FoodRegistration"
-                    component={FoodRegistrationScreen}
-                    options={{ title: "Registrar Alimento" }}
-                  />
-                  <Stack.Screen
-                    name="FoodManagement"
-                    component={FoodManagementScreen}
-                    options={{ title: "Administrar Alimentos" }}
-                  />
-                  <Stack.Screen
-                    name="FoodEdit"
-                    component={FoodEditScreen}
-                    options={{ title: "Editar Alimento" }}
-                  />
-                  <Stack.Screen
-                    name="EditEstablishmentProfile"
-                    component={EditEstablishmentProfileScreen}
-                    options={{ title: "Editar Perfil" }}
-                  />
-                </>
-              ) : (
-                <>
-                  {/* ─── Beneficiarios ─── */}
-                  <Stack.Screen
-                    name="BeneficiaryHome"
-                    component={BeneficiaryHomeScreen}
-                    options={{
-                      title: "ComiYa",
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="SearchEstablishments"
-                    component={SearchEstablishmentsScreen}
-                    options={{
-                      title: "Buscar Establecimientos",
-                      headerShown: false,
-                    }}
-                  />
-                </>
-              )}
+	return (
+		<Stack.Navigator
+			initialRouteName={initialRouteName}
+			screenOptions={{
+				headerStyle: { backgroundColor: '#2e7d32' },
+				headerTintColor: '#fff',
+				headerTitleStyle: { fontWeight: 'bold' },
+			}}
+		>
+			{isAuthenticated ? (
+				<>
+					{user?.isActive ? (
+						<>
+							{/* ─── Establecimientos ─── */}
+							{user?.role === 'ESTABLISHMENT' ? (
+								<>
+									<Stack.Screen
+										name="Home"
+										component={HomeScreen}
+										options={{ title: 'ComiYa', headerShown: false }}
+									/>
+									<Stack.Screen
+										name="FoodRegistration"
+										component={FoodRegistrationScreen}
+										options={{ title: 'Registrar Alimento' }}
+									/>
+									<Stack.Screen
+										name="FoodManagement"
+										component={FoodManagementScreen}
+										options={{ title: 'Administrar Alimentos' }}
+									/>
+									<Stack.Screen
+										name="FoodEdit"
+										component={FoodEditScreen}
+										options={{ title: 'Editar Alimento' }}
+									/>
+									<Stack.Screen
+										name="EditEstablishmentProfile"
+										component={EditEstablishmentProfileScreen}
+										options={{ title: 'Editar Perfil' }}
+									/>
+								</>
+							) : (
+								<>
+									{/* ─── Beneficiarios ─── */}
+									<Stack.Screen
+										name="BeneficiaryHome"
+										component={BeneficiaryHomeScreen}
+										options={{
+											title: 'ComiYa',
+											headerShown: false,
+										}}
+									/>
+									<Stack.Screen
+										name="SearchEstablishments"
+										component={SearchEstablishmentsScreen}
+										options={{
+											title: 'Buscar Establecimientos',
+											headerShown: false,
+										}}
+									/>
+								</>
+							)}
 
-              {/* Pantalla compartida para ambos roles */}
-              <Stack.Screen
-                name="EstablishmentList"
-                component={EstablishmentListScreen}
-                options={{
-                  title: "Establecimientos",
-                  headerShown: false,
-                }}
-              />
-              <Stack.Screen
-                name="AvailableFoodList"
-                component={AvailableFoodListScreen}
-                options={{
-                  title: "Alimentos Disponibles",
-                  headerShown: true,
-                }}
-              />
-            </>
-          ) : (
-            // Usuario autenticado pero sin completar el perfil
-            <Stack.Screen
-              name="CompleteProfile"
-              component={CompleteProfileScreen}
-              options={{
-                title: "Completar Perfil",
-                headerShown: true,
-                gestureEnabled: false, // No permitir swipe back
-              }}
-            />
-          )}
-        </>
-      ) : (
-        <>
-          {/* ─── Usuario no autenticado ─── */}
-          <Stack.Screen
-            name="Welcome"
-            component={WelcomeScreen}
-            options={{ title: "ComiYa", headerShown: false }}
-          />
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ title: "Iniciar sesión", headerShown: false }}
-          />
-          <Stack.Screen
-            name="BasicRegistration"
-            component={BasicRegistrationScreen}
-            options={{ title: "Crear cuenta", headerShown: true }}
-          />
-          <Stack.Screen
-            name="RegisterOptions"
-            component={RegisterOptionsScreen}
-            options={{ title: "Crear cuenta", headerShown: true }}
-          />
-          <Stack.Screen
-            name="EstablishmentRegistration"
-            component={EstablishmentRegistrationScreen}
-            options={{
-              title: "Registro de Establecimiento",
-              headerShown: true,
-            }}
-          />
-          <Stack.Screen
-            name="BeneficiaryRegistration"
-            component={BeneficiaryRegistrationScreen}
-            options={{
-              title: "Registro de Beneficiario",
-              headerShown: true,
-            }}
-          />
-        </>
-      )}
-    </Stack.Navigator>
-  );
+							{/* Pantalla compartida para ambos roles */}
+							<Stack.Screen
+								name="EstablishmentList"
+								component={EstablishmentListScreen}
+								options={{
+									title: 'Establecimientos',
+									headerShown: false,
+								}}
+							/>
+							<Stack.Screen
+								name="AvailableFoodList"
+								component={AvailableFoodListScreen}
+								options={{
+									title: 'Alimentos Disponibles',
+									headerShown: true,
+								}}
+							/>
+						</>
+					) : (
+						// Usuario autenticado pero sin completar el perfil
+						<Stack.Screen
+							name="CompleteProfile"
+							component={CompleteProfileScreen}
+							options={{
+								title: 'Completar Perfil',
+								headerShown: true,
+								gestureEnabled: false, // No permitir swipe back
+							}}
+						/>
+					)}
+				</>
+			) : (
+				<>
+					{/* ─── Usuario no autenticado ─── */}
+					<Stack.Screen
+						name="Welcome"
+						component={WelcomeScreen}
+						options={{ title: 'ComiYa', headerShown: false }}
+					/>
+					<Stack.Screen
+						name="Login"
+						component={LoginScreen}
+						options={{ title: 'Iniciar sesión', headerShown: false }}
+					/>
+					<Stack.Screen
+						name="BasicRegistration"
+						component={BasicRegistrationScreen}
+						options={{ title: 'Crear cuenta', headerShown: true }}
+					/>
+					<Stack.Screen
+						name="RegisterOptions"
+						component={RegisterOptionsScreen}
+						options={{ title: 'Crear cuenta', headerShown: true }}
+					/>
+					<Stack.Screen
+						name="EstablishmentRegistration"
+						component={EstablishmentRegistrationScreen}
+						options={{
+							title: 'Registro de Establecimiento',
+							headerShown: true,
+						}}
+					/>
+					<Stack.Screen
+						name="BeneficiaryRegistration"
+						component={BeneficiaryRegistrationScreen}
+						options={{
+							title: 'Registro de Beneficiario',
+							headerShown: true,
+						}}
+					/>
+				</>
+			)}
+		</Stack.Navigator>
+	);
 }
 
 // ─── App Principal ───────────────────────────────────────
 export default function App() {
-  return (
-    <AuthProvider>
-      <NavigationContainer>
-        <StatusBar style="auto" />
-        <NotificationProvider>
-          <RootNavigator />
-        </NotificationProvider>
-      </NavigationContainer>
-    </AuthProvider>
-  );
+	return (
+		<AuthProvider>
+			<NavigationContainer>
+				<StatusBar style="auto" />
+				<NotificationProvider>
+					<RootNavigator />
+				</NotificationProvider>
+			</NavigationContainer>
+			<Toast />
+		</AuthProvider>
+	);
 }

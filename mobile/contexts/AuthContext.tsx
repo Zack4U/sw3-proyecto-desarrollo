@@ -21,6 +21,7 @@ import authService from '../services/authService';
 import api, { setRefreshFailedCallback } from '../services/api';
 import notificationService from '../services/notificationService';
 import { registerPushTokenAfterAuth } from '../utils/pushTokenHelper';
+import { useToast } from '../hooks/useToast';
 
 type AuthState = {
 	user: User | null;
@@ -112,6 +113,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	const [state, dispatch] = useReducer(authReducer, initialState);
+	const toast = useToast();
 
 	/**
 	 * Guardar tokens en almacenamiento seguro
@@ -346,7 +348,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 					response.email,
 					response.userId,
 					response.establishmentId
-				); // Guardar tokens y usuario
+				);
+
+				// Guardar tokens y usuario
 				await saveTokens(response.accessToken, response.refreshToken, response.expiresIn);
 				await saveUser(user);
 
@@ -359,16 +363,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 						expiresIn: response.expiresIn,
 					},
 				});
+
 				// Registrar token push después de autenticación
 				await registerPushTokenAfterAuth();
+				toast.success('Bienvenido de vuelta', '¡Hola!');
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Error al iniciar sesión';
 				dispatch({ type: 'SET_ERROR', payload: message });
+				toast.error(message, 'Error de inicio de sesión');
 				throw error;
 			}
 		},
-		[saveTokens, saveUser, getUserFromToken]
+		[saveTokens, saveUser, getUserFromToken, toast]
 	);
 
 	/**
@@ -405,14 +412,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 				});
 				// Registrar token push después de autenticación
 				await registerPushTokenAfterAuth();
+				toast.success('Cuenta creada exitosamente', '¡Bienvenido!');
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Error al registrar beneficiario';
 				dispatch({ type: 'SET_ERROR', payload: message });
+				toast.error(message, 'Error de registro');
 				throw error;
 			}
 		},
-		[saveTokens, saveUser]
+		[saveTokens, saveUser, toast]
 	);
 
 	/**
@@ -448,13 +457,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 				});
 				// Registrar token push después de autenticación
 				await registerPushTokenAfterAuth();
+				toast.success('Cuenta creada exitosamente', '¡Bienvenido!');
 			} catch (error) {
 				const message = error instanceof Error ? error.message : 'Error al crear cuenta';
 				dispatch({ type: 'SET_ERROR', payload: message });
+				toast.error(message, 'Error de registro');
 				throw error;
 			}
 		},
-		[saveTokens, saveUser, getUserFromToken]
+		[saveTokens, saveUser, getUserFromToken, toast]
 	);
 
 	/**
@@ -491,14 +502,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 				});
 				// Registrar token push después de autenticación
 				await registerPushTokenAfterAuth();
+				toast.success('Establecimiento registrado exitosamente', '¡Bienvenido!');
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Error al registrar establecimiento';
 				dispatch({ type: 'SET_ERROR', payload: message });
+				toast.error(message, 'Error de registro');
 				throw error;
 			}
 		},
-		[saveTokens, saveUser]
+		[saveTokens, saveUser, toast]
 	);
 
 	/**
@@ -542,14 +555,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 				});
 				// Registrar token push después de autenticación
 				await registerPushTokenAfterAuth();
+				toast.success('Sesión iniciada con Google', '¡Hola!');
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Error al iniciar sesión con Google';
 				dispatch({ type: 'SET_ERROR', payload: message });
+				toast.error(message, 'Error de Google');
 				throw error;
 			}
 		},
-		[saveTokens, saveUser]
+		[saveTokens, saveUser, toast]
 	);
 
 	/**
@@ -586,14 +601,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 				});
 				// Registrar token push después de autenticación
 				await registerPushTokenAfterAuth();
+				toast.success('Perfil completado exitosamente', '¡Todo listo!');
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Error al completar perfil';
 				dispatch({ type: 'SET_ERROR', payload: message });
+				toast.error(message, 'Error de perfil');
 				throw error;
 			}
 		},
-		[saveTokens, saveUser]
+		[saveTokens, saveUser, toast]
 	);
 
 	/**
@@ -621,13 +638,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 			// Despachar logout completado
 			dispatch({ type: 'LOGOUT' });
+			toast.info('Sesión cerrada correctamente', 'Hasta luego');
 		} catch (error) {
 			console.error('Error al logout local:', error);
 			// Aún así, logout localmente
 			await clearTokens();
 			dispatch({ type: 'LOGOUT' });
+			toast.info('Sesión cerrada', 'Hasta luego');
 		}
-	}, [clearTokens]);
+	}, [clearTokens, toast]);
 
 	/**
 	 * Limpiar errores
@@ -646,11 +665,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 			// para evitar loop infinito
 			clearTokens().then(() => {
 				dispatch({ type: 'LOGOUT' });
+				toast.warning('Tu sesión ha expirado', 'Sesión caducada');
 			});
 		};
 
 		setRefreshFailedCallback(refreshFailedHandler);
-	}, [clearTokens]);
+	}, [clearTokens, toast]);
 
 	/**
 	 * Validar sesión al iniciar la app
