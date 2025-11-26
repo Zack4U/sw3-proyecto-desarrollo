@@ -23,6 +23,7 @@ import AvailableFoodListScreen from './screens/AvailableFoodListScreen';
 import SplashScreen from './screens/SplashScreen';
 import CompleteProfileScreen from './screens/CompleteProfileScreen';
 import EditEstablishmentProfileScreen from './screens/EditEstablishmentProfileScreen';
+import EditBeneficiaryProfileScreen from './screens/EditBeneficiaryProfileScreen';
 import SearchEstablishmentsScreen from './screens/SearchEstablishmentsScreen';
 
 // ─── Tipado de Rutas ─────────────────────────────────────
@@ -42,6 +43,7 @@ export type RootStackParamList = {
 	AvailableFoodList: { establishmentId?: string };
 	CompleteProfile: undefined;
 	EditEstablishmentProfile: undefined;
+	EditBeneficiaryProfile: undefined;
 	SearchEstablishments: undefined;
 };
 
@@ -128,9 +130,13 @@ function RootNavigator() {
 										name="SearchEstablishments"
 										component={SearchEstablishmentsScreen}
 										options={{
-											title: 'Buscar Establecimientos',
 											headerShown: false,
 										}}
+									/>
+									<Stack.Screen
+										name="EditBeneficiaryProfile"
+										component={EditBeneficiaryProfileScreen}
+										options={{ title: 'Editar Perfil' }}
 									/>
 								</>
 							)}

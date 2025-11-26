@@ -170,6 +170,7 @@ export default function BeneficiaryHomeScreen() {
 				visible={profileModalVisible}
 				user={user}
 				onClose={() => setProfileModalVisible(false)}
+				onEditProfile={() => navigation.navigate('EditBeneficiaryProfile')}
 			/>
 		</View>
 	);

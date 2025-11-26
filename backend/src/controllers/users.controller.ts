@@ -8,6 +8,7 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
+  Delete,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -152,6 +153,18 @@ export class UsersController {
       if (error.message === 'Document number already in use') {
         throw new ConflictException('Document number already in use');
       }
+      throw error;
+    }
+  }
+
+  @Delete('profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  async deleteProfile(@Request() req: any) {
+    try {
+      await this.usersService.deactivate(req.user.userId);
+      return { message: 'User deactivated successfully' };
+    } catch (error) {
       throw error;
     }
   }

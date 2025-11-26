@@ -63,9 +63,26 @@ export class UsersService {
     const updateData: Prisma.UserUpdateInput = {};
     if (updateDto.email) updateData.email = updateDto.email;
     if (updateDto.phone) updateData.phone = updateDto.phone;
+    if (updateDto.username) updateData.username = updateDto.username;
     if (updateDto.documentNumber) updateData.documentNumber = updateDto.documentNumber;
     if (updateDto.documentType) {
       updateData.documentType = updateDto.documentType as any;
+    }
+
+    // Si hay datos de beneficiario (nombre o apellido), actualizarlos
+    if (updateDto.name || updateDto.lastName) {
+      const beneficiaryUpdateData: any = {};
+      if (updateDto.name) beneficiaryUpdateData.name = updateDto.name;
+      if (updateDto.lastName) beneficiaryUpdateData.lastName = updateDto.lastName;
+
+      // Intentar actualizar el beneficiario asociado
+      // Usamos updateMany porque la relación es uno a muchos en el esquema (aunque lógica de negocio sea 1 a 1)
+      // o findFirst para obtener el ID.
+      // Dado que el esquema dice Beneficiary tiene userUserId, podemos hacer updateMany con userUserId
+      await this.prisma.beneficiary.updateMany({
+        where: { userUserId: userId },
+        data: beneficiaryUpdateData,
+      });
     }
 
     return this.prisma.user.update({
@@ -84,6 +101,12 @@ export class UsersService {
         isActive: true,
         createdAt: true,
         updatedAt: true,
+        beneficiary: {
+          select: {
+            name: true,
+            lastName: true,
+          },
+        },
       },
     });
   }
@@ -92,6 +115,13 @@ export class UsersService {
     return this.prisma.user.update({
       where: { userId },
       data: { password: newPasswordHash },
+    });
+  }
+
+  async deactivate(userId: string) {
+    return this.prisma.user.update({
+      where: { userId },
+      data: { isActive: false },
     });
   }
 }
