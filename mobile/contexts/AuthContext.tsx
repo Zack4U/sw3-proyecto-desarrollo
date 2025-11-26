@@ -19,6 +19,8 @@ import {
 } from '../types/auth.types';
 import authService from '../services/authService';
 import api, { setRefreshFailedCallback } from '../services/api';
+import notificationService from '../services/notificationService';
+import { registerPushTokenAfterAuth } from '../utils/pushTokenHelper';
 
 type AuthState = {
 	user: User | null;
@@ -357,6 +359,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 						expiresIn: response.expiresIn,
 					},
 				});
+				// Registrar token push después de autenticación
+				await registerPushTokenAfterAuth();
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Error al iniciar sesión';
@@ -399,6 +403,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 						expiresIn: response.expiresIn,
 					},
 				});
+				// Registrar token push después de autenticación
+				await registerPushTokenAfterAuth();
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Error al registrar beneficiario';
@@ -440,6 +446,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 						expiresIn: response.expiresIn,
 					},
 				});
+				// Registrar token push después de autenticación
+				await registerPushTokenAfterAuth();
 			} catch (error) {
 				const message = error instanceof Error ? error.message : 'Error al crear cuenta';
 				dispatch({ type: 'SET_ERROR', payload: message });
@@ -481,6 +489,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 						expiresIn: response.expiresIn,
 					},
 				});
+				// Registrar token push después de autenticación
+				await registerPushTokenAfterAuth();
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Error al registrar establecimiento';
@@ -530,6 +540,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 						expiresIn: response.expiresIn,
 					},
 				});
+				// Registrar token push después de autenticación
+				await registerPushTokenAfterAuth();
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Error al iniciar sesión con Google';
@@ -572,6 +584,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 						expiresIn: response.expiresIn,
 					},
 				});
+				// Registrar token push después de autenticación
+				await registerPushTokenAfterAuth();
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Error al completar perfil';

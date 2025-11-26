@@ -61,6 +61,7 @@ model User {
     establishments Establishment[]
     beneficiary    Beneficiary[]
     passwordResetTokens  PasswordResetToken[]
+    pushTokens     PushToken[]
 }
 
 // ====================
@@ -330,4 +331,29 @@ model PasswordResetToken {
   @@index([token])
   @@index([userId])
   @@map("password_reset_tokens")
+}
+
+// ====================
+// PUSH NOTIFICATIONS
+// ====================
+
+model PushToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  token     String
+  platform  Platform
+  isActive  Boolean  @default(true)
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, token])
+  @@index([userId])
+  @@index([token])
+  @@map("push_tokens")
+}
+
+enum Platform {
+  android
+  ios
 }
