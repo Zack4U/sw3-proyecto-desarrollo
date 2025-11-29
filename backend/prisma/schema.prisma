@@ -12,20 +12,20 @@ datasource db {
 // ====================
 
 model Department {
-  departmentId String @id @default(uuid())
-  name         String @unique
+  departmentId String   @id @default(uuid())
+  name         String   @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   cities       City[]
 }
 
 model City {
-  cityId        String @id @default(uuid())
-  name          String
-  departmentId  String
-  department    Department @relation(fields: [departmentId], references: [departmentId])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  cityId         String          @id @default(uuid())
+  name           String
+  departmentId   String
+  department     Department      @relation(fields: [departmentId], references: [departmentId])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   establishments Establishment[]
 
   @@unique([name, departmentId])
@@ -37,31 +37,31 @@ model City {
 
 // Modelo para los Usuarios
 model User {
-    userId         String        @id @db.Uuid
-    username       String?       @unique
-    documentNumber String?       @unique
-    documentType   DocumentType?
-    email          String        @unique
-    phone          String?
-    password       String?
-    role           UserRole      @default(BENEFICIARY)
-    picture        String?
-    isVerified     Boolean       @default(true)
-    isActive       Boolean       @default(true)
-    createdAt      DateTime      @default(now())
-    updatedAt      DateTime      @updatedAt
+  userId         String        @id @db.Uuid
+  username       String?       @unique
+  documentNumber String?       @unique
+  documentType   DocumentType?
+  email          String        @unique
+  phone          String?
+  password       String?
+  role           UserRole      @default(BENEFICIARY)
+  picture        String?
+  isVerified     Boolean       @default(true)
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
-    // Configuraciones
-    settings Json?
+  // Configuraciones
+  settings Json?
 
-    // IDs externos
-    googleId String? @unique
+  // IDs externos
+  googleId String? @unique
 
-    // Relación: Un usuario puede tener muchos establecimientos
-    establishments Establishment[]
-    beneficiary    Beneficiary[]
-    passwordResetTokens  PasswordResetToken[]
-    pushTokens     PushToken[]
+  // Relación: Un usuario puede tener muchos establecimientos
+  establishments      Establishment[]
+  beneficiary         Beneficiary[]
+  passwordResetTokens PasswordResetToken[]
+  pushTokens          PushToken[]
 }
 
 // ====================
@@ -70,15 +70,18 @@ model User {
 
 // Modelo para Beneficiarios
 model Beneficiary {
-    beneficiaryId String   @id @db.Uuid
-    name          String
-    lastName      String   @unique
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
+  beneficiaryId String   @id @db.Uuid
+  name          String
+  lastName      String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-    // Relación: Un beneficiario pertenece a un usuario
-    User       User   @relation(fields: [userUserId], references: [userId])
-    userUserId String @db.Uuid
+  // Relación: Un beneficiario pertenece a un usuario
+  User       User   @relation(fields: [userUserId], references: [userId])
+  userUserId String @db.Uuid
+
+  // Relación: Un beneficiario puede tener muchas recogidas
+  pickups Pickup[]
 }
 
 // ====================
@@ -87,24 +90,25 @@ model Beneficiary {
 
 // Modelo para los Establecimientos
 model Establishment {
-    establishmentId   String             @id @db.Uuid
-    name              String
-    description       String?
-    address           String
-    neighborhood      String?
-    location          Json
-    establishmentType EstablishmentType?
-    createdAt         DateTime           @default(now())
-    updatedAt         DateTime           @updatedAt
+  establishmentId   String             @id @db.Uuid
+  name              String
+  description       String?
+  address           String
+  neighborhood      String?
+  location          Json
+  establishmentType EstablishmentType?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
-    // Relaciones
-    user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
-    userId String @db.Uuid
+  // Relaciones
+  user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  userId String @db.Uuid
 
-    city   City   @relation(fields: [cityId], references: [cityId])
-    cityId String
+  city   City   @relation(fields: [cityId], references: [cityId])
+  cityId String
 
-    foods  Food[]
+  foods   Food[]
+  pickups Pickup[]
 }
 
 // ====================
@@ -113,205 +117,208 @@ model Establishment {
 
 // Modelo para los Alimentos
 model Food {
-    foodId        String        @id @default(uuid()) @db.Uuid
-    name          String
-    description   String?
-    category      FoodCategory?
-    quantity      Float
-    unitOfMeasure UnitOfMeasure
-    status        FoodStatus    @default(AVAILABLE)
-    imageUrl      String?
-    expiresAt     DateTime      @db.Date
-    createdAt     DateTime      @default(now())
-    updatedAt     DateTime      @updatedAt
+  foodId        String        @id @default(uuid()) @db.Uuid
+  name          String
+  description   String?
+  category      FoodCategory?
+  quantity      Float
+  unitOfMeasure UnitOfMeasure
+  status        FoodStatus    @default(AVAILABLE)
+  imageUrl      String?
+  expiresAt     DateTime      @db.Date
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
-    // Relación: Un alimento pertenece a un establecimiento
-    establishment   Establishment @relation(fields: [establishmentId], references: [establishmentId], onDelete: Cascade)
-    establishmentId String        @db.Uuid
+  // Relación: Un alimento pertenece a un establecimiento
+  establishment   Establishment @relation(fields: [establishmentId], references: [establishmentId], onDelete: Cascade)
+  establishmentId String        @db.Uuid
+
+  // Relación: Un alimento puede tener muchas recogidas
+  pickups Pickup[]
 }
 
 enum DocumentType {
-    CC
-    TI
-    CE
-    RC
-    PAS
-    PPT
-    NIT
+  CC
+  TI
+  CE
+  RC
+  PAS
+  PPT
+  NIT
 }
 
 enum UserRole {
-    ADMIN
-    ESTABLISHMENT
-    BENEFICIARY
+  ADMIN
+  ESTABLISHMENT
+  BENEFICIARY
 }
 
 enum FoodStatus {
-    AVAILABLE
-    DELIVERED
-    EXPIRED
+  AVAILABLE
+  DELIVERED
+  EXPIRED
 }
 
 enum UnitOfMeasure {
-    // Units
-    UNIT
-    DOZEN
-    PACKAGE
-    BOX
-    CAN
-    BOTTLE
-    BAG
-    ROLL
-    JAR
-    TUBE
+  // Units
+  UNIT
+  DOZEN
+  PACKAGE
+  BOX
+  CAN
+  BOTTLE
+  BAG
+  ROLL
+  JAR
+  TUBE
 
-    // Weight (Metric System)
-    GRAM
-    KILOGRAM
-    MILLIGRAM
+  // Weight (Metric System)
+  GRAM
+  KILOGRAM
+  MILLIGRAM
 
-    // Volume (Metric System)
-    LITER
-    MILLILITER
-    CUBIC_CENTIMETER
+  // Volume (Metric System)
+  LITER
+  MILLILITER
+  CUBIC_CENTIMETER
 
-    // Weight (Imperial System)
-    OUNCE
-    POUND
+  // Weight (Imperial System)
+  OUNCE
+  POUND
 
-    // Volume (Imperial System)
-    FLUID_OUNCE
-    PINT
-    QUART
-    GALLON
+  // Volume (Imperial System)
+  FLUID_OUNCE
+  PINT
+  QUART
+  GALLON
 
-    // Cooking Units
-    TEASPOON
-    TABLESPOON
-    CUP
-    PINCH
-    CLOVE // For garlic, for example
-    BRANCH
+  // Cooking Units
+  TEASPOON
+  TABLESPOON
+  CUP
+  PINCH
+  CLOVE // For garlic, for example
+  BRANCH
 }
 
 enum FoodCategory {
-    // Fruits and Vegetables
-    FRUITS
-    VEGETABLES
-    GREENS
-    LEGUMES
-    TUBERS
+  // Fruits and Vegetables
+  FRUITS
+  VEGETABLES
+  GREENS
+  LEGUMES
+  TUBERS
 
-    // Meats and Poultry
-    RED_MEAT
-    POULTRY
-    FISH
-    SEAFOOD
-    COLD_CUTS
+  // Meats and Poultry
+  RED_MEAT
+  POULTRY
+  FISH
+  SEAFOOD
+  COLD_CUTS
 
-    // Dairy and Eggs
-    DAIRY
-    CHEESE
-    YOGURT
-    EGGS
+  // Dairy and Eggs
+  DAIRY
+  CHEESE
+  YOGURT
+  EGGS
 
-    // Grains, Cereals and Bakery
-    CEREALS
-    GRAINS
-    PASTA
-    BAKERY
-    FLOUR
+  // Grains, Cereals and Bakery
+  CEREALS
+  GRAINS
+  PASTA
+  BAKERY
+  FLOUR
 
-    // Pantry and Canned
-    CANNED
-    PRESERVES
-    SAUCES_AND_CONDIMENTS
-    OILS_AND_VINEGARS
-    SPICES_AND_HERBS
-    SOUPS_AND_CREAMS
+  // Pantry and Canned
+  CANNED
+  PRESERVES
+  SAUCES_AND_CONDIMENTS
+  OILS_AND_VINEGARS
+  SPICES_AND_HERBS
+  SOUPS_AND_CREAMS
 
-    // Snacks and Sweets
-    SALTY_SNACKS
-    SWEETS_AND_CHOCOLATES
-    COOKIES_AND_DESSERTS
-    NUTS
+  // Snacks and Sweets
+  SALTY_SNACKS
+  SWEETS_AND_CHOCOLATES
+  COOKIES_AND_DESSERTS
+  NUTS
 
-    // Beverages
-    NON_ALCOHOLIC_BEVERAGES
-    JUICES
-    COFFEE_AND_TEA
-    ALCOHOLIC_BEVERAGES
+  // Beverages
+  NON_ALCOHOLIC_BEVERAGES
+  JUICES
+  COFFEE_AND_TEA
+  ALCOHOLIC_BEVERAGES
 
-    // Frozen
-    FROZEN
+  // Frozen
+  FROZEN
 
-    // Prepared Food
-    PREPARED_FOOD
+  // Prepared Food
+  PREPARED_FOOD
 
-    // Others
-    OTHERS
+  // Others
+  OTHERS
 }
 
 enum EstablishmentType {
-    // Food and Beverages
-    RESTAURANT
-    COFFEE_SHOP
-    BAR
-    NIGHTCLUB
-    BAKERY
-    SUPERMARKET
-    GROCERY_STORE
-    FRUIT_SHOP
-    BUTCHER_SHOP
-    FOOD_TRUCK
+  // Food and Beverages
+  RESTAURANT
+  COFFEE_SHOP
+  BAR
+  NIGHTCLUB
+  BAKERY
+  SUPERMARKET
+  GROCERY_STORE
+  FRUIT_SHOP
+  BUTCHER_SHOP
+  FOOD_TRUCK
 
-    // Accommodation
-    HOTEL
-    HOSTEL
-    MOTEL
-    APART_HOTEL
+  // Accommodation
+  HOTEL
+  HOSTEL
+  MOTEL
+  APART_HOTEL
 
-    // Retail
-    CLOTHING_STORE
-    SHOE_STORE
-    JEWELRY_STORE
-    BOOKSTORE
-    STATIONERY_STORE
-    TOY_STORE
-    ELECTRONICS_STORE
-    SPORTS_STORE
-    PHARMACY
-    HARDWARE_STORE
-    PET_STORE
-    NURSERY
+  // Retail
+  CLOTHING_STORE
+  SHOE_STORE
+  JEWELRY_STORE
+  BOOKSTORE
+  STATIONERY_STORE
+  TOY_STORE
+  ELECTRONICS_STORE
+  SPORTS_STORE
+  PHARMACY
+  HARDWARE_STORE
+  PET_STORE
+  NURSERY
 
-    // Services
-    HAIR_SALON
-    BARBER_SHOP
-    BEAUTY_CENTER
-    SPA
-    GYM
-    LAUNDRY
-    AUTO_REPAIR_SHOP
-    MEDICAL_OFFICE
-    DENTAL_OFFICE
-    VETERINARY
-    CORPORATE_OFFICE
-    EDUCATIONAL_CENTER
+  // Services
+  HAIR_SALON
+  BARBER_SHOP
+  BEAUTY_CENTER
+  SPA
+  GYM
+  LAUNDRY
+  AUTO_REPAIR_SHOP
+  MEDICAL_OFFICE
+  DENTAL_OFFICE
+  VETERINARY
+  CORPORATE_OFFICE
+  EDUCATIONAL_CENTER
 
-    // Entertainment and Culture
-    CINEMA
-    THEATER
-    MUSEUM
-    ART_GALLERY
-    EVENT_CENTER
-    AMUSEMENT_PARK
-    BOWLING_ALLEY
+  // Entertainment and Culture
+  CINEMA
+  THEATER
+  MUSEUM
+  ART_GALLERY
+  EVENT_CENTER
+  AMUSEMENT_PARK
+  BOWLING_ALLEY
 
-    // Others
-    SHOPPING_MALL
-    PARKING
-    OTHER
+  // Others
+  SHOPPING_MALL
+  PARKING
+  OTHER
 }
 
 // ====================
@@ -356,4 +363,61 @@ model PushToken {
 enum Platform {
   android
   ios
+}
+
+// ====================
+// RECOGIDAS / CITAS
+// ====================
+
+model Pickup {
+  pickupId String @id @default(uuid()) @db.Uuid
+
+  // Relaciones
+  beneficiary   Beneficiary @relation(fields: [beneficiaryId], references: [beneficiaryId])
+  beneficiaryId String      @db.Uuid
+
+  establishment   Establishment @relation(fields: [establishmentId], references: [establishmentId])
+  establishmentId String        @db.Uuid
+
+  food   Food   @relation(fields: [foodId], references: [foodId])
+  foodId String @db.Uuid
+
+  // Información de la cita
+  status        PickupStatus @default(PENDING)
+  scheduledDate DateTime     @db.Timestamp
+
+  // Cantidades
+  requestedQuantity Float // Cantidad solicitada
+  deliveredQuantity Float? // Cantidad real entregada (null hasta completar)
+
+  // Confirmaciones y tiempos
+  confirmedAt      DateTime? @db.Timestamp
+  visitConfirmedAt DateTime? @db.Timestamp // Cuando llega al establecimiento
+  completedAt      DateTime? @db.Timestamp
+  cancelledAt      DateTime? @db.Timestamp
+
+  // Notas y observaciones
+  beneficiaryNotes   String? // Notas del beneficiario al solicitar
+  establishmentNotes String? // Notas del establecimiento
+  cancellationReason String? // Razón de cancelación
+
+  // Auditoría
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([beneficiaryId])
+  @@index([establishmentId])
+  @@index([foodId])
+  @@index([status])
+  @@index([scheduledDate])
+  @@map("pickups")
+}
+
+enum PickupStatus {
+  PENDING // Solicitud creada, esperando confirmación
+  CONFIRMED // Establecimiento confirmó la cita
+  IN_PROGRESS // Beneficiario llegó al establecimiento
+  COMPLETED // Entrega completada
+  CANCELLED // Cancelada por beneficiario
+  REJECTED // Rechazada por establecimiento
 }
