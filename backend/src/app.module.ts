@@ -18,6 +18,8 @@ import { GeolocationController } from './controllers/geolocation.controller';
 import { EmailModule } from './notifications/email.module';
 import { NotificationsController } from './controllers/notifications.controller';
 import { NotificationsService } from './services/notifications.service';
+import { PickupsController } from './controllers/pickup.controller';
+import { PickupsService } from './services/pickup.service';
 
 @Module({
   imports: [AuthModule, EmailModule],
@@ -30,6 +32,7 @@ import { NotificationsService } from './services/notifications.service';
     UsersController,
     GeolocationController,
     NotificationsController,
+    PickupsController,
   ],
   providers: [
     AppService,
@@ -41,6 +44,7 @@ import { NotificationsService } from './services/notifications.service';
     UsersService,
     GeolocationService,
     NotificationsService,
+    PickupsService,
   ],
 })
 export class AppModule {}
