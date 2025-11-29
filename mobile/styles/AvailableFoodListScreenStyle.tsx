@@ -156,4 +156,22 @@ export const availableFoodListStyles = StyleSheet.create({
   emptyButton: {
     marginTop: Spacing.md,
   },
+
+  // Botón de solicitar recogida
+  requestButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: Spacing.md,
+  },
+  requestButtonPressed: {
+    opacity: 0.85,
+  },
+  requestButtonText: {
+    color: Colors.textLight,
+    fontSize: 16,
+    fontWeight: "600" as any,
+  },
 });

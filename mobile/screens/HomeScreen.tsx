@@ -10,6 +10,7 @@ type RootStackParamList = {
   FoodRegistration: undefined;
   FoodManagement: undefined;
   EditEstablishmentProfile: undefined;
+  PickupManagement: undefined;
 };
 
 type HomeScreenProps = {
@@ -80,6 +81,22 @@ export default function HomeScreen({ navigation }: Readonly<HomeScreenProps>) {
               <Text style={styles.buttonText}>Editar alimento</Text>
               <Text style={styles.buttonDescription}>
                 Actualiza o elimina alimentos ya registrados
+              </Text>
+            </TouchableOpacity>
+          )}
+          {user?.role === "ESTABLISHMENT" && (
+            <TouchableOpacity
+              style={[
+                styles.menuButton,
+                styles.establishmentButton,
+                { marginTop: 12 },
+              ]}
+              onPress={() => navigation.navigate("PickupManagement")}
+            >
+              <Text style={styles.buttonIcon}>📋</Text>
+              <Text style={styles.buttonText}>Gestión de Recogidas</Text>
+              <Text style={styles.buttonDescription}>
+                Administra las solicitudes de recogida
               </Text>
             </TouchableOpacity>
           )}

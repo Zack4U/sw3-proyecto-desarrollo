@@ -27,6 +27,7 @@ import { Picker } from "@react-native-picker/picker";
 type RootStackParamList = {
   AvailableFoodList: { establishmentId?: string };
   BeneficiaryHome: undefined;
+  PickupRequest: { foodId: string; establishmentId: string };
 };
 
 type Props = {
@@ -163,7 +164,8 @@ export default function AvailableFoodListScreen({
 
   const renderFoodItem = ({ item }: { item: FoodResponse }) => {
     const establishment = establishments.get(item.establishmentId);
-    const isExpiringSoon = new Date(item.expiresAt) < new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const isExpiringSoon =
+      new Date(item.expiresAt) < new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     return (
       <Card style={availableFoodListStyles.foodCard}>
@@ -221,8 +223,7 @@ export default function AvailableFoodListScreen({
           {establishment?.address && (
             <Text style={availableFoodListStyles.establishmentAddress}>
               {establishment.address}
-              {establishment.neighborhood &&
-                `, ${establishment.neighborhood}`}
+              {establishment.neighborhood && `, ${establishment.neighborhood}`}
             </Text>
           )}
 
@@ -238,6 +239,24 @@ export default function AvailableFoodListScreen({
               {formatDate(item.expiresAt)}
             </Text>
           </View>
+
+          {/* Botón de solicitar recogida */}
+          <Pressable
+            style={({ pressed }) => [
+              availableFoodListStyles.requestButton,
+              pressed && availableFoodListStyles.requestButtonPressed,
+            ]}
+            onPress={() =>
+              navigation.navigate("PickupRequest", {
+                foodId: item.foodId,
+                establishmentId: item.establishmentId,
+              })
+            }
+          >
+            <Text style={availableFoodListStyles.requestButtonText}>
+              📋 Solicitar Recogida
+            </Text>
+          </Pressable>
         </View>
       </Card>
     );
@@ -267,7 +286,11 @@ export default function AvailableFoodListScreen({
           >
             <Picker.Item label="Todas las categorías" value="ALL" />
             {FOOD_CATEGORIES.map((cat) => (
-              <Picker.Item key={cat.value} label={cat.label} value={cat.value} />
+              <Picker.Item
+                key={cat.value}
+                label={cat.label}
+                value={cat.value}
+              />
             ))}
           </Picker>
         </View>
@@ -297,7 +320,9 @@ export default function AvailableFoodListScreen({
       )}
 
       {/* Botón para limpiar filtros */}
-      {(searchName || filterCategory || (filterEstablishment && !establishmentId)) && (
+      {(searchName ||
+        filterCategory ||
+        (filterEstablishment && !establishmentId)) && (
         <Button
           title="Limpiar filtros"
           onPress={clearFilters}
@@ -312,7 +337,9 @@ export default function AvailableFoodListScreen({
     <View>
       <View style={availableFoodListStyles.header}>
         <Text style={availableFoodListStyles.title}>
-          {establishmentId ? "Alimentos del Establecimiento" : "Alimentos Disponibles"}
+          {establishmentId
+            ? "Alimentos del Establecimiento"
+            : "Alimentos Disponibles"}
         </Text>
         <Text style={availableFoodListStyles.subtitle}>
           {filteredFoods.length} alimento{filteredFoods.length !== 1 ? "s" : ""}{" "}
@@ -330,9 +357,7 @@ export default function AvailableFoodListScreen({
         />
       )}
 
-      {error && (
-        <FeedbackMessage type="error" message={error} visible={true} />
-      )}
+      {error && <FeedbackMessage type="error" message={error} visible={true} />}
     </View>
   );
 
