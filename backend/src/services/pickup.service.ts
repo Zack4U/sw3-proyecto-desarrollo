@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { NotificationsService } from './notifications.service';
+import { NotificationsService, PickupNotificationType } from './notifications.service';
 import { PickupStatus, FoodStatus } from '@prisma/client';
 import {
   CreatePickupDto,
@@ -105,8 +105,19 @@ export class PickupsService {
 
     this.logger.log(`Pickup created with ID ${pickup.pickupId}`);
 
-    // TODO: Enviar notificación al establecimiento
-    // await this.sendNotificationToEstablishment(pickup);
+    // Enviar notificación al establecimiento
+    await this.notificationsService.sendNewPickupRequestNotification(
+      pickup.establishment.user.userId,
+      {
+        type: PickupNotificationType.NEW_REQUEST,
+        pickupId: pickup.pickupId,
+        foodName: pickup.food.name,
+        beneficiaryName:
+          pickup.beneficiary.name || pickup.beneficiary.User?.username || 'Beneficiario',
+        scheduledDate: pickup.scheduledDate.toISOString(),
+        quantity: pickup.requestedQuantity,
+      },
+    );
 
     return pickup;
   }
@@ -309,8 +320,21 @@ export class PickupsService {
 
     this.logger.log(`Pickup ${id} ${dto.confirmed ? 'confirmed' : 'rejected'}`);
 
-    // TODO: Enviar notificación al beneficiario
-    // await this.sendNotificationToBeneficiary(updated, newStatus);
+    // Enviar notificación al beneficiario
+    await this.notificationsService.sendPickupConfirmationNotification(
+      updated.beneficiary.userUserId,
+      {
+        type: dto.confirmed
+          ? PickupNotificationType.REQUEST_CONFIRMED
+          : PickupNotificationType.REQUEST_REJECTED,
+        pickupId: updated.pickupId,
+        foodName: updated.food.name,
+        establishmentName: updated.establishment.name,
+        scheduledDate: updated.scheduledDate.toISOString(),
+        quantity: updated.requestedQuantity,
+      },
+      dto.confirmed,
+    );
 
     return updated;
   }
@@ -352,8 +376,16 @@ export class PickupsService {
 
     this.logger.log(`Visit confirmed for pickup ${id}`);
 
-    // TODO: Enviar notificación al establecimiento
-    // await this.sendNotificationToEstablishment(updated, 'VISIT_CONFIRMED');
+    // Enviar notificación al establecimiento
+    await this.notificationsService.sendVisitConfirmedNotification(updated.establishment.userId, {
+      type: PickupNotificationType.VISIT_CONFIRMED,
+      pickupId: updated.pickupId,
+      foodName: updated.food.name,
+      beneficiaryName:
+        updated.beneficiary.name || updated.beneficiary.User?.username || 'Beneficiario',
+      scheduledDate: updated.scheduledDate.toISOString(),
+      quantity: updated.requestedQuantity,
+    });
 
     return updated;
   }
@@ -426,8 +458,20 @@ export class PickupsService {
 
     this.logger.log(`Pickup ${id} completed with ${dto.deliveredQuantity} units delivered`);
 
-    // TODO: Enviar notificación a ambos
-    // await this.sendCompletionNotification(result);
+    // Enviar notificación a ambos (beneficiario y establecimiento)
+    await this.notificationsService.sendPickupCompletedNotification(
+      result.beneficiary.userUserId,
+      result.establishment.userId,
+      {
+        type: PickupNotificationType.PICKUP_COMPLETED,
+        pickupId: result.pickupId,
+        foodName: result.food.name,
+        establishmentName: result.establishment.name,
+        beneficiaryName:
+          result.beneficiary.name || result.beneficiary.User?.username || 'Beneficiario',
+        quantity: dto.deliveredQuantity,
+      },
+    );
 
     return result;
   }
@@ -468,8 +512,15 @@ export class PickupsService {
 
     this.logger.log(`Pickup ${id} cancelled by beneficiary`);
 
-    // TODO: Enviar notificación al establecimiento
-    // await this.sendCancellationNotification(updated);
+    // Enviar notificación al establecimiento
+    await this.notificationsService.sendPickupCancelledNotification(updated.establishment.userId, {
+      type: PickupNotificationType.PICKUP_CANCELLED,
+      pickupId: updated.pickupId,
+      foodName: updated.food.name,
+      beneficiaryName:
+        updated.beneficiary.name || updated.beneficiary.User?.username || 'Beneficiario',
+      reason: dto.reason,
+    });
 
     return updated;
   }

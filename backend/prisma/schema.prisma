@@ -62,6 +62,7 @@ model User {
   beneficiary         Beneficiary[]
   passwordResetTokens PasswordResetToken[]
   pushTokens          PushToken[]
+  notifications       Notification[]
 }
 
 // ====================
@@ -420,4 +421,52 @@ enum PickupStatus {
   COMPLETED // Entrega completada
   CANCELLED // Cancelada por beneficiario
   REJECTED // Rechazada por establecimiento
+}
+
+// ====================
+// NOTIFICACIONES EN APP
+// ====================
+
+model Notification {
+  id String @id @default(uuid()) @map("notification_id") @db.Uuid
+
+  // Usuario destinatario
+  user   User   @relation(fields: [userId], references: [userId])
+  userId String @db.Uuid
+
+  // Contenido de la notificación
+  title String
+  body  String
+  type  NotificationType
+
+  // Datos adicionales (JSON para navegación, pickupId, etc.)
+  data Json?
+
+  // Referencia a pickup (si aplica)
+  pickupId String? @db.Uuid
+
+  // Estados
+  isRead    Boolean   @default(false)
+  isDeleted Boolean   @default(false)
+  readAt    DateTime?
+
+  // Auditoría
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([isDeleted])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  PICKUP_NEW_REQUEST // Nueva solicitud de recogida
+  PICKUP_CONFIRMED // Recogida confirmada
+  PICKUP_REJECTED // Recogida rechazada
+  PICKUP_VISIT_CONFIRMED // Beneficiario llegó
+  PICKUP_COMPLETED // Entrega completada
+  PICKUP_CANCELLED // Recogida cancelada
+  SYSTEM // Notificación del sistema
 }
