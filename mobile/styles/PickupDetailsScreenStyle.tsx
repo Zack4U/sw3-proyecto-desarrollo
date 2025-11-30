@@ -516,6 +516,20 @@ export const styles = StyleSheet.create({
     fontWeight: FontWeights.semibold,
     color: Colors.textLight,
   },
+  waitingContainer: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  waitingText: {
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    textAlign: "center",
+  },
   completeButton: {
     backgroundColor: Colors.primary,
     flex: 1,

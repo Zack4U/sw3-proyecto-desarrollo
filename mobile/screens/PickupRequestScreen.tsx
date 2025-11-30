@@ -123,7 +123,7 @@ export default function PickupRequestScreen({
         beneficiaryNotes: notes.trim() || undefined,
       });
 
-      toast.success("Solicitud de recogida creada exitosamente");
+      toast.success("¡Solicitud creada! El establecimiento ha sido notificado");
 
       // Navigate to pickup details
       navigation.replace("PickupDetails", { pickupId: pickup.pickupId });

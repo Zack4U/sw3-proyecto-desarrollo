@@ -109,15 +109,12 @@ export interface PickupResponse {
   status: PickupStatus;
   scheduledDate: string;
   requestedQuantity: number;
-  confirmedQuantity?: number;
   deliveredQuantity?: number;
   confirmedAt?: string;
   visitConfirmedAt?: string;
   completedAt?: string;
   cancelledAt?: string;
-  cancelledBy?: "BENEFICIARY" | "ESTABLISHMENT";
   beneficiaryNotes?: string;
-  notes?: string;
   establishmentNotes?: string;
   cancellationReason?: string;
   createdAt: string;

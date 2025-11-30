@@ -60,7 +60,6 @@ export default function PickupManagementScreen({
   const [selectedPickup, setSelectedPickup] = useState<PickupResponse | null>(
     null
   );
-  const [confirmedQuantity, setConfirmedQuantity] = useState("");
   const [deliveredQuantity, setDeliveredQuantity] = useState("");
   const [cancelReason, setCancelReason] = useState("");
 
@@ -98,25 +97,16 @@ export default function PickupManagementScreen({
   // Handle confirm pickup
   const handleConfirmPickup = (pickup: PickupResponse) => {
     setSelectedPickup(pickup);
-    setConfirmedQuantity(pickup.requestedQuantity.toString());
     setConfirmModalVisible(true);
   };
 
   const submitConfirmPickup = async () => {
     if (!selectedPickup) return;
 
-    const quantity = parseInt(confirmedQuantity);
-    if (isNaN(quantity) || quantity <= 0) {
-      toast.error("Por favor ingresa una cantidad válida");
-      return;
-    }
-
     try {
       setProcessingId(selectedPickup.pickupId);
-      await pickupService.confirmPickup(selectedPickup.pickupId, {
-        confirmedQuantity: quantity,
-      });
-      toast.success("Recogida confirmada exitosamente");
+      await pickupService.confirmPickup(selectedPickup.pickupId, {});
+      toast.success("Recogida confirmada. El beneficiario ha sido notificado");
       setConfirmModalVisible(false);
       await loadData();
     } catch (error) {
@@ -131,9 +121,7 @@ export default function PickupManagementScreen({
   // Handle complete pickup
   const handleCompletePickup = (pickup: PickupResponse) => {
     setSelectedPickup(pickup);
-    setDeliveredQuantity(
-      (pickup.confirmedQuantity || pickup.requestedQuantity).toString()
-    );
+    setDeliveredQuantity(pickup.requestedQuantity.toString());
     setCompleteModalVisible(true);
   };
 
@@ -152,7 +140,7 @@ export default function PickupManagementScreen({
         deliveredQuantity: quantity,
         notes: "Entrega completada exitosamente",
       });
-      toast.success("Recogida completada exitosamente");
+      toast.success("¡Entrega completada! Ambos han sido notificados");
       setCompleteModalVisible(false);
       await loadData();
     } catch (error) {
@@ -181,11 +169,12 @@ export default function PickupManagementScreen({
 
     try {
       setProcessingId(selectedPickup.pickupId);
-      await pickupService.cancelPickup(selectedPickup.pickupId, {
-        reason: cancelReason,
-        cancelledBy: "ESTABLISHMENT",
+      // Usar confirm con confirmed: false para rechazar
+      await pickupService.confirm(selectedPickup.pickupId, {
+        confirmed: false,
+        notes: cancelReason,
       });
-      toast.success("Recogida rechazada");
+      toast.success("Recogida rechazada. El beneficiario ha sido notificado");
       setCancelModalVisible(false);
       await loadData();
     } catch (error) {
@@ -195,36 +184,6 @@ export default function PickupManagementScreen({
     } finally {
       setProcessingId(null);
     }
-  };
-
-  // Handle confirm visit (beneficiary arrived)
-  const handleConfirmVisit = async (pickup: PickupResponse) => {
-    Alert.alert(
-      "Confirmar Visita",
-      "¿El beneficiario ha llegado a recoger los alimentos?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Confirmar",
-          onPress: async () => {
-            try {
-              setProcessingId(pickup.pickupId);
-              await pickupService.confirmVisit(pickup.pickupId);
-              toast.success("Visita confirmada");
-              await loadData();
-            } catch (error) {
-              const message =
-                error instanceof Error
-                  ? error.message
-                  : "Error al confirmar visita";
-              toast.error(message);
-            } finally {
-              setProcessingId(null);
-            }
-          },
-        },
-      ]
-    );
   };
 
   // Filter pickups by tab
@@ -293,13 +252,13 @@ export default function PickupManagementScreen({
           <View style={styles.pickupInfoRow}>
             <Text style={styles.pickupInfoIcon}>📦</Text>
             <Text style={styles.pickupInfoText}>
-              Solicitado:{" "}
+              Cantidad solicitada:{" "}
               <Text style={styles.pickupInfoHighlight}>
                 {item.requestedQuantity}
               </Text>
-              {item.confirmedQuantity !== null &&
-                item.confirmedQuantity !== undefined && (
-                  <Text> | Confirmado: {item.confirmedQuantity}</Text>
+              {item.deliveredQuantity !== null &&
+                item.deliveredQuantity !== undefined && (
+                  <Text> | Entregado: {item.deliveredQuantity}</Text>
                 )}
             </Text>
           </View>
@@ -315,11 +274,11 @@ export default function PickupManagementScreen({
               })}
             </Text>
           </View>
-          {item.notes && (
+          {item.beneficiaryNotes && (
             <View style={styles.pickupInfoRow}>
               <Text style={styles.pickupInfoIcon}>📝</Text>
               <Text style={styles.pickupInfoText} numberOfLines={2}>
-                {item.notes}
+                {item.beneficiaryNotes}
               </Text>
             </View>
           )}
@@ -351,17 +310,12 @@ export default function PickupManagementScreen({
 
         {item.status === PickupStatus.CONFIRMED && (
           <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.visitButton]}
-              onPress={() => handleConfirmVisit(item)}
-              disabled={isProcessing}
-            >
-              {isProcessing ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <Text style={styles.visitButtonText}>Beneficiario Llegó</Text>
-              )}
-            </TouchableOpacity>
+            <View style={styles.waitingContainer}>
+              <Text style={styles.waitingIcon}>⏳</Text>
+              <Text style={styles.waitingText}>
+                Esperando que el beneficiario confirme su llegada
+              </Text>
+            </View>
           </View>
         )}
 
@@ -549,17 +503,17 @@ export default function PickupManagementScreen({
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Confirmar Recogida</Text>
             <Text style={styles.modalDescription}>
-              Confirma la cantidad de alimentos que estarán disponibles para la
-              recogida.
+              ¿Deseas confirmar esta solicitud de recogida? El beneficiario será
+              notificado.
             </Text>
-            <Text style={styles.inputLabel}>Cantidad confirmada:</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={confirmedQuantity}
-              onChangeText={setConfirmedQuantity}
-              keyboardType="numeric"
-              placeholder="Cantidad"
-            />
+            {selectedPickup && (
+              <View style={styles.pickupInfoRow}>
+                <Text style={styles.modalDescription}>
+                  📦 {selectedPickup.food?.name} - Cantidad:{" "}
+                  {selectedPickup.requestedQuantity}
+                </Text>
+              </View>
+            )}
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.modalCancelButton]}

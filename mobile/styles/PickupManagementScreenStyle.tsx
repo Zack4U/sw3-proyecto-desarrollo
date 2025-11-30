@@ -302,6 +302,26 @@ export const styles = StyleSheet.create({
     color: Colors.textLight,
     textAlign: "center",
   },
+  waitingContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F5F5F5",
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.xs,
+  },
+  waitingIcon: {
+    fontSize: FontSizes.lg,
+  },
+  waitingText: {
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    textAlign: "center",
+    flex: 1,
+  },
   rejectButtonText: {
     fontSize: FontSizes.sm,
     fontWeight: FontWeights.semibold,

@@ -1,222 +1,344 @@
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
-import { Platform } from 'react-native';
-import Constants from 'expo-constants';
-import api from './api';
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import { Platform } from "react-native";
+import Constants from "expo-constants";
+import api from "./api";
 
 // Configurar comportamiento de notificaciones
 Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-        shouldShowBanner: true,
-        shouldShowList: true,
-    }),
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
 });
 
 class NotificationService {
-    private static instance: NotificationService;
+  private static instance: NotificationService;
 
-    private constructor() {
-        this.setupNotificationChannel();
+  private constructor() {
+    this.setupNotificationChannel();
+  }
+
+  static getInstance(): NotificationService {
+    if (!NotificationService.instance) {
+      NotificationService.instance = new NotificationService();
+    }
+    return NotificationService.instance;
+  }
+
+  private async setupNotificationChannel() {
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "Notificaciones Generales",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+        sound: "default",
+      });
+
+      // Canal para pedidos
+      await Notifications.setNotificationChannelAsync("orders", {
+        name: "Pedidos",
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250, 250, 250],
+        sound: "default",
+      });
+
+      // Canal para alertas de alimentos
+      await Notifications.setNotificationChannelAsync("food-alerts", {
+        name: "Alertas de Alimentos",
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 500, 250, 500],
+        sound: "default",
+      });
+    }
+  }
+
+  async requestPermissions(): Promise<boolean> {
+    // Advertencia informativa (no bloquea notificaciones locales)
+    if (!Device.isDevice) {
+      console.warn(
+        "Las notificaciones push solo funcionan en dispositivos físicos"
+      );
+      console.info("ℹ️ Notificaciones locales disponibles para testing");
     }
 
-    static getInstance(): NotificationService {
-        if (!NotificationService.instance) {
-            NotificationService.instance = new NotificationService();
-        }
-        return NotificationService.instance;
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
     }
 
-    private async setupNotificationChannel() {
-        if (Platform.OS === 'android') {
-            await Notifications.setNotificationChannelAsync('default', {
-                name: 'Notificaciones Generales',
-                importance: Notifications.AndroidImportance.MAX,
-                vibrationPattern: [0, 250, 250, 250],
-                lightColor: '#FF231F7C',
-                sound: 'default',
-            });
-
-            // Canal para pedidos
-            await Notifications.setNotificationChannelAsync('orders', {
-                name: 'Pedidos',
-                importance: Notifications.AndroidImportance.HIGH,
-                vibrationPattern: [0, 250, 250, 250],
-                sound: 'default',
-            });
-
-            // Canal para alertas de alimentos
-            await Notifications.setNotificationChannelAsync('food-alerts', {
-                name: 'Alertas de Alimentos',
-                importance: Notifications.AndroidImportance.HIGH,
-                vibrationPattern: [0, 500, 250, 500],
-                sound: 'default',
-            });
-        }
+    if (finalStatus !== "granted") {
+      console.warn("Permisos de notificación denegados");
+      return false;
     }
 
-    async requestPermissions(): Promise<boolean> {
-        // Advertencia informativa (no bloquea notificaciones locales)
-        if (!Device.isDevice) {
-            console.warn('Las notificaciones push solo funcionan en dispositivos físicos');
-            console.info('ℹ️ Notificaciones locales disponibles para testing');
-        }
+    return true;
+  }
 
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
+  async getExpoPushToken(): Promise<string | null> {
+    try {
+      const hasPermission = await this.requestPermissions();
+      if (!hasPermission) {
+        console.warn("⚠️ No se pudo obtener token push (permisos denegados)");
+        return null;
+      }
 
-        if (existingStatus !== 'granted') {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
-        }
+      // En emulador, no podemos obtener push token real, pero podemos hacer notificaciones locales
+      if (!Device.isDevice) {
+        console.info("ℹ️ Emulador detectado - usando modo de testing local");
+        return "LOCAL_TESTING_TOKEN";
+      }
 
-        if (finalStatus !== 'granted') {
-            console.warn('Permisos de notificación denegados');
-            return false;
-        }
+      const projectId = Constants.expoConfig?.extra?.eas?.projectId;
 
-        return true;
+      const token = await Notifications.getExpoPushTokenAsync({
+        projectId,
+      });
+
+      console.log("✅ Push Token obtenido:", token.data);
+      return token.data;
+    } catch (error) {
+      console.error("❌ Error obteniendo push token:", error);
+      // Permitir modo local si falla
+      console.info("ℹ️ Usando modo de testing local");
+      return "LOCAL_TESTING_TOKEN";
     }
+  }
 
-    async getExpoPushToken(): Promise<string | null> {
-        try {
-            const hasPermission = await this.requestPermissions();
-            if (!hasPermission) {
-                console.warn('⚠️ No se pudo obtener token push (permisos denegados)');
-                return null;
-            }
+  async registerTokenWithBackend(token: string): Promise<void> {
+    try {
+      const platform = Platform.OS as "ios" | "android";
 
-            // En emulador, no podemos obtener push token real, pero podemos hacer notificaciones locales
-            if (!Device.isDevice) {
-                console.info('ℹ️ Emulador detectado - usando modo de testing local');
-                return 'LOCAL_TESTING_TOKEN';
-            }
+      await api.post("/notifications/register", {
+        token,
+        platform,
+      });
 
-            const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-
-            const token = await Notifications.getExpoPushTokenAsync({
-                projectId,
-            });
-
-            console.log('✅ Push Token obtenido:', token.data);
-            return token.data;
-        } catch (error) {
-            console.error('❌ Error obteniendo push token:', error);
-            // Permitir modo local si falla
-            console.info('ℹ️ Usando modo de testing local');
-            return 'LOCAL_TESTING_TOKEN';
-        }
+      console.log("Token registrado en el backend");
+    } catch (error) {
+      console.error("Error registrando token en backend:", error);
+      throw error;
     }
+  }
 
-    async registerTokenWithBackend(token: string): Promise<void> {
-        try {
-            const platform = Platform.OS as 'ios' | 'android';
+  async schedulePushNotification(
+    title: string,
+    body: string,
+    data?: any,
+    channelId: string = "default"
+  ): Promise<void> {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        data,
+        sound: true,
+        ...(Platform.OS === "android" && { channelId }),
+      },
+      trigger: null,
+    });
+  }
 
-            await api.post('/notifications/register', {
-                token,
-                platform,
-            });
+  /**
+   * Envía una notificación de prueba para verificar configuración
+   * Esta función simula el comportamiento futuro cuando el backend envíe notificaciones
+   * al seleccionar un alimento (notificará al establecimiento)
+   *
+   * ✅ Funciona en emuladores (notificaciones locales)
+   * ✅ Funciona en dispositivos físicos (notificaciones push)
+   */
+  async sendTestNotificationToBackend(): Promise<void> {
+    try {
+      // Verificar permisos primero
+      const hasPermission = await this.requestPermissions();
+      if (!hasPermission) {
+        throw new Error("Permisos de notificación no otorgados");
+      }
 
-            console.log('Token registrado en el backend');
-        } catch (error) {
-            console.error('Error registrando token en backend:', error);
-            throw error;
-        }
+      // Simula notificación que recibiría un establecimiento cuando se selecciona su alimento
+      await this.schedulePushNotification(
+        "🍽️ Nuevo Interés en Alimento",
+        "Un beneficiario ha mostrado interés en tus alimentos disponibles",
+        {
+          type: "food_alert",
+          message: "Notificación de prueba del sistema",
+          timestamp: new Date().toISOString(),
+          isTest: true,
+        },
+        "food-alerts"
+      );
+
+      console.log("✅ Notificación de prueba enviada correctamente");
+
+      if (!Device.isDevice) {
+        console.info("ℹ️ Notificación local enviada (modo emulador)");
+      } else {
+        console.info("ℹ️ Notificación push enviada (dispositivo físico)");
+      }
+    } catch (error) {
+      console.error("❌ Error enviando notificación de prueba:", error);
+      throw error;
     }
+  }
 
-    async schedulePushNotification(
-        title: string,
-        body: string,
-        data?: any,
-        channelId: string = 'default'
-    ): Promise<void> {
-        await Notifications.scheduleNotificationAsync({
-            content: {
-                title,
-                body,
-                data,
-                sound: true,
-                ...(Platform.OS === 'android' && { channelId }),
-            },
-            trigger: null,
-        });
+  addNotificationReceivedListener(
+    listener: (notification: Notifications.Notification) => void
+  ) {
+    return Notifications.addNotificationReceivedListener(listener);
+  }
+
+  addNotificationResponseReceivedListener(
+    listener: (response: Notifications.NotificationResponse) => void
+  ) {
+    return Notifications.addNotificationResponseReceivedListener(listener);
+  }
+
+  async getBadgeCount(): Promise<number> {
+    return await Notifications.getBadgeCountAsync();
+  }
+
+  async setBadgeCount(count: number): Promise<void> {
+    await Notifications.setBadgeCountAsync(count);
+  }
+
+  async clearBadge(): Promise<void> {
+    await Notifications.setBadgeCountAsync(0);
+  }
+
+  async getAllScheduledNotifications() {
+    return await Notifications.getAllScheduledNotificationsAsync();
+  }
+
+  async cancelAllScheduledNotifications() {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  }
+
+  // ==================== MÉTODOS CRUD PARA NOTIFICACIONES EN BD ====================
+
+  /**
+   * Obtiene las notificaciones del usuario con paginación
+   */
+  async getNotifications(params?: {
+    unreadOnly?: boolean;
+    page?: number;
+    limit?: number;
+  }): Promise<{
+    notifications: StoredNotification[];
+    pagination: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
+    unreadCount: number;
+  }> {
+    try {
+      const response = await api.get("/notifications", { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      throw error;
     }
+  }
 
-    /**
-     * Envía una notificación de prueba para verificar configuración
-     * Esta función simula el comportamiento futuro cuando el backend envíe notificaciones
-     * al seleccionar un alimento (notificará al establecimiento)
-     * 
-     * ✅ Funciona en emuladores (notificaciones locales)
-     * ✅ Funciona en dispositivos físicos (notificaciones push)
-     */
-    async sendTestNotificationToBackend(): Promise<void> {
-        try {
-            // Verificar permisos primero
-            const hasPermission = await this.requestPermissions();
-            if (!hasPermission) {
-                throw new Error('Permisos de notificación no otorgados');
-            }
-
-            // Simula notificación que recibiría un establecimiento cuando se selecciona su alimento
-            await this.schedulePushNotification(
-                '🍽️ Nuevo Interés en Alimento',
-                'Un beneficiario ha mostrado interés en tus alimentos disponibles',
-                {
-                    type: 'food_alert',
-                    message: 'Notificación de prueba del sistema',
-                    timestamp: new Date().toISOString(),
-                    isTest: true,
-                },
-                'food-alerts'
-            );
-
-            console.log('✅ Notificación de prueba enviada correctamente');
-            
-            if (!Device.isDevice) {
-                console.info('ℹ️ Notificación local enviada (modo emulador)');
-            } else {
-                console.info('ℹ️ Notificación push enviada (dispositivo físico)');
-            }
-        } catch (error) {
-            console.error('❌ Error enviando notificación de prueba:', error);
-            throw error;
-        }
+  /**
+   * Obtiene el conteo de notificaciones no leídas
+   */
+  async getUnreadCount(): Promise<number> {
+    try {
+      const response = await api.get("/notifications/unread-count");
+      return response.data.unreadCount;
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+      return 0;
     }
+  }
 
-    addNotificationReceivedListener(
-        listener: (notification: Notifications.Notification) => void
-    ) {
-        return Notifications.addNotificationReceivedListener(listener);
+  /**
+   * Marca notificaciones como leídas
+   */
+  async markAsRead(notificationIds: string[]): Promise<{ updated: number }> {
+    try {
+      const response = await api.patch("/notifications/read", {
+        notificationIds,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error marking notifications as read:", error);
+      throw error;
     }
+  }
 
-    addNotificationResponseReceivedListener(
-        listener: (response: Notifications.NotificationResponse) => void
-    ) {
-        return Notifications.addNotificationResponseReceivedListener(listener);
+  /**
+   * Marca todas las notificaciones como leídas
+   */
+  async markAllAsRead(): Promise<{ updated: number }> {
+    try {
+      const response = await api.patch("/notifications/read-all");
+      return response.data;
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      throw error;
     }
+  }
 
-    async getBadgeCount(): Promise<number> {
-        return await Notifications.getBadgeCountAsync();
+  /**
+   * Elimina una notificación
+   */
+  async deleteNotification(notificationId: string): Promise<void> {
+    try {
+      await api.delete(`/notifications/${notificationId}`);
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      throw error;
     }
+  }
 
-    async setBadgeCount(count: number): Promise<void> {
-        await Notifications.setBadgeCountAsync(count);
+  /**
+   * Elimina todas las notificaciones
+   */
+  async deleteAllNotifications(): Promise<{ deleted: number }> {
+    try {
+      const response = await api.delete("/notifications");
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting all notifications:", error);
+      throw error;
     }
-
-    async clearBadge(): Promise<void> {
-        await Notifications.setBadgeCountAsync(0);
-    }
-
-    async getAllScheduledNotifications() {
-        return await Notifications.getAllScheduledNotificationsAsync();
-    }
-
-    async cancelAllScheduledNotifications() {
-        await Notifications.cancelAllScheduledNotificationsAsync();
-    }
+  }
 }
+
+// Tipos para notificaciones almacenadas
+export interface StoredNotification {
+  id: string;
+  userId: string;
+  title: string;
+  body: string;
+  type: NotificationType;
+  data?: Record<string, any>;
+  pickupId?: string;
+  isRead: boolean;
+  isDeleted: boolean;
+  readAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type NotificationType =
+  | "PICKUP_NEW_REQUEST"
+  | "PICKUP_CONFIRMED"
+  | "PICKUP_REJECTED"
+  | "PICKUP_VISIT_CONFIRMED"
+  | "PICKUP_COMPLETED"
+  | "PICKUP_CANCELLED"
+  | "SYSTEM";
 
 export default NotificationService.getInstance();

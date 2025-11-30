@@ -1,10 +1,15 @@
 import { StatusBar } from "expo-status-bar";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  useNavigationContainerRef,
+} from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Toast from "react-native-toast-message";
 import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { useAuth } from "./hooks/useAuth";
+import { setNavigationCallback } from "./hooks/useNotifications";
+import { useEffect } from "react";
 
 // ─── Screens ─────────────────────────────────────────────
 import HomeScreen from "./screens/HomeScreen";
@@ -32,6 +37,9 @@ import MyPickupsScreen from "./screens/MyPickupsScreen";
 import PickupManagementScreen from "./screens/PickupManagementScreen";
 import PickupDetailsScreen from "./screens/PickupDetailsScreen";
 
+// ─── Notifications Screen ────────────────────────────────
+import NotificationsScreen from "./screens/NotificationsScreen";
+
 // ─── Tipado de Rutas ─────────────────────────────────────
 export type RootStackParamList = {
   Welcome: undefined;
@@ -56,6 +64,8 @@ export type RootStackParamList = {
   MyPickups: undefined;
   PickupManagement: undefined;
   PickupDetails: { pickupId: string };
+  // Notifications
+  Notifications: undefined;
 };
 
 // ─── Creación del Stack ──────────────────────────────────
@@ -194,6 +204,14 @@ function RootNavigator() {
                   headerShown: true,
                 }}
               />
+              <Stack.Screen
+                name="Notifications"
+                component={NotificationsScreen}
+                options={{
+                  title: "Notificaciones",
+                  headerShown: false,
+                }}
+              />
             </>
           ) : (
             // Usuario autenticado pero sin completar el perfil
@@ -255,9 +273,20 @@ function RootNavigator() {
 
 // ─── App Principal ───────────────────────────────────────
 export default function App() {
+  const navigationRef = useNavigationContainerRef<RootStackParamList>();
+
+  useEffect(() => {
+    // Configurar el callback de navegación para notificaciones
+    setNavigationCallback((screen: string, params?: Record<string, any>) => {
+      if (navigationRef.isReady()) {
+        navigationRef.navigate(screen as any, params as any);
+      }
+    });
+  }, [navigationRef]);
+
   return (
     <AuthProvider>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <StatusBar style="auto" />
         <NotificationProvider>
           <RootNavigator />

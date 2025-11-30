@@ -246,12 +246,12 @@ export const pickupService = {
    */
   confirmPickup: async (
     id: string,
-    data: { confirmedQuantity: number }
+    data: { confirmedQuantity?: number; notes?: string }
   ): Promise<PickupResponse> => {
     try {
       const response = await api.put<PickupResponse>(`/pickups/${id}/confirm`, {
         confirmed: true,
-        confirmedQuantity: data.confirmedQuantity,
+        notes: data.notes,
       });
       return response.data;
     } catch (error) {

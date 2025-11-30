@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,13 +7,14 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAuth } from "../hooks/useAuth";
 import { useNotificationContext } from "../contexts/NotificationContext";
 import { styles } from "../styles/HomeScreenStyle";
 import ProfileModal from "../components/ProfileModal";
 import Button from "../components/Button";
+import notificationService from "../services/notificationService";
 
 export default function BeneficiaryHomeScreen() {
   const { logout, user, isLoading } = useAuth();
@@ -26,6 +27,26 @@ export default function BeneficiaryHomeScreen() {
     >();
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [isTestingNotification, setIsTestingNotification] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const count = await notificationService.getUnreadCount();
+      setUnreadCount(count);
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+    }
+  }, []);
+
+  // Actualizar contador cuando la pantalla tenga foco
+  useFocusEffect(
+    useCallback(() => {
+      fetchUnreadCount();
+      // Polling cada 10 segundos
+      const interval = setInterval(fetchUnreadCount, 10000);
+      return () => clearInterval(interval);
+    }, [fetchUnreadCount])
+  );
 
   const handleLogout = async () => {
     try {
@@ -89,6 +110,35 @@ export default function BeneficiaryHomeScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>ComiYa</Text>
         <View style={styles.headerButtonsContainer}>
+          {/* Botón de notificaciones */}
+          <TouchableOpacity
+            style={styles.profileButton}
+            onPress={() => navigation.navigate("Notifications" as never)}
+          >
+            <Text style={styles.profileButtonText}>🔔</Text>
+            {unreadCount > 0 && (
+              <View
+                style={{
+                  position: "absolute",
+                  top: -4,
+                  right: -4,
+                  backgroundColor: "#F44336",
+                  borderRadius: 10,
+                  minWidth: 18,
+                  height: 18,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingHorizontal: 4,
+                }}
+              >
+                <Text
+                  style={{ color: "#fff", fontSize: 11, fontWeight: "bold" }}
+                >
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
           {user && (
             <TouchableOpacity
               style={styles.profileButton}
