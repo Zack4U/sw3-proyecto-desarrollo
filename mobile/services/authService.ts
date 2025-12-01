@@ -200,6 +200,40 @@ class AuthService {
   }
 
   /**
+   * Solicitar recuperación de contraseña (envía email con link de reseteo)
+   */
+  async requestPasswordReset(email: string): Promise<{ message: string }> {
+    try {
+      const response = await api.post<{ message: string }>("/auth/forgot-password", {
+        email,
+      });
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Resetear contraseña usando token recibido por email
+   */
+  async resetPassword(
+    token: string,
+    newPassword: string,
+    confirmPassword?: string
+  ) {
+    try {
+      const response = await api.post("/auth/reset-password", {
+        token,
+        newPassword,
+        confirmPassword,
+      });
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
    * Manejar errores
    */
   private handleError(error: any): Error {

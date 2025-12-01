@@ -283,8 +283,11 @@ export class AuthService {
       expiresIn: '1h',
     });
 
+    // Sign refresh token with a dedicated secret (JWT_REFRESH_SECRET) so
+    // it can be validated independently from access tokens.
     const refreshToken = this.jwtService.sign(payload, {
       expiresIn: '7d',
+      secret: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key-change-this',
     });
 
     return {

@@ -5,6 +5,8 @@ import { Button, Input, FeedbackMessage, GoogleSignInButton } from '../component
 import { styles } from '../styles/LoginScreenStyle';
 import { useAuth } from '../hooks/useAuth';
 import { useGoogleSignIn } from '../hooks/useGoogleSignIn';
+import authService from '../services/authService';
+import { useToast } from '../hooks/useToast';
 import { LoginCredentials } from '../types/auth.types';
 
 type RootStackParamList = {
@@ -24,6 +26,8 @@ export default function LoginScreen({ navigation }: Readonly<Props>) {
 		password?: string;
 	}>({});
 	const { login, isLoading, error, clearError, loginWithGoogle } = useAuth();
+	const toast = useToast();
+	const [forgotLoading, setForgotLoading] = useState(false);
 	const {
 		googleUser,
 		isLoading: isGoogleLoading,
@@ -76,6 +80,32 @@ export default function LoginScreen({ navigation }: Readonly<Props>) {
 			await signIn();
 		} catch (e) {
 			console.error('Google sign in error', e);
+		}
+	};
+
+	const handleForgotPassword = async () => {
+		clearError();
+		const email = identifier;
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!email || !emailRegex.test(email)) {
+			toast.info(
+				'Ingresa el correo electrónico asociado a tu cuenta',
+				'Correo requerido'
+			);
+			return;
+		}
+
+		try {
+			setForgotLoading(true);
+			const res = await authService.requestPasswordReset(email);
+			toast.success(
+				res?.message || 'Si el correo está registrado, recibirás instrucciones por email'
+			);
+		} catch (e: any) {
+			const msg = e?.message || 'Error solicitando recuperación';
+			toast.error(msg, 'Error');
+		} finally {
+			setForgotLoading(false);
 		}
 	};
 
@@ -156,6 +186,17 @@ export default function LoginScreen({ navigation }: Readonly<Props>) {
 							onPress={onSubmit}
 							variant="primary"
 							disabled={isLoading}
+						/>
+					</View>
+
+					{/* Recuperar contraseña: debajo del botón Iniciar sesión dentro de la card */}
+					<View style={{ alignItems: 'flex-end', marginTop: 8 }}>
+						<Button
+							title="Recuperar contraseña"
+							onPress={handleForgotPassword}
+							variant="text"
+							disabled={isLoading}
+							loading={forgotLoading}
 						/>
 					</View>
 
