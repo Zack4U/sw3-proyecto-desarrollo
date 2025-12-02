@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentación
+    url: https://github.com/Zack4U/sw3-proyecto-desarrollo/wiki
+    about: Consulta la documentación completa del proyecto
+  - name: 💬 Discusiones
+    url: https://github.com/Zack4U/sw3-proyecto-desarrollo/discussions
+    about: Participa en discusiones generales o haz preguntas
+  - name: 🐛 Swagger API Docs
+    url: http://localhost:3000/api
+    about: Documentación interactiva de la API

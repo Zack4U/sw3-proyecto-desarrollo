@@ -129,8 +129,11 @@ Write-Host "Paso 5: Creando base de datos..." -ForegroundColor $ColorWarning
 $createDbQuery = @"
 CREATE DATABASE $DbName
     WITH 
+    TEMPLATE = template0
     OWNER = $DbUser
     ENCODING = 'UTF8'
+    LC_COLLATE = 'Spanish_Colombia.1252'
+    LC_CTYPE = 'Spanish_Colombia.1252'
     CONNECTION LIMIT = -1;
 "@
 $createDbResult = Invoke-PsqlCommand -Command $createDbQuery
